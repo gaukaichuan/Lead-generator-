@@ -844,6 +844,77 @@ select {
   z-index: 1;
 }
 
+.google-results-modal-card {
+  width: min(1080px, 100%);
+}
+
+.google-results-toolbar {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0.96), rgba(240, 246, 255, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.google-results-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.google-result-card {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.94));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.google-result-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(96, 165, 250, 0.34);
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+}
+
+.google-result-checkbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+.google-result-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.google-result-top,
+.google-result-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.google-result-copy strong {
+  font-size: 1rem;
+}
+
+.google-result-copy p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.google-result-meta span {
+  color: var(--muted-soft);
+  font-size: 0.86rem;
+}
+
 .lead-form textarea,
 .email-body-textarea {
   resize: vertical;

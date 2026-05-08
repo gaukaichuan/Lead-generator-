@@ -8,6 +8,8 @@ const state = {
   activeEmailLeadId: null,
   currentLocation: null,
   isResolvingLocation: false,
+  googleMapsResults: [],
+  selectedGoogleMapsResults: new Set(),
   emailDrafts: {},
   senderName: "Your Name",
   senderEmail: "sales@example.com",
@@ -42,6 +44,14 @@ const googleMapsLatitudeInput = document.getElementById("googleMapsLatitudeInput
 const googleMapsLongitudeInput = document.getElementById("googleMapsLongitudeInput");
 const locationStatusTitle = document.getElementById("locationStatusTitle");
 const locationStatusMessage = document.getElementById("locationStatusMessage");
+const googleMapsResultsModal = document.getElementById("googleMapsResultsModal");
+const closeGoogleMapsResultsModal = document.getElementById("closeGoogleMapsResultsModal");
+const googleMapsResultsList = document.getElementById("googleMapsResultsList");
+const googleMapsResultsSummary = document.getElementById("googleMapsResultsSummary");
+const googleMapsResultsEmpty = document.getElementById("googleMapsResultsEmpty");
+const selectAllGoogleMapsResults = document.getElementById("selectAllGoogleMapsResults");
+const clearGoogleMapsResults = document.getElementById("clearGoogleMapsResults");
+const importSelectedGoogleMapsResults = document.getElementById("importSelectedGoogleMapsResults");
 const loadDemoLeadsButton = document.getElementById("loadDemoLeads");
 const refreshLeadsButton = document.getElementById("refreshLeads");
 const searchInput = document.getElementById("searchInput");
@@ -439,6 +449,52 @@ function showNotification(title, message) {
   window.setTimeout(() => {
     card.remove();
   }, 3200);
+}
+
+function googleMapsResultKey(lead) {
+  return lead.externalRef || `${lead.company}-${lead.phone}-${lead.region}`;
+}
+
+function renderGoogleMapsResultsModal() {
+  googleMapsResultsList.innerHTML = "";
+  const selectedCount = state.selectedGoogleMapsResults.size;
+  const totalCount = state.googleMapsResults.length;
+
+  googleMapsResultsSummary.textContent = `${totalCount} nearby business${totalCount === 1 ? "" : "es"} found. ${selectedCount} selected for import.`;
+  googleMapsResultsEmpty.hidden = totalCount > 0;
+  importSelectedGoogleMapsResults.disabled = selectedCount === 0;
+
+  state.googleMapsResults.forEach((lead) => {
+    const key = googleMapsResultKey(lead);
+    const card = document.createElement("label");
+    card.className = "google-result-card";
+    card.innerHTML = `
+      <input class="google-result-checkbox" type="checkbox" ${state.selectedGoogleMapsResults.has(key) ? "checked" : ""}>
+      <div class="google-result-copy">
+        <div class="google-result-top">
+          <strong>${lead.company}</strong>
+          <span class="mini-tag">${lead.distanceKm !== null && lead.distanceKm !== undefined ? `${lead.distanceKm.toFixed(1)} km` : "Nearby"}</span>
+        </div>
+        <p>${lead.notes || "Imported from Google Maps."}</p>
+        <div class="google-result-meta">
+          <span>${lead.phone || "No phone"}</span>
+          <span>${lead.website || "No website"}</span>
+        </div>
+      </div>
+    `;
+
+    const checkbox = card.querySelector(".google-result-checkbox");
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        state.selectedGoogleMapsResults.add(key);
+      } else {
+        state.selectedGoogleMapsResults.delete(key);
+      }
+      renderGoogleMapsResultsModal();
+    });
+
+    googleMapsResultsList.appendChild(card);
+  });
 }
 
 const workspaceMeta = {
@@ -868,7 +924,8 @@ function syncBodyLock() {
     !leadDetailModal.hidden ||
     !emailDetailModal.hidden ||
     !timelineModal.hidden ||
-    !settingsModal.hidden;
+    !settingsModal.hidden ||
+    !googleMapsResultsModal.hidden;
 
   document.body.classList.toggle("modal-open", shouldLock);
 }
@@ -935,35 +992,28 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
   }
 
   googleMapsImportButton.disabled = true;
-  googleMapsImportButton.textContent = "Importing...";
+  googleMapsImportButton.textContent = "Searching...";
 
   try {
     await ensureLiveLocation();
     body.latitude = googleMapsLatitudeInput.value;
     body.longitude = googleMapsLongitudeInput.value;
 
-    const payload = await request("/api/import/google-maps", {
+    const payload = await request("/api/google-maps/search", {
       method: "POST",
       body: JSON.stringify(body)
     });
 
-    await loadLeads();
-    googleMapsImportForm.reset();
-    googleMapsRadiusInput.value = "15";
-    googleMapsLatitudeInput.value = state.currentLocation ? String(state.currentLocation.latitude) : "";
-    googleMapsLongitudeInput.value = state.currentLocation ? String(state.currentLocation.longitude) : "";
-
-    const importedCount = payload.importedCount || 0;
-    const duplicateCount = payload.duplicateCount || 0;
-    showNotification(
-      "Google Maps import complete",
-      `${importedCount} lead(s) imported${duplicateCount ? `, ${duplicateCount} duplicate(s) skipped` : ""}.`
-    );
+    state.googleMapsResults = Array.isArray(payload.leads) ? payload.leads : [];
+    state.selectedGoogleMapsResults = new Set(state.googleMapsResults.map(googleMapsResultKey));
+    renderGoogleMapsResultsModal();
+    googleMapsResultsModal.hidden = false;
+    syncBodyLock();
   } catch (error) {
-    showNotification("Import failed", error.message || "Google Maps import could not be completed.");
+    showNotification("Search failed", error.message || "Google Maps search could not be completed.");
   } finally {
     googleMapsImportButton.disabled = false;
-    googleMapsImportButton.textContent = "Import from Google Maps";
+    googleMapsImportButton.textContent = "Search Google Maps";
   }
 });
 
@@ -1054,6 +1104,62 @@ toggleLeadDetail.addEventListener("click", () => {
 closeLeadDetailModal.addEventListener("click", () => {
   leadDetailModal.hidden = true;
   syncBodyLock();
+});
+
+closeGoogleMapsResultsModal.addEventListener("click", () => {
+  googleMapsResultsModal.hidden = true;
+  syncBodyLock();
+});
+
+googleMapsResultsModal.addEventListener("click", (event) => {
+  if (event.target === googleMapsResultsModal) {
+    googleMapsResultsModal.hidden = true;
+    syncBodyLock();
+  }
+});
+
+selectAllGoogleMapsResults.addEventListener("click", () => {
+  state.selectedGoogleMapsResults = new Set(state.googleMapsResults.map(googleMapsResultKey));
+  renderGoogleMapsResultsModal();
+});
+
+clearGoogleMapsResults.addEventListener("click", () => {
+  state.selectedGoogleMapsResults = new Set();
+  renderGoogleMapsResultsModal();
+});
+
+importSelectedGoogleMapsResults.addEventListener("click", async () => {
+  const selectedLeads = state.googleMapsResults.filter((lead) => state.selectedGoogleMapsResults.has(googleMapsResultKey(lead)));
+  if (!selectedLeads.length) {
+    showNotification("Nothing selected", "Select at least one shop before importing.");
+    return;
+  }
+
+  importSelectedGoogleMapsResults.disabled = true;
+  importSelectedGoogleMapsResults.textContent = "Importing...";
+
+  try {
+    const payload = await request("/api/google-maps/import-selected", {
+      method: "POST",
+      body: JSON.stringify({ leads: selectedLeads })
+    });
+    googleMapsResultsModal.hidden = true;
+    syncBodyLock();
+    await loadLeads();
+    googleMapsImportForm.reset();
+    googleMapsRadiusInput.value = "15";
+    googleMapsLatitudeInput.value = state.currentLocation ? String(state.currentLocation.latitude) : "";
+    googleMapsLongitudeInput.value = state.currentLocation ? String(state.currentLocation.longitude) : "";
+    showNotification(
+      "Google Maps import complete",
+      `${payload.importedCount || 0} lead(s) imported${payload.duplicateCount ? `, ${payload.duplicateCount} duplicate(s) skipped` : ""}.`
+    );
+  } catch (error) {
+    showNotification("Import failed", error.message || "Selected Google Maps shops could not be imported.");
+  } finally {
+    importSelectedGoogleMapsResults.disabled = false;
+    importSelectedGoogleMapsResults.textContent = "Import Selected";
+  }
 });
 
 leadDetailModal.addEventListener("click", (event) => {

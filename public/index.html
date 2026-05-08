@@ -127,6 +127,29 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="googleMapsResultsModal" hidden>
+    <div class="modal-card google-results-modal-card">
+      <button class="modal-close-button" id="closeGoogleMapsResultsModal" type="button" aria-label="Close Google Maps results">&times;</button>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Google Maps Results</p>
+          <h2>Choose Shops to Import</h2>
+          <p class="topbar-description">Review nearby businesses inside your radius, tick the ones you want, then import only those shops into the system.</p>
+        </div>
+        <div class="header-actions">
+          <button class="button secondary" id="selectAllGoogleMapsResults" type="button">Select All</button>
+          <button class="button secondary" id="clearGoogleMapsResults" type="button">Clear</button>
+          <button class="button primary" id="importSelectedGoogleMapsResults" type="button">Import Selected</button>
+        </div>
+      </div>
+      <div class="google-results-toolbar">
+        <strong id="googleMapsResultsSummary">No businesses loaded yet.</strong>
+      </div>
+      <div class="google-results-list" id="googleMapsResultsList"></div>
+      <p class="empty-state" id="googleMapsResultsEmpty" hidden>No nearby businesses matched this search yet.</p>
+    </div>
+  </div>
+
   <div class="app-shell">
     <aside class="sidebar-shell">
       <div class="sidebar-brand">
@@ -343,7 +366,7 @@
                 <input id="googleMapsLatitudeInput" name="latitude" type="hidden">
                 <input id="googleMapsLongitudeInput" name="longitude" type="hidden">
                 <div class="full-span form-actions">
-                  <button class="button primary" id="googleMapsImportButton" type="submit">Import from Google Maps</button>
+                  <button class="button primary" id="googleMapsImportButton" type="submit">Search Google Maps</button>
                 </div>
               </form>
               <p class="form-note">This uses the official Google Places API. LinkedIn remains manual-only because automated scraping is not permitted.</p>
