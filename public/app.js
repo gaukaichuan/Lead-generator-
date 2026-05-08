@@ -32,7 +32,7 @@ const state = {
   ].join("\n")
 };
 
-const QUEUE_PAGE_SIZE = 10;
+const QUEUE_PAGE_SIZE = 5;
 const SENDER_SETTINGS_KEY = "lead-generator-sender-settings";
 
 const leadForm = document.getElementById("leadForm");
