@@ -44,6 +44,8 @@ const products = {
   }
 };
 
+const EARTH_RADIUS_KM = 6371;
+
 function readStore() {
   return JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
 }
@@ -175,7 +177,34 @@ async function readJsonResponse(response) {
   return response.json();
 }
 
-async function fetchGoogleMapsLeads({ query, region, companyType, painPoint }, fetchImpl = fetch, apiKey = "") {
+function toRadians(value) {
+  return (Number(value) * Math.PI) / 180;
+}
+
+function calculateDistanceKm(from, to) {
+  const lat1 = Number(from.latitude);
+  const lon1 = Number(from.longitude);
+  const lat2 = Number(to.latitude);
+  const lon2 = Number(to.longitude);
+
+  if ([lat1, lon1, lat2, lon2].some((item) => Number.isNaN(item))) {
+    return null;
+  }
+
+  const deltaLat = toRadians(lat2 - lat1);
+  const deltaLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(deltaLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(deltaLon / 2) ** 2;
+
+  return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+async function fetchGoogleMapsLeads(
+  { query, region, companyType, painPoint, latitude, longitude, radiusKm },
+  fetchImpl = fetch,
+  apiKey = ""
+) {
   apiKey = apiKey || process.env.GOOGLE_MAPS_API_KEY || "";
   if (!apiKey) {
     throw new Error("Google Maps API key is not configured.");
@@ -186,7 +215,7 @@ async function fetchGoogleMapsLeads({ query, region, companyType, painPoint }, f
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey,
-      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.primaryType,places.websiteUri"
+      "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.primaryType,places.websiteUri,places.location"
     },
     body: JSON.stringify({
       textQuery: query,
@@ -215,6 +244,14 @@ async function fetchGoogleMapsLeads({ query, region, companyType, painPoint }, f
       });
 
       const details = await readJsonResponse(detailsResponse);
+      const placeLocation = place.location || null;
+      const distanceKm =
+        placeLocation && latitude !== undefined && longitude !== undefined
+          ? calculateDistanceKm(
+              { latitude, longitude },
+              { latitude: placeLocation.latitude, longitude: placeLocation.longitude }
+            )
+          : null;
       return {
         company: place.displayName && place.displayName.text ? place.displayName.text : "Unknown business",
         contactName: "Business Contact",
@@ -231,14 +268,34 @@ async function fetchGoogleMapsLeads({ query, region, companyType, painPoint }, f
         notes: [
           "Imported from Google Maps.",
           place.formattedAddress ? `Address: ${place.formattedAddress}` : "",
+          distanceKm !== null ? `Distance: ${distanceKm.toFixed(1)} km` : "",
           details.websiteUri ? `Website: ${details.websiteUri}` : ""
         ].filter(Boolean).join(" "),
-        externalRef: place.id
+        externalRef: place.id,
+        distanceKm,
+        location: placeLocation
       };
     })
   );
 
-  return detailedPlaces.filter(Boolean);
+  const normalizedRadiusKm = Number(radiusKm);
+  const hasRadiusFilter =
+    Number.isFinite(normalizedRadiusKm) &&
+    normalizedRadiusKm > 0 &&
+    latitude !== undefined &&
+    longitude !== undefined;
+
+  return detailedPlaces.filter((place) => {
+    if (!place) {
+      return false;
+    }
+
+    if (!hasRadiusFilter) {
+      return true;
+    }
+
+    return place.distanceKm !== null && place.distanceKm <= normalizedRadiusKm;
+  });
 }
 
 function importExternalLeads(store, incomingLeads) {
@@ -527,12 +584,29 @@ async function handleApi(request, response, pathname, options = {}) {
       return;
     }
 
+    const latitude = Number(body.latitude);
+    const longitude = Number(body.longitude);
+    const radiusKm = Number(body.radiusKm);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      sendJson(response, 400, { error: "Your live location is required before importing from Google Maps." });
+      return;
+    }
+
+    if (!Number.isFinite(radiusKm) || radiusKm <= 0) {
+      sendJson(response, 400, { error: "Please enter a valid radius in kilometers." });
+      return;
+    }
+
     const externalLeads = await fetchGoogleMapsLeads(
       {
         query: body.query,
         region: body.region,
         companyType: body.companyType,
-        painPoint: body.painPoint
+        painPoint: body.painPoint,
+        latitude,
+        longitude,
+        radiusKm
       },
       googlePlacesFetch
     );

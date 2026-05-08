@@ -280,49 +280,68 @@
                 <div>
                   <p class="eyebrow">Real Data Import</p>
                   <h3>Google Maps Lead Pull</h3>
+                  <p class="import-hero-copy">Search by business category, lock to your live location, and only bring in nearby prospects.</p>
                 </div>
               </div>
               <form id="googleMapsImportForm" class="import-form">
-                <label class="full-span">
-                  <span>Search Query</span>
-                  <input id="googleMapsQueryInput" name="query" placeholder="Example: retail shops in Kuala Lumpur" required>
-                </label>
-                <label>
-                  <span>Target Region</span>
-                  <select name="region">
-                    <option>Kuala Lumpur</option>
-                    <option>Petaling Jaya</option>
-                    <option>Subang Jaya</option>
-                    <option>Shah Alam</option>
-                    <option>Puchong</option>
-                    <option>Klang</option>
-                    <option>Cheras</option>
-                    <option>Ampang</option>
-                    <option>Kajang</option>
-                    <option>Other</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Company Type</span>
-                  <select name="companyType">
-                    <option value="retail">Retail</option>
-                    <option value="fnb">F&B</option>
-                    <option value="wholesale">Wholesale</option>
-                    <option value="warehouse">Warehouse</option>
-                    <option value="service">Service</option>
-                    <option value="manufacturing">Manufacturing</option>
-                  </select>
-                </label>
-                <label>
-                  <span>Pain Point</span>
-                  <select name="painPoint">
-                    <option value="manual-accounting">Manual accounting</option>
-                    <option value="stock-visibility">Stock visibility</option>
-                    <option value="warehouse-control">Warehouse control</option>
-                    <option value="checkout-pos">Retail checkout</option>
-                    <option value="payroll-compliance">Payroll compliance</option>
-                  </select>
-                </label>
+                <div class="import-form-grid">
+                  <label class="full-span import-field import-field-search">
+                    <span>Business Category or Search Query</span>
+                    <input id="googleMapsQueryInput" name="query" placeholder="Example: retail shops in Kuala Lumpur" required>
+                  </label>
+                  <label class="import-field">
+                    <span>Target Region</span>
+                    <select name="region">
+                      <option>Kuala Lumpur</option>
+                      <option>Petaling Jaya</option>
+                      <option>Subang Jaya</option>
+                      <option>Shah Alam</option>
+                      <option>Puchong</option>
+                      <option>Klang</option>
+                      <option>Cheras</option>
+                      <option>Ampang</option>
+                      <option>Kajang</option>
+                      <option>Other</option>
+                    </select>
+                  </label>
+                  <label class="import-field">
+                    <span>Company Type</span>
+                    <select name="companyType">
+                      <option value="retail">Retail</option>
+                      <option value="fnb">F&B</option>
+                      <option value="wholesale">Wholesale</option>
+                      <option value="warehouse">Warehouse</option>
+                      <option value="service">Service</option>
+                      <option value="manufacturing">Manufacturing</option>
+                    </select>
+                  </label>
+                  <label class="import-field">
+                    <span>Pain Point</span>
+                    <select name="painPoint">
+                      <option value="manual-accounting">Manual accounting</option>
+                      <option value="stock-visibility">Stock visibility</option>
+                      <option value="warehouse-control">Warehouse control</option>
+                      <option value="checkout-pos">Retail checkout</option>
+                      <option value="payroll-compliance">Payroll compliance</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="import-location-card full-span">
+                  <div class="import-location-copy">
+                    <p class="import-location-label">Live radius filter</p>
+                    <strong id="locationStatusTitle">Location permission required</strong>
+                    <p id="locationStatusMessage">Allow browser location access so the import only keeps leads near your current position.</p>
+                  </div>
+                  <div class="import-location-actions">
+                    <label class="import-field radius-field">
+                      <span>Radius (km)</span>
+                      <input id="googleMapsRadiusInput" name="radiusKm" type="number" min="1" step="1" value="15" required>
+                    </label>
+                    <button class="button secondary location-button" id="detectLocationButton" type="button">Use My Location</button>
+                  </div>
+                </div>
+                <input id="googleMapsLatitudeInput" name="latitude" type="hidden">
+                <input id="googleMapsLongitudeInput" name="longitude" type="hidden">
                 <div class="full-span form-actions">
                   <button class="button primary" id="googleMapsImportButton" type="submit">Import from Google Maps</button>
                 </div>

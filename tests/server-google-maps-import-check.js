@@ -34,13 +34,21 @@ async function main() {
             displayName: { text: "KL Auto Mart" },
             formattedAddress: "Kuala Lumpur, Malaysia",
             primaryType: "car_dealer",
-            websiteUri: "https://example.com/kl-auto"
+            websiteUri: "https://example.com/kl-auto",
+            location: {
+              latitude: 3.139,
+              longitude: 101.6869
+            }
           },
           {
             id: "place-2",
             displayName: { text: "Selangor Retail Hub" },
             formattedAddress: "Shah Alam, Selangor, Malaysia",
-            primaryType: "store"
+            primaryType: "store",
+            location: {
+              latitude: 3.0738,
+              longitude: 101.5183
+            }
           }
         ]
       });
@@ -74,15 +82,19 @@ async function main() {
         query: "accounting software retail in kuala lumpur",
         region: "Kuala Lumpur",
         companyType: "retail",
-        painPoint: "checkout-pos"
+        painPoint: "checkout-pos",
+        latitude: 3.139,
+        longitude: 101.6869,
+        radiusKm: 15
       })
     });
     assert.equal(firstResponse.status, 201);
     const firstPayload = await firstResponse.json();
-    assert.equal(firstPayload.importedCount, 2);
+    assert.equal(firstPayload.importedCount, 1);
     assert.equal(firstPayload.duplicateCount, 0);
     assert.equal(firstPayload.leads[0].source, "Google Maps");
     assert.equal(firstPayload.leads[0].status, "new");
+    assert.match(firstPayload.leads[0].notes, /Distance:/);
 
     const secondResponse = await fetch(`http://localhost:${port}/api/import/google-maps`, {
       method: "POST",
@@ -91,16 +103,19 @@ async function main() {
         query: "accounting software retail in kuala lumpur",
         region: "Kuala Lumpur",
         companyType: "retail",
-        painPoint: "checkout-pos"
+        painPoint: "checkout-pos",
+        latitude: 3.139,
+        longitude: 101.6869,
+        radiusKm: 15
       })
     });
     assert.equal(secondResponse.status, 201);
     const secondPayload = await secondResponse.json();
     assert.equal(secondPayload.importedCount, 0);
-    assert.equal(secondPayload.duplicateCount, 2);
+    assert.equal(secondPayload.duplicateCount, 1);
 
     const store = JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
-    assert.equal(store.leads.length, 2);
+    assert.equal(store.leads.length, 1);
     assert.match(store.leads[0].notes, /Imported from Google Maps/);
     assert.equal(calls.filter((item) => item.includes(":searchText")).length, 2);
     console.log("PASS");

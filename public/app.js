@@ -6,6 +6,7 @@ const state = {
   activeExportView: null,
   queuePage: 1,
   activeEmailLeadId: null,
+  currentLocation: null,
   emailDrafts: {},
   senderName: "Your Name",
   senderEmail: "sales@example.com",
@@ -34,6 +35,12 @@ const SENDER_SETTINGS_KEY = "lead-generator-sender-settings";
 const leadForm = document.getElementById("leadForm");
 const googleMapsImportForm = document.getElementById("googleMapsImportForm");
 const googleMapsImportButton = document.getElementById("googleMapsImportButton");
+const detectLocationButton = document.getElementById("detectLocationButton");
+const googleMapsRadiusInput = document.getElementById("googleMapsRadiusInput");
+const googleMapsLatitudeInput = document.getElementById("googleMapsLatitudeInput");
+const googleMapsLongitudeInput = document.getElementById("googleMapsLongitudeInput");
+const locationStatusTitle = document.getElementById("locationStatusTitle");
+const locationStatusMessage = document.getElementById("locationStatusMessage");
 const loadDemoLeadsButton = document.getElementById("loadDemoLeads");
 const refreshLeadsButton = document.getElementById("refreshLeads");
 const searchInput = document.getElementById("searchInput");
@@ -253,10 +260,79 @@ async function request(url, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error("Request failed");
+    let message = "Request failed";
+    try {
+      const payload = await response.json();
+      message = payload.error || message;
+    } catch (error) {
+      // Keep the fallback error when the response is not JSON.
+    }
+    throw new Error(message);
   }
 
   return response.json();
+}
+
+function setLocationStatus(title, message, mode = "idle") {
+  locationStatusTitle.textContent = title;
+  locationStatusMessage.textContent = message;
+  locationStatusTitle.dataset.mode = mode;
+}
+
+function syncLocationInputs() {
+  googleMapsLatitudeInput.value = state.currentLocation ? String(state.currentLocation.latitude) : "";
+  googleMapsLongitudeInput.value = state.currentLocation ? String(state.currentLocation.longitude) : "";
+}
+
+function updateLocationUi() {
+  syncLocationInputs();
+  if (!state.currentLocation) {
+    setLocationStatus(
+      "Location permission required",
+      "Allow browser location access so the import only keeps leads near your current position.",
+      "idle"
+    );
+    detectLocationButton.textContent = "Use My Location";
+    return;
+  }
+
+  setLocationStatus(
+    "Location locked",
+    `Using your live location at ${state.currentLocation.latitude.toFixed(4)}, ${state.currentLocation.longitude.toFixed(4)}.`,
+    "ready"
+  );
+  detectLocationButton.textContent = "Refresh Location";
+}
+
+function readLiveLocation() {
+  if (!navigator.geolocation) {
+    throw new Error("This browser does not support live location access.");
+  }
+
+  setLocationStatus("Checking your location", "Waiting for browser permission so the radius filter can run.", "loading");
+
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        state.currentLocation = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        };
+        updateLocationUi();
+        resolve(state.currentLocation);
+      },
+      () => {
+        state.currentLocation = null;
+        updateLocationUi();
+        reject(new Error("Location access is required for Google Maps radius filtering. Please allow location and try again."));
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 300000
+      }
+    );
+  });
 }
 
 function loadSenderSettings() {
@@ -836,10 +912,23 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
   const formData = new FormData(googleMapsImportForm);
   const body = Object.fromEntries(formData.entries());
 
+  const radiusKm = Number(body.radiusKm);
+  if (!Number.isFinite(radiusKm) || radiusKm <= 0) {
+    showNotification("Radius required", "Please enter a valid radius in kilometers before importing.");
+    googleMapsRadiusInput.focus();
+    return;
+  }
+
   googleMapsImportButton.disabled = true;
   googleMapsImportButton.textContent = "Importing...";
 
   try {
+    if (!state.currentLocation) {
+      await readLiveLocation();
+      body.latitude = googleMapsLatitudeInput.value;
+      body.longitude = googleMapsLongitudeInput.value;
+    }
+
     const payload = await request("/api/import/google-maps", {
       method: "POST",
       body: JSON.stringify(body)
@@ -847,6 +936,9 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
 
     await loadLeads();
     googleMapsImportForm.reset();
+    googleMapsRadiusInput.value = "15";
+    googleMapsLatitudeInput.value = state.currentLocation ? String(state.currentLocation.latitude) : "";
+    googleMapsLongitudeInput.value = state.currentLocation ? String(state.currentLocation.longitude) : "";
 
     const importedCount = payload.importedCount || 0;
     const duplicateCount = payload.duplicateCount || 0;
@@ -855,10 +947,23 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
       `${importedCount} lead(s) imported${duplicateCount ? `, ${duplicateCount} duplicate(s) skipped` : ""}.`
     );
   } catch (error) {
-    showNotification("Import failed", "Google Maps import could not be completed. Check the server API key and query.");
+    showNotification("Import failed", error.message || "Google Maps import could not be completed.");
   } finally {
     googleMapsImportButton.disabled = false;
     googleMapsImportButton.textContent = "Import from Google Maps";
+  }
+});
+
+detectLocationButton.addEventListener("click", async () => {
+  detectLocationButton.disabled = true;
+
+  try {
+    await readLiveLocation();
+    showNotification("Location ready", "Your live location is now active for Google Maps radius filtering.");
+  } catch (error) {
+    showNotification("Location needed", error.message);
+  } finally {
+    detectLocationButton.disabled = false;
   }
 });
 
@@ -1087,4 +1192,5 @@ exportPreviewButton.addEventListener("click", () => {
 
 loadSenderSettings();
 renderSenderSettings();
+updateLocationUi();
 loadLeads();
