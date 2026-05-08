@@ -44,7 +44,7 @@ html {
 body {
   margin: 0;
   font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 15px;
+  font-size: 13px;
   color: var(--text);
   background:
     radial-gradient(circle at top left, rgba(37, 99, 235, 0.16), transparent 24%),
@@ -71,26 +71,26 @@ p {
 }
 
 h1 {
-  font-size: 1.35rem;
+  font-size: 1.18rem;
   line-height: 1.2;
   margin-bottom: 0;
 }
 
 h2 {
-  font-size: clamp(1.7rem, 3vw, 2.25rem);
-  margin-bottom: 0.25rem;
+  font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+  margin-bottom: 0.15rem;
   line-height: 1.1;
 }
 
 h3 {
-  font-size: 1.08rem;
+  font-size: 0.96rem;
   margin-bottom: 0;
 }
 
 .eyebrow {
   margin: 0 0 0.4rem;
   color: var(--primary-deep);
-  font-size: 0.68rem;
+  font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -98,7 +98,7 @@ h3 {
 
 .app-shell {
   width: min(1480px, calc(100% - 32px));
-  margin: 12px auto;
+  margin: 6px auto;
   display: grid;
   grid-template-columns: 236px minmax(0, 1fr);
   gap: 12px;
@@ -279,14 +279,14 @@ h3 {
 
 .main-shell {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   align-content: start;
 }
 
 .topbar,
 .snapshot-shell {
   border-radius: var(--radius-xl);
-  padding: 12px 14px;
+  padding: 10px 12px;
 }
 
 .topbar {
@@ -305,8 +305,7 @@ h3 {
 
 .topbar-description {
   margin: 0;
-  font-size: 0.84rem;
-  max-width: 72ch;
+  display: none;
   line-height: 1.4;
 }
 
@@ -326,9 +325,9 @@ h3 {
 }
 
 .metric-card {
-  padding: 12px 12px 10px;
-  border-radius: 16px;
-  min-height: 82px;
+  padding: 10px 10px 8px;
+  border-radius: 14px;
+  min-height: 72px;
   display: grid;
   align-content: space-between;
   position: relative;
@@ -336,7 +335,7 @@ h3 {
 }
 
 .metric-card strong {
-  font-size: 1.65rem;
+  font-size: 1.45rem;
   line-height: 1;
 }
 
@@ -374,7 +373,7 @@ h3 {
 }
 
 .panel {
-  padding: 14px;
+  padding: 12px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(252, 253, 255, 0.92));
 }
@@ -472,7 +471,7 @@ h3 {
 .overview-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.95fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .overview-grid > :first-child {
@@ -493,7 +492,7 @@ h3 {
 }
 
 .spotlight-card {
-  padding: 12px;
+  padding: 10px;
   background: linear-gradient(145deg, #f7fbff, #eef5ff);
   border: 1px solid rgba(148, 163, 184, 0.18);
 }
@@ -501,14 +500,14 @@ h3 {
 .spotlight-card span {
   display: block;
   color: var(--muted-soft);
-  font-size: 0.76rem;
+  font-size: 0.68rem;
   margin-bottom: 6px;
 }
 
 .spotlight-card strong {
   display: block;
-  font-size: 0.98rem;
-  margin-bottom: 4px;
+  font-size: 0.88rem;
+  margin-bottom: 0;
 }
 
 .mini-table,
@@ -520,7 +519,7 @@ h3 {
 
 .mini-row,
 .overview-activity-card {
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.9));
 }
 
@@ -544,7 +543,7 @@ h3 {
 .mini-row strong,
 .overview-activity-card strong {
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-size: 0.86rem;
 }
 
