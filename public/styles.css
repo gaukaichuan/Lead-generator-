@@ -635,6 +635,11 @@ h3 {
   gap: 12px;
 }
 
+.import-form-grid-compact {
+  grid-template-columns: minmax(0, 1fr) 150px;
+  align-items: end;
+}
+
 .import-form label,
 .lead-form label,
 .search-box {
@@ -738,6 +743,10 @@ h3 {
 
 .import-field-search {
   margin-bottom: 4px;
+}
+
+.import-field-search-compact {
+  margin-bottom: 0;
 }
 
 .import-field-search input {
@@ -1536,4 +1545,5 @@ th {
     font-size: 1.5rem;
   }
 }
+
 
