@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lead Generator</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <button class="floating-timeline-button" id="openTimelineModal" type="button" aria-label="Open timeline">
+    <svg class="floating-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm1 3a1 1 0 0 1 1 1v3.59l2.7 2.7a1 1 0 0 1-1.4 1.42l-3-3A1 1 0 0 1 12 12V8a1 1 0 0 1 1-1Z"></path>
+    </svg>
+  </button>
+
+  <div class="modal-backdrop" id="emailDetailModal" hidden>
+    <div class="modal-card email-detail-card">
+      <button class="modal-close-button" id="closeEmailDetail" type="button" aria-label="Close email review">&times;</button>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Sent Email Review</p>
+          <h2 id="emailDetailTitle">Email Content</h2>
+        </div>
+        <div class="header-actions">
+          <button class="button secondary" id="resetEmailDraft" type="button">Reset Draft</button>
+        </div>
+      </div>
+      <div class="detail-card tone-soft">
+        <div class="detail-box">
+          <strong>Subject</strong>
+          <input class="email-subject-input" id="emailDetailSubject" type="text">
+        </div>
+        <div class="detail-box">
+          <strong>Message</strong>
+          <textarea class="email-body-textarea" id="emailDetailBody" rows="12"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="timelineModal" hidden>
+    <div class="modal-card">
+      <button class="modal-close-button" id="closeTimelineModal" type="button" aria-label="Close timeline">&times;</button>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Timeline</p>
+          <h2>Recent Activity</h2>
+        </div>
+      </div>
+      <div id="activityList" class="timeline"></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="settingsModal" hidden>
+    <div class="modal-card settings-modal-card">
+      <button class="modal-close-button" id="closeSettingsModal" type="button" aria-label="Close settings">&times;</button>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Settings</p>
+          <h2>Email Workspace</h2>
+        </div>
+      </div>
+      <div class="detail-card tone-soft settings-card">
+        <form class="settings-grid" id="senderEmailForm">
+          <section class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-logo">From</div>
+              <div>
+                <strong>Sender Identity</strong>
+                <p>Choose the sender name and email shown in every generated draft.</p>
+              </div>
+            </div>
+            <div class="compact-auth-form">
+              <label>
+                <span>Sender Name</span>
+                <input id="senderNameInput" name="senderName" placeholder="Your Name or Team Name">
+              </label>
+              <label>
+                <span>Sender Email</span>
+                <input id="senderEmailInput" name="senderEmail" type="email" placeholder="sales@yourcompany.com" required>
+              </label>
+            </div>
+          </section>
+
+          <section class="settings-section">
+            <div class="settings-section-header">
+              <div class="settings-logo alt">Tpl</div>
+              <div>
+                <strong>Email Draft Template</strong>
+                <p>Customize the default outreach message used whenever the system prepares a lead email.</p>
+              </div>
+            </div>
+            <div class="compact-auth-form">
+              <label>
+                <span>Subject Template</span>
+                <input id="emailTemplateSubjectInput" name="emailTemplateSubject" placeholder="{{productName}} idea for {{company}}">
+              </label>
+              <label>
+                <span>Body Template</span>
+                <textarea id="emailTemplateBodyInput" name="emailTemplateBody" rows="10"></textarea>
+              </label>
+              <p class="form-note">Available placeholders: <code>{{contactName}}</code>, <code>{{company}}</code>, <code>{{source}}</code>, <code>{{region}}</code>, <code>{{industry}}</code>, <code>{{productName}}</code>, <code>{{pitch}}</code>, <code>{{reason}}</code>, <code>{{senderName}}</code>, <code>{{senderEmail}}</code></p>
+            </div>
+          </section>
+
+          <div class="settings-actions">
+            <button class="button primary" type="submit">Save Email Settings</button>
+            <p class="form-note" id="senderEmailStatus">The current sender email and template will be used in new email drafts.</p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="leadDetailModal" hidden>
+    <div class="modal-card detail-modal-card">
+      <button class="modal-close-button" id="closeLeadDetailModal" type="button" aria-label="Close lead detail">&times;</button>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Lead Detail</p>
+          <h2 id="detailTitle">Select a lead</h2>
+          <div class="lead-status-strip" id="detailStatusStrip"></div>
+        </div>
+        <span class="status-chip" id="detailBadge">No lead selected</span>
+      </div>
+      <div id="detailCard" class="detail-card empty-detail">Select a lead from the list to view its source, priority, and recommended system.</div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar-shell">
+      <div class="sidebar-brand">
+        <div class="sidebar-mark">LG</div>
+        <div>
+          <p class="eyebrow">Lead Generator</p>
+          <h1>LeadGen AI</h1>
+        </div>
+      </div>
+
+      <nav class="workspace-nav" aria-label="Primary">
+        <button class="workspace-tab active" data-workspace="overview" type="button">
+          <span class="workspace-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 13h7V4H4v9Zm9 7h7V4h-7v16ZM4 20h7v-5H4v5Z"></path>
+            </svg>
+          </span>
+          <span class="workspace-text">
+            <strong>Dashboard</strong>
+            <span>Overview and recent performance.</span>
+          </span>
+        </button>
+        <button class="workspace-tab" data-workspace="intake" type="button">
+          <span class="workspace-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19 11H13V5h-2v6H5v2h6v6h2v-6h6v-2Z"></path>
+            </svg>
+          </span>
+          <span class="workspace-text">
+            <strong>Inbound Scanner</strong>
+            <span>Capture and enrich new leads.</span>
+          </span>
+        </button>
+        <button class="workspace-tab" data-workspace="queue" type="button">
+          <span class="workspace-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 5h16v2H4V5Zm0 6h16v2H4v-2Zm0 6h10v2H4v-2Z"></path>
+            </svg>
+          </span>
+          <span class="workspace-text">
+            <strong>CRM Manager</strong>
+            <span>Review queue, qualify, and log follow-up.</span>
+          </span>
+        </button>
+        <button class="workspace-tab" data-workspace="export" type="button">
+          <span class="workspace-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3 7 8h3v5h4V8h3l-5-5Zm-7 14h14v2H5v-2Z"></path>
+            </svg>
+          </span>
+          <span class="workspace-text">
+            <strong>Outbound Tools</strong>
+            <span>Email activity and export center.</span>
+          </span>
+        </button>
+      </nav>
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="topbar-copy">
+          <p class="eyebrow" id="pageEyebrow">Overview</p>
+          <h2 id="pageTitle">Lead Operations Dashboard</h2>
+          <p class="topbar-description" id="pageDescription">Track intake, qualification, outreach, and CRM follow-up from one workspace.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="button secondary" id="openSettingsModal" type="button">Settings</button>
+        </div>
+      </header>
+
+      <section class="snapshot-shell">
+        <article class="metric-card accent">
+          <span>Total Leads</span>
+          <strong id="metricTotal">0</strong>
+        </article>
+        <article class="metric-card">
+          <span>Qualified</span>
+          <strong id="metricQualified">0</strong>
+        </article>
+        <article class="metric-card">
+          <span>Priority Area</span>
+          <strong id="metricPriority">0</strong>
+        </article>
+        <article class="metric-card dark">
+          <span>Emails Sent</span>
+          <strong id="metricSent">0</strong>
+        </article>
+      </section>
+
+      <main class="workspace-shell">
+        <section class="workspace-panel" id="workspaceOverview">
+          <div class="overview-grid">
+            <section class="panel">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">Overview</p>
+                  <h3>Pipeline Summary</h3>
+                </div>
+              </div>
+              <div class="overview-spotlight">
+                <div class="spotlight-card">
+                  <span>Current queue</span>
+                  <strong id="overviewLeadCount">0 active leads</strong>
+                  <p>The workspace stays focused on your latest captured leads and qualification progress.</p>
+                </div>
+                <div class="spotlight-card">
+                  <span>Best opportunity</span>
+                  <strong id="overviewPriorityCount">0 in priority market</strong>
+                  <p>KL and Selangor remain front-of-queue to keep outreach aligned with your target area.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">Recent Leads</p>
+                  <h3>Latest Additions</h3>
+                </div>
+              </div>
+              <div class="mini-table" id="overviewLeadTable"></div>
+            </section>
+
+            <section class="panel">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">Recent Activity</p>
+                  <h3>Team Timeline</h3>
+                </div>
+              </div>
+              <div class="overview-activity" id="overviewActivityList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="workspace-panel" id="workspaceIntake" hidden>
+          <div class="panel">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">Inbound Scanner</p>
+                <h3>Add Lead</h3>
+              </div>
+              <div class="header-actions">
+                <button class="button secondary" id="loadDemoLeads" type="button">Load Demo</button>
+                <button class="button secondary" id="refreshLeads" type="button">Refresh</button>
+              </div>
+            </div>
+
+            <section class="import-panel">
+              <div class="section-heading compact import-heading">
+                <div>
+                  <p class="eyebrow">Real Data Import</p>
+                  <h3>Google Maps Lead Pull</h3>
+                </div>
+              </div>
+              <form id="googleMapsImportForm" class="import-form">
+                <label class="full-span">
+                  <span>Search Query</span>
+                  <input id="googleMapsQueryInput" name="query" placeholder="Example: retail shops in Kuala Lumpur" required>
+                </label>
+                <label>
+                  <span>Target Region</span>
+                  <select name="region">
+                    <option>Kuala Lumpur</option>
+                    <option>Petaling Jaya</option>
+                    <option>Subang Jaya</option>
+                    <option>Shah Alam</option>
+                    <option>Puchong</option>
+                    <option>Klang</option>
+                    <option>Cheras</option>
+                    <option>Ampang</option>
+                    <option>Kajang</option>
+                    <option>Other</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Company Type</span>
+                  <select name="companyType">
+                    <option value="retail">Retail</option>
+                    <option value="fnb">F&B</option>
+                    <option value="wholesale">Wholesale</option>
+                    <option value="warehouse">Warehouse</option>
+                    <option value="service">Service</option>
+                    <option value="manufacturing">Manufacturing</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Pain Point</span>
+                  <select name="painPoint">
+                    <option value="manual-accounting">Manual accounting</option>
+                    <option value="stock-visibility">Stock visibility</option>
+                    <option value="warehouse-control">Warehouse control</option>
+                    <option value="checkout-pos">Retail checkout</option>
+                    <option value="payroll-compliance">Payroll compliance</option>
+                  </select>
+                </label>
+                <div class="full-span form-actions">
+                  <button class="button primary" id="googleMapsImportButton" type="submit">Import from Google Maps</button>
+                </div>
+              </form>
+              <p class="form-note">This uses the official Google Places API. LinkedIn remains manual-only because automated scraping is not permitted.</p>
+            </section>
+
+            <form id="leadForm" class="lead-form">
+              <label><span>Company <em class="required-star">*</em></span><input name="company" required></label>
+              <label><span>Contact Name <em class="required-star">*</em></span><input name="contactName" required></label>
+              <label><span>Email <em class="required-star">*</em></span><input name="email" type="email" required></label>
+              <label><span>Phone</span><input name="phone"></label>
+              <label><span>Role</span><input name="role"></label>
+              <label><span>Industry</span><input name="industry"></label>
+              <label>
+                <span>Region <em class="required-star">*</em></span>
+                <select name="region" required>
+                  <option>Kuala Lumpur</option>
+                  <option>Petaling Jaya</option>
+                  <option>Subang Jaya</option>
+                  <option>Shah Alam</option>
+                  <option>Puchong</option>
+                  <option>Klang</option>
+                  <option>Cheras</option>
+                  <option>Ampang</option>
+                  <option>Kajang</option>
+                  <option>Johor Bahru</option>
+                  <option>Penang</option>
+                  <option>Other</option>
+                </select>
+              </label>
+              <label>
+                <span>Lead Source <em class="required-star">*</em></span>
+                <select name="source" required>
+                  <option>Google Maps</option>
+                  <option>LinkedIn</option>
+                  <option>Directory</option>
+                  <option>Referral</option>
+                  <option>Manual research</option>
+                </select>
+              </label>
+              <label>
+                <span>Company Type <em class="required-star">*</em></span>
+                <select name="companyType" required>
+                  <option value="retail">Retail</option>
+                  <option value="fnb">F&B</option>
+                  <option value="wholesale">Wholesale</option>
+                  <option value="warehouse">Warehouse</option>
+                  <option value="service">Service</option>
+                  <option value="manufacturing">Manufacturing</option>
+                </select>
+              </label>
+              <label>
+                <span>Pain Point <em class="required-star">*</em></span>
+                <select name="painPoint" required>
+                  <option value="manual-accounting">Manual accounting</option>
+                  <option value="stock-visibility">Stock visibility</option>
+                  <option value="warehouse-control">Warehouse control</option>
+                  <option value="checkout-pos">Retail checkout</option>
+                  <option value="payroll-compliance">Payroll compliance</option>
+                </select>
+              </label>
+              <label>
+                <span>Status <em class="required-star">*</em></span>
+                <input value="New" disabled>
+                <input type="hidden" name="status" value="new">
+              </label>
+              <label class="full-span">
+                <span>Notes</span>
+                <textarea name="notes" rows="4" placeholder="Current workflow, opportunity notes, or qualifying details"></textarea>
+              </label>
+              <p class="form-note full-span">Fields marked with <em class="required-star">*</em> must be filled in before saving a manual lead.</p>
+              <div class="full-span form-actions">
+                <button class="button primary" type="submit">Save Lead</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="workspace-panel" id="workspaceQueue" hidden>
+          <div class="panel">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">CRM Manager</p>
+                <h3>Lead Queue</h3>
+              </div>
+              <label class="search-box">
+                <span>Search</span>
+                <input id="searchInput" placeholder="Search company, source, area, product">
+              </label>
+            </div>
+            <div class="queue-toolbar">
+              <button class="button secondary" id="toggleLeadDetail" type="button">Show Lead Detail</button>
+            </div>
+            <div id="leadList" class="lead-list"></div>
+            <div class="queue-pagination">
+              <button class="button secondary" id="previousQueuePage" type="button">Previous</button>
+              <span class="queue-page-indicator" id="queuePageIndicator">Page 1 of 1</span>
+              <button class="button secondary" id="nextQueuePage" type="button">Next</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="workspace-panel" id="workspaceExport" hidden>
+          <div class="panel">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">Outbound Tools</p>
+                <h3>Outreach and Export</h3>
+              </div>
+            </div>
+            <div class="export-workspace-grid">
+              <button class="export-workspace-card" id="showExportQueue" type="button">
+                <strong>Lead Queue</strong>
+                <span>Preview the full lead queue before exporting.</span>
+              </button>
+              <button class="export-workspace-card" id="showExportEmailActivity" type="button">
+                <strong>Email Activity</strong>
+                <span>Review sent outreach records and export them to Excel.</span>
+              </button>
+            </div>
+            <section class="export-preview-panel" id="exportPreviewPanel" hidden>
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow" id="exportPreviewEyebrow">Export Preview</p>
+                  <h3 id="exportPreviewTitle">Choose a table to preview</h3>
+                </div>
+                <div class="header-actions">
+                  <button class="button primary" id="exportPreviewButton" type="button">Export Excel</button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table id="exportQueueTable" hidden>
+                  <thead>
+                    <tr>
+                      <th>Company</th>
+                      <th>Contact</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Region</th>
+                      <th>Source</th>
+                      <th>Priority</th>
+                      <th>Recommended Product</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="exportQueueBody"></tbody>
+                </table>
+                <table id="exportEmailTable" hidden>
+                  <thead>
+                    <tr>
+                      <th>Company</th>
+                      <th>Contact</th>
+                      <th>Email</th>
+                      <th>Region</th>
+                      <th>Source</th>
+                      <th>Sent</th>
+                    </tr>
+                  </thead>
+                  <tbody id="exportEmailBody"></tbody>
+                </table>
+              </div>
+              <p class="empty-state" id="exportPreviewEmpty" hidden>No records are available for this export view yet.</p>
+            </section>
+            <p class="export-save-note" id="exportSaveNote">When supported, export will ask where to save. Otherwise, it will save into the app project folder automatically.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="notification-center" id="notificationCenter" aria-live="polite" aria-atomic="false"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1600" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4F5F1"/>
+      <stop offset="1" stop-color="#E7EAE2"/>
+    </linearGradient>
+    <filter id="shadow3" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="22" stdDeviation="28" flood-color="#868A79" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#bg3)"/>
+  <rect x="74" y="54" width="1452" height="892" rx="30" fill="#FBFBF8" filter="url(#shadow3)"/>
+
+  <text x="116" y="114" font-family="Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="3" fill="#6C7A65">EXECUTIVE MINIMAL</text>
+  <text x="116" y="164" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="#1D241E">Lead Generator</text>
+  <text x="116" y="204" font-family="Arial, sans-serif" font-size="18" fill="#6E766D">Presentation-like clarity for a calmer lead operations experience.</text>
+  <rect x="1292" y="94" width="92" height="42" rx="21" fill="#F2F3EE" stroke="#DEE1D8"/>
+  <text x="1318" y="120" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#445145">Settings</text>
+  <rect x="1398" y="94" width="96" height="42" rx="21" fill="#1F2820"/>
+  <text x="1424" y="120" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">Login</text>
+
+  <line x1="116" y1="240" x2="1486" y2="240" stroke="#E3E5DE" stroke-width="2"/>
+
+  <g>
+    <text x="116" y="292" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2.6" fill="#6C7A65">LIVE SNAPSHOT</text>
+    <rect x="116" y="320" width="320" height="88" rx="18" fill="#F3F5F0"/>
+    <rect x="460" y="320" width="320" height="88" rx="18" fill="#F8F8F5"/>
+    <rect x="804" y="320" width="320" height="88" rx="18" fill="#F6F4EB"/>
+    <rect x="1148" y="320" width="320" height="88" rx="18" fill="#F5F6F1"/>
+    <text x="146" y="350" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#687567">Total Leads</text>
+    <text x="146" y="388" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#202722">184</text>
+    <text x="490" y="350" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#687567">Qualified</text>
+    <text x="490" y="388" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#202722">62</text>
+    <text x="834" y="350" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#687567">Priority Area</text>
+    <text x="834" y="388" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#202722">84</text>
+    <text x="1178" y="350" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#687567">Emails Sent</text>
+    <text x="1178" y="388" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#202722">39</text>
+  </g>
+
+  <g>
+    <text x="116" y="470" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2.6" fill="#6C7A65">WORKSPACE CHOICE</text>
+    <rect x="116" y="494" width="440" height="110" rx="24" fill="#F4F6F2"/>
+    <rect x="580" y="494" width="440" height="110" rx="24" fill="#FBFBF8"/>
+    <rect x="1044" y="494" width="440" height="110" rx="24" fill="#FBFBF8"/>
+    <text x="148" y="538" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#1E2520">Lead Intake</text>
+    <text x="148" y="570" font-family="Arial, sans-serif" font-size="16" fill="#6D756B">A clean form experience with sender email context and fewer distractions.</text>
+    <text x="612" y="538" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#1E2520">Lead Queue</text>
+    <text x="612" y="570" font-family="Arial, sans-serif" font-size="16" fill="#6D756B">A more elegant operational list with quiet highlighting and measured density.</text>
+    <text x="1076" y="538" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#1E2520">Email Activity</text>
+    <text x="1076" y="570" font-family="Arial, sans-serif" font-size="16" fill="#6D756B">Review drafts, sender identity, exports, and timeline from one calm rail.</text>
+  </g>
+
+  <rect x="116" y="642" width="620" height="242" rx="28" fill="#FFFFFF"/>
+  <text x="150" y="688" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2.6" fill="#6C7A65">LEAD INTAKE PANEL</text>
+  <text x="150" y="726" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#1E2520">Refined data capture</text>
+  <text x="150" y="766" font-family="Arial, sans-serif" font-size="17" fill="#6B7369">Two-column spacing, gentler borders, and clearer field grouping for manual lead entry.</text>
+  <rect x="150" y="800" width="196" height="42" rx="16" fill="#1F2820"/>
+  <text x="216" y="827" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">Save Lead</text>
+
+  <rect x="766" y="642" width="718" height="242" rx="28" fill="#FFFFFF"/>
+  <text x="800" y="688" font-family="Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="2.6" fill="#6C7A65">QUEUE + REVIEW PANEL</text>
+  <text x="800" y="726" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#1E2520">Executive reading flow</text>
+  <text x="800" y="766" font-family="Arial, sans-serif" font-size="17" fill="#6B7369">Top metrics first, queue second, editable email drafts and exports tucked into a quiet review area.</text>
+  <rect x="800" y="802" width="184" height="42" rx="16" fill="#F1F3EE" stroke="#DEE2D8"/>
+  <text x="847" y="829" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#445145">Export CSV</text>
+  <rect x="1000" y="802" width="184" height="42" rx="16" fill="#F1F3EE" stroke="#DEE2D8"/>
+  <text x="1058" y="829" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#445145">Timeline</text>
+</svg>

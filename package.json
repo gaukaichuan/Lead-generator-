@@ -1,0 +1,10 @@
+{
+  "name": "lead-automation-node",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node.js lead automation demo with source tracking and KL/Selangor prioritization",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
