@@ -56,7 +56,6 @@ const loadDemoLeadsButton = document.getElementById("loadDemoLeads");
 const refreshLeadsButton = document.getElementById("refreshLeads");
 const searchInput = document.getElementById("searchInput");
 const leadList = document.getElementById("leadList");
-const toggleLeadDetail = document.getElementById("toggleLeadDetail");
 const previousQueuePage = document.getElementById("previousQueuePage");
 const nextQueuePage = document.getElementById("nextQueuePage");
 const queuePageIndicator = document.getElementById("queuePageIndicator");
@@ -665,6 +664,9 @@ function renderLeadList() {
     card.addEventListener("click", () => {
       state.selectedLeadId = lead.id;
       renderLeadList();
+      renderLeadDetail();
+      leadDetailModal.hidden = false;
+      syncBodyLock();
     });
     leadList.appendChild(card);
   });
@@ -1093,12 +1095,6 @@ workspaceTabs.forEach((tab) => {
       });
     }
   });
-});
-
-toggleLeadDetail.addEventListener("click", () => {
-  renderLeadDetail();
-  leadDetailModal.hidden = false;
-  syncBodyLock();
 });
 
 closeLeadDetailModal.addEventListener("click", () => {

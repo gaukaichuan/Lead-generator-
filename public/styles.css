@@ -100,8 +100,8 @@ h3 {
   width: min(1480px, calc(100% - 32px));
   margin: 12px auto;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 236px minmax(0, 1fr);
+  gap: 12px;
   min-height: calc(100vh - 24px);
   position: relative;
 }
@@ -132,10 +132,10 @@ h3 {
 }
 
 .sidebar-shell {
-  padding: 18px 14px;
+  padding: 14px 12px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   background:
     radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 26%),
     linear-gradient(180deg, #0f172a 0%, #111c31 44%, #14233d 100%);
@@ -147,20 +147,20 @@ h3 {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 6px 6px 2px;
+  padding: 2px 2px 0;
 }
 
 .sidebar-brand .eyebrow {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.15rem;
   color: rgba(191, 219, 254, 0.82);
 }
 
 .sidebar-mark {
-  width: 58px;
-  height: 58px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 18px;
+  border-radius: 14px;
   color: #ffffff;
   font-weight: 800;
   background: linear-gradient(135deg, #3b82f6, #7dd3fc);
@@ -173,15 +173,15 @@ h3 {
 
 .workspace-nav {
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .workspace-tab {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
   align-items: center;
-  padding: 11px;
+  padding: 9px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.04);
   background: rgba(255, 255, 255, 0.02);
@@ -204,9 +204,9 @@ h3 {
 }
 
 .workspace-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   background: rgba(255, 255, 255, 0.08);
@@ -229,11 +229,11 @@ h3 {
 
 .workspace-text {
   display: grid;
-  gap: 4px;
+  gap: 2px;
 }
 
 .workspace-text strong {
-  font-size: 1rem;
+  font-size: 0.86rem;
   font-weight: 700;
 }
 
@@ -255,6 +255,7 @@ h3 {
 
 .workspace-text span {
   color: rgba(203, 213, 225, 0.82);
+  font-size: 0.74rem;
 }
 
 .sidebar-note {
@@ -278,21 +279,21 @@ h3 {
 
 .main-shell {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   align-content: start;
 }
 
 .topbar,
 .snapshot-shell {
   border-radius: var(--radius-xl);
-  padding: 16px 18px;
+  padding: 12px 14px;
 }
 
 .topbar {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 16px;
+  gap: 12px;
   background:
     radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 24%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(250, 252, 255, 0.92));
@@ -304,8 +305,9 @@ h3 {
 
 .topbar-description {
   margin: 0;
-  font-size: 0.97rem;
-  max-width: 58ch;
+  font-size: 0.84rem;
+  max-width: 72ch;
+  line-height: 1.4;
 }
 
 .topbar-actions {
@@ -317,16 +319,16 @@ h3 {
 .snapshot-shell {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.5)),
     linear-gradient(135deg, rgba(37, 99, 235, 0.06), transparent 44%);
 }
 
 .metric-card {
-  padding: 14px 14px 12px;
-  border-radius: 18px;
-  min-height: 102px;
+  padding: 12px 12px 10px;
+  border-radius: 16px;
+  min-height: 82px;
   display: grid;
   align-content: space-between;
   position: relative;
@@ -334,7 +336,7 @@ h3 {
 }
 
 .metric-card strong {
-  font-size: 1.9rem;
+  font-size: 1.65rem;
   line-height: 1;
 }
 
@@ -364,7 +366,7 @@ h3 {
 
 .workspace-shell {
   display: grid;
-  gap: 18px;
+  gap: 10px;
 }
 
 .workspace-panel {
@@ -372,7 +374,7 @@ h3 {
 }
 
 .panel {
-  padding: 18px;
+  padding: 14px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(252, 253, 255, 0.92));
 }
@@ -381,7 +383,7 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: end;
-  gap: 16px;
+  gap: 10px;
 }
 
 .header-actions {
@@ -470,7 +472,7 @@ h3 {
 .overview-grid {
   display: grid;
   grid-template-columns: 1.15fr 0.95fr;
-  gap: 18px;
+  gap: 10px;
 }
 
 .overview-grid > :first-child {
@@ -480,8 +482,8 @@ h3 {
 .overview-spotlight {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .spotlight-card,
@@ -491,7 +493,7 @@ h3 {
 }
 
 .spotlight-card {
-  padding: 18px;
+  padding: 12px;
   background: linear-gradient(145deg, #f7fbff, #eef5ff);
   border: 1px solid rgba(148, 163, 184, 0.18);
 }
@@ -499,33 +501,33 @@ h3 {
 .spotlight-card span {
   display: block;
   color: var(--muted-soft);
-  font-size: 0.88rem;
-  margin-bottom: 12px;
+  font-size: 0.76rem;
+  margin-bottom: 6px;
 }
 
 .spotlight-card strong {
   display: block;
-  font-size: 1.22rem;
-  margin-bottom: 8px;
+  font-size: 0.98rem;
+  margin-bottom: 4px;
 }
 
 .mini-table,
 .overview-activity {
   display: grid;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .mini-row,
 .overview-activity-card {
-  padding: 16px 18px;
+  padding: 10px 12px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.9));
 }
 
 .mini-row {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   align-items: flex-start;
 }
 
@@ -543,24 +545,24 @@ h3 {
 .overview-activity-card strong {
   display: block;
   margin-bottom: 4px;
-  font-size: 0.98rem;
+  font-size: 0.86rem;
 }
 
 .mini-tag {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 6px 10px;
+  padding: 4px 8px;
   background: #f8fafc;
   border: 1px solid var(--line);
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
 .mini-row-meta,
 .mini-time {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   color: var(--muted-soft);
 }
 
@@ -939,12 +941,12 @@ select {
 .lead-list,
 .timeline {
   display: grid;
-  gap: 10px;
-  margin-top: 12px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .lead-card {
-  padding: 12px 14px;
+  padding: 10px 12px;
   cursor: pointer;
   position: relative;
   transition:
@@ -985,20 +987,20 @@ select {
 }
 
 .lead-card h3 {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   margin-bottom: 6px;
 }
 
 .lead-card p {
   margin-bottom: 4px;
-  font-size: 0.84rem;
+  font-size: 0.78rem;
 }
 
 .lead-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .pill,
@@ -1040,8 +1042,8 @@ select {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 .queue-page-indicator {
@@ -1474,13 +1476,13 @@ th {
   }
 
   .workspace-tab {
-    grid-template-columns: 40px minmax(0, 1fr);
-    padding: 10px;
+    grid-template-columns: 36px minmax(0, 1fr);
+    padding: 8px;
   }
 
   .workspace-icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
   }
 
   .import-form .button.primary {
@@ -1491,7 +1493,7 @@ th {
 @media (max-width: 640px) {
   .app-shell {
     width: min(100% - 16px, 1480px);
-    margin: 8px auto;
+    margin: 6px auto;
   }
 
   .sidebar-shell,
