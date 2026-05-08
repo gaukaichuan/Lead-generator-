@@ -1123,24 +1123,24 @@ th {
 }
 
 .detail-card {
-  margin-top: 12px;
-  padding: 12px;
+  margin-top: 8px;
+  padding: 10px;
   background: linear-gradient(180deg, rgba(248, 251, 255, 0.92), rgba(244, 247, 252, 0.94));
 }
 
 .lead-status-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 5px;
+  margin-top: 6px;
 }
 
 .state-pill {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 0.62rem;
+  padding: 3px 7px;
+  font-size: 0.58rem;
   font-weight: 800;
   border: 1px solid transparent;
 }
@@ -1195,21 +1195,28 @@ th {
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .detail-box {
-  padding: 10px;
+  padding: 8px 10px;
   border-radius: 12px;
   background: #ffffff;
   border: 1px solid var(--line);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.035);
 }
 
 .detail-box strong {
   display: block;
-  margin-bottom: 6px;
-  font-size: 0.78rem;
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+}
+
+.detail-box p,
+.detail-box a {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.42;
 }
 
 .detail-link {
@@ -1226,7 +1233,7 @@ th {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .timeline-item {
@@ -1279,7 +1286,7 @@ th {
   max-height: 82vh;
   overflow: auto;
   position: relative;
-  padding: 40px 14px 14px;
+  padding: 34px 12px 12px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 255, 0.96));
 }
 
@@ -1288,7 +1295,26 @@ th {
 }
 
 .detail-modal-card {
-  width: min(860px, 100%);
+  width: min(920px, 100%);
+}
+
+.detail-modal-card h2 {
+  font-size: clamp(1.8rem, 2.2vw, 2.4rem);
+  line-height: 1.04;
+}
+
+.detail-modal-card .eyebrow {
+  margin-bottom: 0.25rem;
+}
+
+.detail-modal-card .section-heading.compact {
+  gap: 8px;
+  align-items: start;
+}
+
+.detail-modal-card .status-chip {
+  padding: 5px 10px;
+  font-size: 0.68rem;
 }
 
 .email-detail-card {
@@ -1510,3 +1536,4 @@ th {
     font-size: 1.5rem;
   }
 }
+
