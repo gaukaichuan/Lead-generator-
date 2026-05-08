@@ -7,6 +7,7 @@ const state = {
   queuePage: 1,
   activeEmailLeadId: null,
   currentLocation: null,
+  isResolvingLocation: false,
   emailDrafts: {},
   senderName: "Your Name",
   senderEmail: "sales@example.com",
@@ -35,8 +36,8 @@ const SENDER_SETTINGS_KEY = "lead-generator-sender-settings";
 const leadForm = document.getElementById("leadForm");
 const googleMapsImportForm = document.getElementById("googleMapsImportForm");
 const googleMapsImportButton = document.getElementById("googleMapsImportButton");
-const detectLocationButton = document.getElementById("detectLocationButton");
 const googleMapsRadiusInput = document.getElementById("googleMapsRadiusInput");
+const googleMapsQueryInput = document.getElementById("googleMapsQueryInput");
 const googleMapsLatitudeInput = document.getElementById("googleMapsLatitudeInput");
 const googleMapsLongitudeInput = document.getElementById("googleMapsLongitudeInput");
 const locationStatusTitle = document.getElementById("locationStatusTitle");
@@ -288,11 +289,10 @@ function updateLocationUi() {
   syncLocationInputs();
   if (!state.currentLocation) {
     setLocationStatus(
-      "Location permission required",
+      "Waiting for location",
       "Allow browser location access so the import only keeps leads near your current position.",
       "idle"
     );
-    detectLocationButton.textContent = "Use My Location";
     return;
   }
 
@@ -301,13 +301,18 @@ function updateLocationUi() {
     `Using your live location at ${state.currentLocation.latitude.toFixed(4)}, ${state.currentLocation.longitude.toFixed(4)}.`,
     "ready"
   );
-  detectLocationButton.textContent = "Refresh Location";
 }
 
 function readLiveLocation() {
   if (!navigator.geolocation) {
     throw new Error("This browser does not support live location access.");
   }
+
+  if (state.isResolvingLocation) {
+    return Promise.resolve(state.currentLocation);
+  }
+
+  state.isResolvingLocation = true;
 
   setLocationStatus("Checking your location", "Waiting for browser permission so the radius filter can run.", "loading");
 
@@ -318,11 +323,13 @@ function readLiveLocation() {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
         };
+        state.isResolvingLocation = false;
         updateLocationUi();
         resolve(state.currentLocation);
       },
       () => {
         state.currentLocation = null;
+        state.isResolvingLocation = false;
         updateLocationUi();
         reject(new Error("Location access is required for Google Maps radius filtering. Please allow location and try again."));
       },
@@ -333,6 +340,14 @@ function readLiveLocation() {
       }
     );
   });
+}
+
+async function ensureLiveLocation() {
+  if (state.currentLocation) {
+    return state.currentLocation;
+  }
+
+  return readLiveLocation();
 }
 
 function loadSenderSettings() {
@@ -923,11 +938,9 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
   googleMapsImportButton.textContent = "Importing...";
 
   try {
-    if (!state.currentLocation) {
-      await readLiveLocation();
-      body.latitude = googleMapsLatitudeInput.value;
-      body.longitude = googleMapsLongitudeInput.value;
-    }
+    await ensureLiveLocation();
+    body.latitude = googleMapsLatitudeInput.value;
+    body.longitude = googleMapsLongitudeInput.value;
 
     const payload = await request("/api/import/google-maps", {
       method: "POST",
@@ -954,17 +967,16 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
   }
 });
 
-detectLocationButton.addEventListener("click", async () => {
-  detectLocationButton.disabled = true;
+[googleMapsQueryInput, googleMapsRadiusInput].forEach((element) => {
+  element.addEventListener("focus", () => {
+    if (state.currentLocation || state.isResolvingLocation) {
+      return;
+    }
 
-  try {
-    await readLiveLocation();
-    showNotification("Location ready", "Your live location is now active for Google Maps radius filtering.");
-  } catch (error) {
-    showNotification("Location needed", error.message);
-  } finally {
-    detectLocationButton.disabled = false;
-  }
+    ensureLiveLocation().catch(() => {
+      // The submit flow will show the full error again if permission is denied.
+    });
+  });
 });
 
 leadForm.addEventListener("submit", async (event) => {
@@ -1025,6 +1037,11 @@ workspaceTabs.forEach((tab) => {
     state.activeWorkspace = tab.dataset.workspace;
     renderWorkspace();
     renderExportPreview();
+    if (state.activeWorkspace === "intake" && !state.currentLocation && !state.isResolvingLocation) {
+      ensureLiveLocation().catch(() => {
+        // Submit flow will show the full permission error if needed.
+      });
+    }
   });
 });
 
@@ -1194,3 +1211,8 @@ loadSenderSettings();
 renderSenderSettings();
 updateLocationUi();
 loadLeads();
+if (!state.currentLocation && !state.isResolvingLocation) {
+  ensureLiveLocation().catch(() => {
+    // Keep the UI passive until the user interacts with the import flow.
+  });
+}

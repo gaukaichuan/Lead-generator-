@@ -289,57 +289,57 @@
                     <span>Business Category or Search Query</span>
                     <input id="googleMapsQueryInput" name="query" placeholder="Example: retail shops in Kuala Lumpur" required>
                   </label>
+                  <label class="import-field import-field-radius">
+                    <span>Radius (km)</span>
+                    <input id="googleMapsRadiusInput" name="radiusKm" type="number" min="1" step="1" value="15" required>
+                  </label>
                   <label class="import-field">
                     <span>Target Region</span>
-                    <select name="region">
-                      <option>Kuala Lumpur</option>
-                      <option>Petaling Jaya</option>
-                      <option>Subang Jaya</option>
-                      <option>Shah Alam</option>
-                      <option>Puchong</option>
-                      <option>Klang</option>
-                      <option>Cheras</option>
-                      <option>Ampang</option>
-                      <option>Kajang</option>
-                      <option>Other</option>
-                    </select>
+                    <input name="region" list="googleMapsRegionOptions" value="Kuala Lumpur" placeholder="Type or pick a region">
                   </label>
                   <label class="import-field">
                     <span>Company Type</span>
-                    <select name="companyType">
-                      <option value="retail">Retail</option>
-                      <option value="fnb">F&B</option>
-                      <option value="wholesale">Wholesale</option>
-                      <option value="warehouse">Warehouse</option>
-                      <option value="service">Service</option>
-                      <option value="manufacturing">Manufacturing</option>
-                    </select>
+                    <input name="companyType" list="googleMapsCompanyTypeOptions" value="retail" placeholder="Type or pick a company type">
                   </label>
                   <label class="import-field">
                     <span>Pain Point</span>
-                    <select name="painPoint">
-                      <option value="manual-accounting">Manual accounting</option>
-                      <option value="stock-visibility">Stock visibility</option>
-                      <option value="warehouse-control">Warehouse control</option>
-                      <option value="checkout-pos">Retail checkout</option>
-                      <option value="payroll-compliance">Payroll compliance</option>
-                    </select>
+                    <input name="painPoint" list="googleMapsPainPointOptions" value="manual-accounting" placeholder="Type or pick a pain point">
                   </label>
                 </div>
                 <div class="import-location-card full-span">
                   <div class="import-location-copy">
                     <p class="import-location-label">Live radius filter</p>
-                    <strong id="locationStatusTitle">Location permission required</strong>
+                    <strong id="locationStatusTitle">Waiting for location</strong>
                     <p id="locationStatusMessage">Allow browser location access so the import only keeps leads near your current position.</p>
                   </div>
-                  <div class="import-location-actions">
-                    <label class="import-field radius-field">
-                      <span>Radius (km)</span>
-                      <input id="googleMapsRadiusInput" name="radiusKm" type="number" min="1" step="1" value="15" required>
-                    </label>
-                    <button class="button secondary location-button" id="detectLocationButton" type="button">Use My Location</button>
-                  </div>
                 </div>
+                <datalist id="googleMapsRegionOptions">
+                  <option value="Kuala Lumpur"></option>
+                  <option value="Petaling Jaya"></option>
+                  <option value="Subang Jaya"></option>
+                  <option value="Shah Alam"></option>
+                  <option value="Puchong"></option>
+                  <option value="Klang"></option>
+                  <option value="Cheras"></option>
+                  <option value="Ampang"></option>
+                  <option value="Kajang"></option>
+                  <option value="Other"></option>
+                </datalist>
+                <datalist id="googleMapsCompanyTypeOptions">
+                  <option value="retail"></option>
+                  <option value="fnb"></option>
+                  <option value="wholesale"></option>
+                  <option value="warehouse"></option>
+                  <option value="service"></option>
+                  <option value="manufacturing"></option>
+                </datalist>
+                <datalist id="googleMapsPainPointOptions">
+                  <option value="manual-accounting"></option>
+                  <option value="stock-visibility"></option>
+                  <option value="warehouse-control"></option>
+                  <option value="checkout-pos"></option>
+                  <option value="payroll-compliance"></option>
+                </datalist>
                 <input id="googleMapsLatitudeInput" name="latitude" type="hidden">
                 <input id="googleMapsLongitudeInput" name="longitude" type="hidden">
                 <div class="full-span form-actions">
