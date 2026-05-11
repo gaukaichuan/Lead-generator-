@@ -353,87 +353,169 @@
 
             <section class="import-panel">
               <div class="import-shell">
-                <div class="import-main-card">
+                <div class="manual-entry-card">
                   <div class="section-heading compact import-heading modern">
                     <div>
-                      <p class="eyebrow">Real Data Import</p>
-                      <h3>Google Maps Lead Finder</h3>
-                      <p class="import-hero-copy">Search nearby businesses, adjust your radius smoothly, and import only the companies you actually want.</p>
+                      <p class="eyebrow">Direct Entry</p>
+                      <h3>Manual Lead Desk</h3>
+                      <p class="import-hero-copy">Key in lead details yourself when you already have the contact and want it added straight into the queue.</p>
                     </div>
                   </div>
-                  <form id="googleMapsImportForm" class="import-form import-form-modern">
-                    <section class="import-step-card">
-                      <div class="import-step-heading">
-                        <span class="import-step-icon">1</span>
-                        <strong>Define Your Prospect</strong>
-                      </div>
-                      <div class="import-query-layout">
-                        <label class="import-field import-field-search import-field-search-modern">
-                          <span>Business Category</span>
-                          <input id="googleMapsQueryInput" name="query" placeholder="Example: retail shops in Kuala Lumpur" required>
-                        </label>
-                      </div>
-                    </section>
-
-                    <section class="import-step-card">
-                      <div class="import-step-heading">
-                        <span class="import-step-icon">2</span>
-                        <strong>Set Your Search Area</strong>
-                      </div>
-                      <div class="import-radius-header">
-                        <span class="import-radius-label">Radius (km)</span>
-                        <strong class="import-radius-value" id="googleMapsRadiusValue">15 KM</strong>
-                      </div>
-                      <div class="import-slider-shell">
-                        <input id="googleMapsRadiusInput" name="radiusKm" class="import-radius-range" type="range" min="5" max="20" step="1" value="15" required>
-                        <div class="import-slider-ticks" aria-hidden="true">
-                          <span>5</span>
-                          <span>10</span>
-                          <span>15</span>
-                          <span>20</span>
-                        </div>
-                      </div>
-
-                      <div class="import-location-card full-span modern">
-                        <div class="import-step-heading compact-space">
-                          <span class="import-step-icon">3</span>
-                          <strong>Live Location Filter</strong>
-                        </div>
-                        <div class="import-location-copy">
-                          <strong id="locationStatusTitle">Waiting for location</strong>
-                          <p id="locationStatusMessage">Allow browser location access so the import only keeps leads near your current position.</p>
-                        </div>
-                        <button class="button secondary import-location-button" id="retryLiveLocationButton" type="button">Detect Current Location</button>
-                      </div>
-                    </section>
-
-                    <input id="googleMapsLatitudeInput" name="latitude" type="hidden">
-                    <input id="googleMapsLongitudeInput" name="longitude" type="hidden">
-                    <div class="full-span form-actions import-actions-modern">
-                      <button class="button primary" id="googleMapsImportButton" type="submit">Search Google Maps</button>
+                  <form id="leadForm" class="lead-form">
+                    <label>
+                      <span>Company *</span>
+                      <input name="company" placeholder="Example: Jackson Retail Sdn Bhd" required>
+                    </label>
+                    <label>
+                      <span>Contact Name *</span>
+                      <input name="contactName" placeholder="Example: Jackson Gau" required>
+                    </label>
+                    <label>
+                      <span>Email *</span>
+                      <input name="email" type="email" placeholder="lead@company.com" required>
+                    </label>
+                    <label>
+                      <span>Phone</span>
+                      <input name="phone" placeholder="+60 12-345 6789">
+                    </label>
+                    <label>
+                      <span>Role</span>
+                      <input name="role" placeholder="Owner / Manager / Director">
+                    </label>
+                    <label>
+                      <span>Industry</span>
+                      <input name="industry" placeholder="Retail, wholesale, clinic, warehouse">
+                    </label>
+                    <label>
+                      <span>Region *</span>
+                      <input name="region" placeholder="Kuala Lumpur" required>
+                    </label>
+                    <label>
+                      <span>Source *</span>
+                      <select name="source" required>
+                        <option value="Manual research">Manual research</option>
+                        <option value="Referral">Referral</option>
+                        <option value="Walk-in">Walk-in</option>
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="LinkedIn">LinkedIn</option>
+                        <option value="Google Maps">Google Maps</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Business Type *</span>
+                      <select name="companyType" required>
+                        <option value="retail">Retail</option>
+                        <option value="fnb">F&B</option>
+                        <option value="wholesale">Wholesale</option>
+                        <option value="warehouse">Warehouse</option>
+                        <option value="service">Service</option>
+                        <option value="manufacturing">Manufacturing</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Pain Point *</span>
+                      <select name="painPoint" required>
+                        <option value="checkout-pos">Checkout / POS</option>
+                        <option value="stock-visibility">Stock Visibility</option>
+                        <option value="warehouse-control">Warehouse Control</option>
+                        <option value="manual-accounting">Manual Accounting</option>
+                        <option value="payroll-compliance">Payroll Compliance</option>
+                      </select>
+                    </label>
+                    <label class="full-span">
+                      <span>Notes</span>
+                      <textarea name="notes" rows="5" placeholder="Optional lead notes, context, or meeting details"></textarea>
+                    </label>
+                    <input name="status" type="hidden" value="new">
+                    <div class="full-span form-actions">
+                      <button class="button primary" type="submit">Save Manual Lead</button>
                     </div>
                   </form>
-                  <p class="form-note import-note-modern">Using the official Google Places API. LinkedIn remains manual-only to respect platform policies against automated scraping.</p>
                 </div>
 
-                <aside class="import-results-panel" id="inlineGoogleMapsResultsPanel" hidden>
-                  <div class="import-results-header">
-                    <div>
-                      <p class="eyebrow">Search Results</p>
-                      <h4>Choose Leads to Import</h4>
+                <div class="import-search-stack">
+                  <div class="import-main-card">
+                    <div class="section-heading compact import-heading modern">
+                      <div>
+                        <p class="eyebrow">Real Data Import</p>
+                        <h3>Google Maps Lead Finder</h3>
+                        <p class="import-hero-copy">Search nearby businesses, adjust your radius smoothly, and import only the companies you actually want.</p>
+                      </div>
                     </div>
-                    <div class="import-results-actions">
-                      <button class="button secondary" id="inlineSelectAllGoogleMapsResults" type="button">Select All</button>
-                      <button class="button secondary" id="inlineClearGoogleMapsResults" type="button">Clear</button>
+                    <form id="googleMapsImportForm" class="import-form import-form-modern">
+                      <section class="import-step-card">
+                        <div class="import-step-heading">
+                          <span class="import-step-icon">1</span>
+                          <strong>Define Your Prospect</strong>
+                        </div>
+                        <div class="import-query-layout">
+                          <label class="import-field import-field-search import-field-search-modern">
+                            <span>Business Category</span>
+                            <input id="googleMapsQueryInput" name="query" placeholder="Example: retail shops in Kuala Lumpur" required>
+                          </label>
+                        </div>
+                      </section>
+
+                      <section class="import-step-card">
+                        <div class="import-step-heading">
+                          <span class="import-step-icon">2</span>
+                          <strong>Set Your Search Area</strong>
+                        </div>
+                        <div class="import-radius-header">
+                          <span class="import-radius-label">Radius (km)</span>
+                          <strong class="import-radius-value" id="googleMapsRadiusValue">15 KM</strong>
+                        </div>
+                        <div class="import-slider-shell">
+                          <input id="googleMapsRadiusInput" name="radiusKm" class="import-radius-range" type="range" min="5" max="20" step="1" value="15" required>
+                          <div class="import-slider-ticks" aria-hidden="true">
+                            <span>5</span>
+                            <span>10</span>
+                            <span>15</span>
+                            <span>20</span>
+                          </div>
+                        </div>
+
+                        <div class="import-location-card full-span modern">
+                          <div class="import-step-heading compact-space">
+                            <span class="import-step-icon">3</span>
+                            <strong>Live Location Filter</strong>
+                          </div>
+                          <div class="import-location-copy">
+                            <strong id="locationStatusTitle">Waiting for location</strong>
+                            <p id="locationStatusMessage">Allow browser location access so the import only keeps leads near your current position.</p>
+                          </div>
+                          <button class="button secondary import-location-button" id="retryLiveLocationButton" type="button">Detect Current Location</button>
+                        </div>
+                      </section>
+
+                      <input id="googleMapsLatitudeInput" name="latitude" type="hidden">
+                      <input id="googleMapsLongitudeInput" name="longitude" type="hidden">
+                      <div class="full-span form-actions import-actions-modern">
+                        <button class="button primary" id="googleMapsImportButton" type="submit">Search Google Maps</button>
+                      </div>
+                    </form>
+                    <p class="form-note import-note-modern">Using the official Google Places API. LinkedIn remains manual-only to respect platform policies against automated scraping.</p>
+                  </div>
+
+                  <aside class="import-results-panel" id="inlineGoogleMapsResultsPanel" hidden>
+                    <div class="import-results-header">
+                      <div>
+                        <p class="eyebrow">Search Results</p>
+                        <h4>Choose Leads to Import</h4>
+                      </div>
+                      <div class="import-results-actions">
+                        <button class="button secondary" id="inlineSelectAllGoogleMapsResults" type="button">Select All</button>
+                        <button class="button secondary" id="inlineClearGoogleMapsResults" type="button">Clear</button>
+                      </div>
                     </div>
-                  </div>
-                  <div class="import-results-toolbar">
-                    <strong id="inlineGoogleMapsResultsSummary">No businesses loaded yet.</strong>
-                  </div>
-                  <div class="import-results-list" id="inlineGoogleMapsResultsList"></div>
-                  <p class="empty-state" id="inlineGoogleMapsResultsEmpty" hidden>No nearby businesses matched this search yet.</p>
-                  <button class="button primary import-results-import" id="inlineImportSelectedGoogleMapsResults" type="button">Import Selected</button>
-                </aside>
+                    <div class="import-results-toolbar">
+                      <strong id="inlineGoogleMapsResultsSummary">No businesses loaded yet.</strong>
+                    </div>
+                    <div class="import-results-list" id="inlineGoogleMapsResultsList"></div>
+                    <p class="empty-state" id="inlineGoogleMapsResultsEmpty" hidden>No nearby businesses matched this search yet.</p>
+                    <button class="button primary import-results-import" id="inlineImportSelectedGoogleMapsResults" type="button">Import Selected</button>
+                  </aside>
+                </div>
               </div>
             </section>
 
