@@ -82,14 +82,12 @@ const detailTitle = document.getElementById("detailTitle");
 const detailBadge = document.getElementById("detailBadge");
 const detailStatusStrip = document.getElementById("detailStatusStrip");
 const detailCard = document.getElementById("detailCard");
-const activityList = document.getElementById("activityList");
+
 const metricTotal = document.getElementById("metricTotal");
 const metricQualified = document.getElementById("metricQualified");
 const metricPriority = document.getElementById("metricPriority");
 const metricSent = document.getElementById("metricSent");
-const openTimelineModal = document.getElementById("openTimelineModal");
-const closeTimelineModal = document.getElementById("closeTimelineModal");
-const timelineModal = document.getElementById("timelineModal");
+
 const openSettingsModal = document.getElementById("openSettingsModal");
 const closeSettingsModal = document.getElementById("closeSettingsModal");
 const settingsModal = document.getElementById("settingsModal");
@@ -820,23 +818,6 @@ function renderLeadDetail() {
   });
 }
 
-function renderActivities() {
-  activityList.innerHTML = "";
-
-  state.activities.forEach((activity) => {
-    const item = document.createElement("article");
-    item.className = "timeline-item";
-    item.innerHTML = `
-      <span class="timeline-dot"></span>
-      <div>
-        <strong>${activity.title}</strong>
-        <p>${activity.body}</p>
-        <p>${formatDate(activity.createdAt)}</p>
-      </div>
-    `;
-    activityList.appendChild(item);
-  });
-}
 
 function renderExportEmailTable() {
   const sentLeads = getSentLeads();
@@ -980,7 +961,7 @@ function syncBodyLock() {
   const shouldLock =
     !leadDetailModal.hidden ||
     !emailDetailModal.hidden ||
-    (timelineModal && !timelineModal.hidden) ||
+
     !settingsModal.hidden ||
     !googleMapsResultsModal.hidden;
 
@@ -1031,7 +1012,6 @@ async function loadLeads() {
   renderOverview();
   renderLeadList();
   renderLeadDetail();
-  renderActivities();
   renderWorkspace();
   renderExportPreview();
 }
@@ -1250,26 +1230,7 @@ leadDetailModal.addEventListener("click", (event) => {
   }
 });
 
-if (openTimelineModal && timelineModal) {
-  openTimelineModal.addEventListener("click", () => {
-    timelineModal.hidden = false;
-    syncBodyLock();
-  });
-}
 
-if (closeTimelineModal && timelineModal) {
-  closeTimelineModal.addEventListener("click", () => {
-    timelineModal.hidden = true;
-    syncBodyLock();
-  });
-
-  timelineModal.addEventListener("click", (event) => {
-    if (event.target === timelineModal) {
-      timelineModal.hidden = true;
-      syncBodyLock();
-    }
-  });
-}
 
 openSettingsModal.addEventListener("click", () => {
   settingsModal.hidden = false;
@@ -1408,6 +1369,8 @@ if (!state.currentLocation && !state.isResolvingLocation) {
     // Keep the UI passive until the user interacts with the import flow.
   });
 }
+
+
 
 
 
