@@ -244,7 +244,7 @@ async function searchGoogleMapsLeads(
         regionCode: "MY",
         languageCode: "en",
         rankPreference: "DISTANCE",
-        locationRestriction: {
+        locationBias: {
           circle: {
             center: {
               latitude: Number(latitude),
@@ -871,6 +871,7 @@ if (require.main === module) {
 }
 
 module.exports = { createAppServer, startServer };
+
 
 
 

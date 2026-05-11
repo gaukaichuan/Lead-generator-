@@ -1084,36 +1084,38 @@ googleMapsRadiusInput.addEventListener("input", updateRadiusDisplay);
   });
 });
 
-leadForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const formData = new FormData(leadForm);
-  const body = Object.fromEntries(formData.entries());
+if (leadForm) {
+  leadForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(leadForm);
+    const body = Object.fromEntries(formData.entries());
 
-  const requiredFields = [
-    "company",
-    "contactName",
-    "email",
-    "region",
-    "source",
-    "companyType",
-    "painPoint",
-    "status"
-  ];
+    const requiredFields = [
+      "company",
+      "contactName",
+      "email",
+      "region",
+      "source",
+      "companyType",
+      "painPoint",
+      "status"
+    ];
 
-  const missingField = requiredFields.find((field) => !String(body[field] || "").trim());
-  if (missingField) {
-    window.alert("Please fill in all required fields marked with * before saving the lead.");
-    return;
-  }
+    const missingField = requiredFields.find((field) => !String(body[field] || "").trim());
+    if (missingField) {
+      window.alert("Please fill in all required fields marked with * before saving the lead.");
+      return;
+    }
 
-  await request("/api/leads", {
-    method: "POST",
-    body: JSON.stringify(body)
+    await request("/api/leads", {
+      method: "POST",
+      body: JSON.stringify(body)
+    });
+    leadForm.reset();
+    await loadLeads();
+    showNotification("Lead saved", `${body.company} was added to the lead queue.`);
   });
-  leadForm.reset();
-  await loadLeads();
-  showNotification("Lead saved", `${body.company} was added to the lead queue.`);
-});
+}
 
 refreshLeadsButton.addEventListener("click", loadLeads);
 loadDemoLeadsButton.addEventListener("click", loadDemoLeads);
@@ -1384,5 +1386,6 @@ if (!state.currentLocation && !state.isResolvingLocation) {
     // Keep the UI passive until the user interacts with the import flow.
   });
 }
+
 
 
