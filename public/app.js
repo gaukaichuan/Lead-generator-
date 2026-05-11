@@ -719,6 +719,7 @@ function getEmailDraft(lead) {
 function openEmailEditor(lead) {
   const draft = getEmailDraft(lead);
   state.activeEmailLeadId = lead.id;
+  leadDetailModal.hidden = true;
   emailDetailTitle.textContent = lead.company;
   emailDetailRecipient.textContent = lead.email || "No recipient email stored";
   emailDetailSubject.value = draft.subject;
@@ -910,7 +911,7 @@ function renderLeadDetail() {
       <p>${lead.notes || "No notes yet."}</p>
     </div>
     <div class="action-row">
-      <button class="button ghost" data-action="email">Email Draft</button>
+      <button class="button ghost" data-action="email">Send Email</button>
       <button class="button ghost" data-action="qualified">Set Qualified</button>
       <button class="button ghost" data-action="new">Set New</button>
       <button class="button ghost${lead.sent ? " success" : ""}" data-action="sent" ${lead.sent ? "disabled" : ""}>${lead.sent ? "Sent" : "Mark Sent"}</button>

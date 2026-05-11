@@ -12,25 +12,28 @@
       <button class="modal-close-button" id="closeEmailDetail" type="button" aria-label="Close email review">&times;</button>
       <div class="section-heading compact">
         <div>
-          <p class="eyebrow">Sent Email Review</p>
+          <p class="eyebrow">Review Draft &amp; Send</p>
           <h2 id="emailDetailTitle">Email Content</h2>
         </div>
         <div class="header-actions">
-          <button class="button primary" id="sendEmailDraft" type="button">Send Email</button>
           <button class="button secondary" id="resetEmailDraft" type="button">Reset Draft</button>
+          <button class="button primary" id="sendEmailDraft" type="button">Send Email</button>
         </div>
       </div>
-      <div class="detail-card tone-soft">
-        <div class="detail-box">
-          <strong>To</strong>
+      <div class="detail-card tone-soft email-review-card">
+        <div class="detail-box email-recipient-box">
+          <strong>Recipient</strong>
           <p id="emailDetailRecipient">No recipient selected</p>
         </div>
-        <div class="detail-box">
-          <strong>Subject</strong>
+        <div class="detail-box email-subject-box">
+          <strong>Subject Line</strong>
           <input class="email-subject-input" id="emailDetailSubject" type="text">
         </div>
-        <div class="detail-box">
-          <strong>Message</strong>
+        <div class="detail-box email-body-box">
+          <div class="email-body-heading">
+            <strong>Message Body</strong>
+            <span class="email-draft-pill">Draft</span>
+          </div>
           <textarea class="email-body-textarea" id="emailDetailBody" rows="12"></textarea>
         </div>
       </div>
