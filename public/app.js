@@ -135,8 +135,10 @@ const exportSaveNote = document.getElementById("exportSaveNote");
 const emailDetailModal = document.getElementById("emailDetailModal");
 const closeEmailDetail = document.getElementById("closeEmailDetail");
 const emailDetailTitle = document.getElementById("emailDetailTitle");
+const emailDetailRecipient = document.getElementById("emailDetailRecipient");
 const emailDetailSubject = document.getElementById("emailDetailSubject");
 const emailDetailBody = document.getElementById("emailDetailBody");
+const sendEmailDraft = document.getElementById("sendEmailDraft");
 const resetEmailDraft = document.getElementById("resetEmailDraft");
 const notificationCenter = document.getElementById("notificationCenter");
 const overviewLeadCount = document.getElementById("overviewLeadCount");
@@ -718,10 +720,64 @@ function openEmailEditor(lead) {
   const draft = getEmailDraft(lead);
   state.activeEmailLeadId = lead.id;
   emailDetailTitle.textContent = lead.company;
+  emailDetailRecipient.textContent = lead.email || "No recipient email stored";
   emailDetailSubject.value = draft.subject;
   emailDetailBody.value = draft.body;
   emailDetailModal.hidden = false;
   syncBodyLock();
+}
+
+async function sendActiveEmailDraft() {
+  if (!state.activeEmailLeadId) {
+    return;
+  }
+
+  const lead = state.leads.find((item) => item.id === state.activeEmailLeadId);
+  if (!lead) {
+    showNotification("Send failed", "The selected lead could not be found.");
+    return;
+  }
+
+  if (!lead.email) {
+    showNotification("Send failed", "This lead does not have a recipient email address yet.");
+    return;
+  }
+
+  const subject = emailDetailSubject.value.trim();
+  const bodyText = emailDetailBody.value.trim();
+  if (!subject || !bodyText) {
+    showNotification("Send failed", "Subject and message are required before sending.");
+    return;
+  }
+
+  sendEmailDraft.disabled = true;
+  sendEmailDraft.textContent = "Sending...";
+
+  try {
+    await request(`/api/leads/${lead.id}/send-email`, {
+      method: "POST",
+      body: JSON.stringify({
+        senderName: state.senderName,
+        senderEmail: state.senderEmail,
+        subject,
+        body: bodyText
+      })
+    });
+
+    state.emailDrafts[lead.id] = {
+      subject,
+      body: bodyText
+    };
+    showNotification("Email sent", `Message sent to ${lead.email}.`);
+    await loadLeads();
+    emailDetailModal.hidden = false;
+    syncBodyLock();
+  } catch (error) {
+    showNotification("Send failed", error.message || "The email could not be sent.");
+  } finally {
+    sendEmailDraft.disabled = false;
+    sendEmailDraft.textContent = "Send Email";
+  }
 }
 
 function renderMetrics(summary) {
@@ -854,6 +910,7 @@ function renderLeadDetail() {
       <p>${lead.notes || "No notes yet."}</p>
     </div>
     <div class="action-row">
+      <button class="button ghost" data-action="email">Email Draft</button>
       <button class="button ghost" data-action="qualified">Set Qualified</button>
       <button class="button ghost" data-action="new">Set New</button>
       <button class="button ghost${lead.sent ? " success" : ""}" data-action="sent" ${lead.sent ? "disabled" : ""}>${lead.sent ? "Sent" : "Mark Sent"}</button>
@@ -865,6 +922,11 @@ function renderLeadDetail() {
   detailCard.querySelectorAll("[data-action]").forEach((button) => {
     button.addEventListener("click", async () => {
       const action = button.dataset.action;
+      if (action === "email") {
+        openEmailEditor(lead);
+        return;
+      }
+
       if (action === "delete") {
         const shouldDelete = window.confirm(`Remove ${lead.company} from the lead queue?`);
         if (!shouldDelete) {
@@ -1458,6 +1520,8 @@ resetEmailDraft.addEventListener("click", () => {
   emailDetailBody.value = state.emailDrafts[lead.id].body;
   showNotification("Draft reset", `${lead.company} email draft was restored to the default version.`);
 });
+
+sendEmailDraft.addEventListener("click", sendActiveEmailDraft);
 
 showExportQueue.addEventListener("click", () => {
   state.activeExportView = "queue";

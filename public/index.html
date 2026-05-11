@@ -16,10 +16,15 @@
           <h2 id="emailDetailTitle">Email Content</h2>
         </div>
         <div class="header-actions">
+          <button class="button primary" id="sendEmailDraft" type="button">Send Email</button>
           <button class="button secondary" id="resetEmailDraft" type="button">Reset Draft</button>
         </div>
       </div>
       <div class="detail-card tone-soft">
+        <div class="detail-box">
+          <strong>To</strong>
+          <p id="emailDetailRecipient">No recipient selected</p>
+        </div>
         <div class="detail-box">
           <strong>Subject</strong>
           <input class="email-subject-input" id="emailDetailSubject" type="text">

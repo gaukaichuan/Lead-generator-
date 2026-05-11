@@ -1,6 +1,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const tls = require("tls");
 const { URL } = require("url");
 
 const PORT = Number(process.env.PORT || 3000);
@@ -52,6 +53,129 @@ function readStore() {
 
 function writeStore(store) {
   fs.writeFileSync(DATA_PATH, JSON.stringify(store, null, 2));
+}
+
+function createSmtpClient(socket) {
+  let buffer = "";
+  let pending = null;
+
+  function consumeLines() {
+    if (!pending) {
+      return;
+    }
+
+    const lines = buffer.split("\r\n");
+    buffer = lines.pop();
+    for (const line of lines) {
+      if (!line) {
+        continue;
+      }
+      pending.lines.push(line);
+      if (/^\d{3} /.test(line)) {
+        const resolver = pending.resolve;
+        const response = pending.lines.join("\n");
+        pending = null;
+        resolver(response);
+      }
+    }
+  }
+
+  socket.on("data", (chunk) => {
+    buffer += chunk.toString("utf8");
+    consumeLines();
+  });
+
+  function readResponse() {
+    return new Promise((resolve) => {
+      pending = { resolve, lines: [] };
+      consumeLines();
+    });
+  }
+
+  async function expectCode(expectedCode) {
+    const response = await readResponse();
+    if (!response.startsWith(String(expectedCode))) {
+      throw new Error(`SMTP error: ${response}`);
+    }
+    return response;
+  }
+
+  async function sendCommand(command, expectedCode) {
+    socket.write(`${command}\r\n`);
+    return expectCode(expectedCode);
+  }
+
+  return { expectCode, sendCommand };
+}
+
+function smtpSafeLine(line) {
+  return line.startsWith(".") ? `.${line}` : line;
+}
+
+function formatMailbox(name, email) {
+  if (!name) {
+    return email;
+  }
+
+  const safeName = String(name).replace(/"/g, "");
+  return `"${safeName}" <${email}>`;
+}
+
+async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
+  const user = process.env.GMAIL_SMTP_EMAIL || "";
+  const pass = process.env.GMAIL_APP_PASSWORD || "";
+
+  if (!user || !pass) {
+    throw new Error("Gmail SMTP is not configured. Set GMAIL_SMTP_EMAIL and GMAIL_APP_PASSWORD on the server.");
+  }
+
+  const smtpHost = process.env.GMAIL_SMTP_HOST || "smtp.gmail.com";
+  const smtpPort = Number(process.env.GMAIL_SMTP_PORT || 465);
+  const replyTo = fromEmail && fromEmail !== user ? fromEmail : "";
+  const envelopeFrom = user;
+  const messageLines = [
+    `From: ${formatMailbox(fromName, user)}`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    ...(replyTo ? [`Reply-To: ${replyTo}`] : []),
+    `Date: ${new Date().toUTCString()}`,
+    "MIME-Version: 1.0",
+    "Content-Type: text/plain; charset=utf-8",
+    "Content-Transfer-Encoding: 8bit",
+    "",
+    ...String(body || "").split(/\r?\n/).map(smtpSafeLine)
+  ];
+
+  const socket = tls.connect({
+    host: smtpHost,
+    port: smtpPort,
+    servername: smtpHost
+  });
+
+  await new Promise((resolve, reject) => {
+    socket.once("secureConnect", resolve);
+    socket.once("error", reject);
+  });
+
+  const client = createSmtpClient(socket);
+
+  try {
+    await client.expectCode(220);
+    await client.sendCommand("EHLO localhost", 250);
+    await client.sendCommand("AUTH LOGIN", 334);
+    await client.sendCommand(Buffer.from(user).toString("base64"), 334);
+    await client.sendCommand(Buffer.from(pass).toString("base64"), 235);
+    await client.sendCommand(`MAIL FROM:<${envelopeFrom}>`, 250);
+    await client.sendCommand(`RCPT TO:<${to}>`, 250);
+    await client.sendCommand("DATA", 354);
+    socket.write(`${messageLines.join("\r\n")}\r\n.\r\n`);
+    const dataResponse = await client.expectCode(250);
+    await client.sendCommand("QUIT", 221);
+    const idMatch = dataResponse.match(/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+)/);
+    return { messageId: idMatch ? idMatch[1] : "" };
+  } finally {
+    socket.end();
+  }
 }
 
 function normalizeLeadIdentityPart(value) {
@@ -539,6 +663,7 @@ function autoSendQualifiedLead(store, lead) {
 async function handleApi(request, response, pathname, options = {}) {
   const store = readStore();
   const googlePlacesFetch = options.googlePlacesFetch || fetch;
+  const sendEmail = options.sendEmail || sendEmailMessage;
 
   if (request.method === "GET" && pathname === "/api/leads") {
     sendJson(response, 200, {
@@ -776,6 +901,56 @@ async function handleApi(request, response, pathname, options = {}) {
     );
     writeStore(store);
     sendJson(response, 201, { lead: enrichLead(lead) });
+    return;
+  }
+
+  const sendEmailMatch = pathname.match(/^\/api\/leads\/([^/]+)\/send-email$/);
+  if (sendEmailMatch && request.method === "POST") {
+    const [, leadId] = sendEmailMatch;
+    const lead = store.leads.find((item) => item.id === leadId);
+
+    if (!lead) {
+      sendJson(response, 404, { error: "Lead not found" });
+      return;
+    }
+
+    if (!String(lead.email || "").trim()) {
+      sendJson(response, 400, { error: "This lead does not have a recipient email address." });
+      return;
+    }
+
+    const body = await readRequestBody(request);
+    const senderName = String(body.senderName || "").trim() || "LeadGen AI";
+    const senderEmail = String(body.senderEmail || "").trim() || process.env.GMAIL_SMTP_EMAIL || "";
+    const subject = String(body.subject || "").trim();
+    const messageBody = String(body.body || "").trim();
+
+    if (!subject || !messageBody) {
+      sendJson(response, 400, { error: "Subject and message body are required before sending." });
+      return;
+    }
+
+    const mailResult = await sendEmail({
+      to: String(lead.email).trim(),
+      fromName: senderName,
+      fromEmail: senderEmail,
+      subject,
+      body: messageBody
+    });
+
+    lead.sent = true;
+    lead.sentAt = new Date().toISOString();
+    appendActivity(
+      store,
+      lead.id,
+      "Outreach email sent",
+      `${lead.company} received a live email send to ${lead.email}.`
+    );
+    writeStore(store);
+    sendJson(response, 200, {
+      success: true,
+      messageId: mailResult && mailResult.messageId ? mailResult.messageId : ""
+    });
     return;
   }
 
