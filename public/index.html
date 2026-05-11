@@ -35,61 +35,127 @@
 </div>
   </div>
 
-  <div class="modal-backdrop" id="settingsModal" hidden>
-    <div class="modal-card settings-modal-card">
-      <button class="modal-close-button" id="closeSettingsModal" type="button" aria-label="Close settings">&times;</button>
+  <div class="settings-drawer-shell" id="settingsDrawerShell" hidden>
+    <div class="settings-drawer-overlay" id="settingsDrawerOverlay"></div>
+    <aside class="settings-drawer" id="settingsDrawer" aria-hidden="true">
+      <div class="settings-drawer-top">
+        <div>
+          <p class="eyebrow settings-drawer-eyebrow">Quick Panel</p>
+          <h2 class="settings-drawer-title" id="settingsDrawerTitle">Settings</h2>
+        </div>
+        <button class="settings-drawer-close" id="closeSettingsDrawer" type="button" aria-label="Close settings">&times;</button>
+      </div>
+
+      <section class="settings-drawer-page active" id="settingsHomePanel">
+        <button class="settings-nav-card" id="openEmailSettingsPanel" type="button">
+          <span class="settings-nav-icon">✉</span>
+          <span class="settings-nav-copy">
+            <strong>Email</strong>
+            <small>Open the current email setup page, sender status, and connection details.</small>
+          </span>
+          <span class="settings-nav-arrow">›</span>
+        </button>
+
+        <div class="settings-mode-card">
+          <div class="settings-nav-copy">
+            <strong>Mode</strong>
+            <small>Switch between the brighter dashboard view and a dark night mode.</small>
+          </div>
+          <button class="mode-toggle" id="modeToggle" type="button" aria-label="Toggle color mode"></button>
+        </div>
+      </section>
+
+      <section class="settings-drawer-page" id="settingsEmailPanel">
+        <div class="settings-email-head">
+          <button class="settings-back-button" id="backToSettingsHome" type="button" aria-label="Back to settings">‹</button>
+          <div>
+            <p class="form-note settings-inline-note">Current email setup</p>
+            <h3 class="settings-subtitle">Email Configuration</h3>
+          </div>
+        </div>
+
+        <div class="settings-email-summary">
+          <div class="settings-email-summary-top">
+            <span class="settings-status-pill">
+              <span class="settings-status-dot"></span>
+              Connected
+            </span>
+            <span class="settings-inline-note">Primary sender</span>
+          </div>
+          <strong class="settings-email-address" id="settingsCurrentSenderEmail">sales@example.com</strong>
+          <p class="settings-email-description" id="senderEmailStatus">The current sender email and template will be used in new email drafts.</p>
+        </div>
+
+        <div class="settings-summary-grid">
+          <div class="settings-summary-card">
+            <span>Daily limit</span>
+            <strong>150 emails</strong>
+          </div>
+          <div class="settings-summary-card">
+            <span>Warm-up status</span>
+            <strong>Healthy</strong>
+          </div>
+        </div>
+
+        <div class="settings-action-stack">
+          <button class="settings-action-button" id="openSenderDetailsModal" type="button">Edit sender details</button>
+          <button class="settings-action-button primary" id="openTemplateEditorModal" type="button">Edit email template</button>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <div class="modal-backdrop" id="senderDetailsModal" hidden>
+    <div class="modal-card settings-editor-modal-card">
+      <button class="modal-close-button" id="closeSenderDetailsModal" type="button" aria-label="Close sender details">&times;</button>
       <div class="section-heading compact">
         <div>
-          <p class="eyebrow">Settings</p>
-          <h2>Email Workspace</h2>
+          <p class="eyebrow">Email Setup</p>
+          <h2>Edit Sender Details</h2>
         </div>
       </div>
-      <div class="detail-card tone-soft settings-card">
-        <form class="settings-grid" id="senderEmailForm">
-          <section class="settings-section">
-            <div class="settings-section-header">
-              <div class="settings-logo">From</div>
-              <div>
-                <strong>Sender Identity</strong>
-                <p>Choose the sender name and email shown in every generated draft.</p>
-              </div>
-            </div>
-            <div class="compact-auth-form">
-              <label>
-                <span>Sender Name</span>
-                <input id="senderNameInput" name="senderName" placeholder="Your Name or Team Name">
-              </label>
-              <label>
-                <span>Sender Email</span>
-                <input id="senderEmailInput" name="senderEmail" type="email" placeholder="sales@yourcompany.com" required>
-              </label>
-            </div>
-          </section>
+      <div class="detail-card tone-soft settings-editor-card">
+        <form class="compact-auth-form" id="senderDetailsForm">
+          <label>
+            <span>Sender Name</span>
+            <input id="senderNameInput" name="senderName" placeholder="Your Name or Team Name">
+          </label>
+          <label>
+            <span>Sender Email</span>
+            <input id="senderEmailInput" name="senderEmail" type="email" placeholder="sales@yourcompany.com" required>
+          </label>
+          <div class="settings-editor-actions">
+            <button class="button secondary" id="cancelSenderDetails" type="button">Cancel</button>
+            <button class="button primary" type="submit">Save changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
-          <section class="settings-section">
-            <div class="settings-section-header">
-              <div class="settings-logo alt">Tpl</div>
-              <div>
-                <strong>Email Draft Template</strong>
-                <p>Customize the default outreach message used whenever the system prepares a lead email.</p>
-              </div>
-            </div>
-            <div class="compact-auth-form">
-              <label>
-                <span>Subject Template</span>
-                <input id="emailTemplateSubjectInput" name="emailTemplateSubject" placeholder="{{productName}} idea for {{company}}">
-              </label>
-              <label>
-                <span>Body Template</span>
-                <textarea id="emailTemplateBodyInput" name="emailTemplateBody" rows="10"></textarea>
-              </label>
-              <p class="form-note">Available placeholders: <code>{{contactName}}</code>, <code>{{company}}</code>, <code>{{source}}</code>, <code>{{region}}</code>, <code>{{industry}}</code>, <code>{{productName}}</code>, <code>{{pitch}}</code>, <code>{{reason}}</code>, <code>{{senderName}}</code>, <code>{{senderEmail}}</code></p>
-            </div>
-          </section>
-
-          <div class="settings-actions">
-            <button class="button primary" type="submit">Save Email Settings</button>
-            <p class="form-note" id="senderEmailStatus">The current sender email and template will be used in new email drafts.</p>
+  <div class="modal-backdrop" id="templateEditorModal" hidden>
+    <div class="modal-card settings-editor-modal-card">
+      <button class="modal-close-button" id="closeTemplateEditorModal" type="button" aria-label="Close email template">&times;</button>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Email Setup</p>
+          <h2>Edit Email Template</h2>
+        </div>
+      </div>
+      <div class="detail-card tone-soft settings-editor-card">
+        <form class="compact-auth-form" id="templateEditorForm">
+          <label>
+            <span>Subject Template</span>
+            <input id="emailTemplateSubjectInput" name="emailTemplateSubject" placeholder="{{productName}} idea for {{company}}">
+          </label>
+          <label>
+            <span>Body Template</span>
+            <textarea id="emailTemplateBodyInput" name="emailTemplateBody" rows="10"></textarea>
+          </label>
+          <p class="form-note">Available placeholders: <code>{{contactName}}</code>, <code>{{company}}</code>, <code>{{source}}</code>, <code>{{region}}</code>, <code>{{industry}}</code>, <code>{{productName}}</code>, <code>{{pitch}}</code>, <code>{{reason}}</code>, <code>{{senderName}}</code>, <code>{{senderEmail}}</code></p>
+          <div class="settings-editor-actions">
+            <button class="button secondary" id="cancelTemplateEditor" type="button">Cancel</button>
+            <button class="button primary" type="submit">Save template</button>
           </div>
         </form>
       </div>
@@ -196,7 +262,11 @@
           <p class="topbar-description" id="pageDescription">Track intake, qualification, outreach, and CRM follow-up from one workspace.</p>
         </div>
         <div class="topbar-actions">
-          <button class="button secondary" id="openSettingsModal" type="button">Settings</button>
+          <button class="settings-icon-button" id="openSettingsDrawer" type="button" aria-label="Open settings">
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </button>
         </div>
       </header>
 

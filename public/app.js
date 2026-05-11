@@ -32,8 +32,10 @@ const state = {
   ].join("\n")
 };
 
+const body = document.body;
 const QUEUE_PAGE_SIZE = 5;
 const SENDER_SETTINGS_KEY = "lead-generator-sender-settings";
+const THEME_SETTINGS_KEY = "lead-generator-theme-mode";
 
 const leadForm = document.getElementById("leadForm");
 const googleMapsImportForm = document.getElementById("googleMapsImportForm");
@@ -88,10 +90,28 @@ const metricQualified = document.getElementById("metricQualified");
 const metricPriority = document.getElementById("metricPriority");
 const metricSent = document.getElementById("metricSent");
 
-const openSettingsModal = document.getElementById("openSettingsModal");
-const closeSettingsModal = document.getElementById("closeSettingsModal");
-const settingsModal = document.getElementById("settingsModal");
-const senderEmailForm = document.getElementById("senderEmailForm");
+const openSettingsDrawerButton = document.getElementById("openSettingsDrawer");
+const closeSettingsDrawerButton = document.getElementById("closeSettingsDrawer");
+const settingsDrawerShell = document.getElementById("settingsDrawerShell");
+const settingsDrawerOverlay = document.getElementById("settingsDrawerOverlay");
+const settingsDrawer = document.getElementById("settingsDrawer");
+const settingsDrawerTitle = document.getElementById("settingsDrawerTitle");
+const settingsHomePanel = document.getElementById("settingsHomePanel");
+const settingsEmailPanel = document.getElementById("settingsEmailPanel");
+const openEmailSettingsPanel = document.getElementById("openEmailSettingsPanel");
+const backToSettingsHome = document.getElementById("backToSettingsHome");
+const modeToggle = document.getElementById("modeToggle");
+const settingsCurrentSenderEmail = document.getElementById("settingsCurrentSenderEmail");
+const senderDetailsModal = document.getElementById("senderDetailsModal");
+const closeSenderDetailsModal = document.getElementById("closeSenderDetailsModal");
+const cancelSenderDetails = document.getElementById("cancelSenderDetails");
+const senderDetailsForm = document.getElementById("senderDetailsForm");
+const templateEditorModal = document.getElementById("templateEditorModal");
+const closeTemplateEditorModal = document.getElementById("closeTemplateEditorModal");
+const cancelTemplateEditor = document.getElementById("cancelTemplateEditor");
+const templateEditorForm = document.getElementById("templateEditorForm");
+const openSenderDetailsModalButton = document.getElementById("openSenderDetailsModal");
+const openTemplateEditorModalButton = document.getElementById("openTemplateEditorModal");
 const senderNameInput = document.getElementById("senderNameInput");
 const senderEmailInput = document.getElementById("senderEmailInput");
 const emailTemplateSubjectInput = document.getElementById("emailTemplateSubjectInput");
@@ -404,12 +424,68 @@ function saveSenderSettings() {
   );
 }
 
+function loadThemeMode() {
+  try {
+    const raw = window.localStorage.getItem(THEME_SETTINGS_KEY);
+    if (raw === "dark") {
+      body.classList.add("dark-mode");
+    }
+  } catch (error) {
+    // Keep the default theme when browser storage is unavailable.
+  }
+}
+
+function saveThemeMode() {
+  try {
+    window.localStorage.setItem(THEME_SETTINGS_KEY, body.classList.contains("dark-mode") ? "dark" : "light");
+  } catch (error) {
+    // Ignore storage failures and keep the in-memory theme change.
+  }
+}
+
 function renderSenderSettings() {
   senderNameInput.value = state.senderName;
   senderEmailInput.value = state.senderEmail;
   emailTemplateSubjectInput.value = state.emailTemplateSubject;
   emailTemplateBodyInput.value = state.emailTemplateBody;
   senderEmailStatus.textContent = `Current sender: ${state.senderName} <${state.senderEmail}>. New and refreshed drafts will use the saved template.`;
+  settingsCurrentSenderEmail.textContent = state.senderEmail;
+}
+
+function setSettingsPanel(panelName) {
+  const showingEmail = panelName === "email";
+  settingsHomePanel.classList.toggle("active", !showingEmail);
+  settingsEmailPanel.classList.toggle("active", showingEmail);
+  settingsDrawerTitle.textContent = showingEmail ? "Email Setup" : "Settings";
+}
+
+function openSettingsDrawer() {
+  setSettingsPanel("home");
+  settingsDrawerShell.hidden = false;
+  settingsDrawer.setAttribute("aria-hidden", "false");
+  syncBodyLock();
+}
+
+function closeSettingsDrawer() {
+  settingsDrawerShell.hidden = true;
+  settingsDrawer.setAttribute("aria-hidden", "true");
+  setSettingsPanel("home");
+  syncBodyLock();
+}
+
+function openModal(modalElement) {
+  modalElement.hidden = false;
+  syncBodyLock();
+}
+
+function closeModal(modalElement) {
+  modalElement.hidden = true;
+  syncBodyLock();
+}
+
+function toggleThemeMode() {
+  body.classList.toggle("dark-mode");
+  saveThemeMode();
 }
 
 function formatDate(value) {
@@ -961,11 +1037,12 @@ function syncBodyLock() {
   const shouldLock =
     !leadDetailModal.hidden ||
     !emailDetailModal.hidden ||
-
-    !settingsModal.hidden ||
+    !settingsDrawerShell.hidden ||
+    !senderDetailsModal.hidden ||
+    !templateEditorModal.hidden ||
     !googleMapsResultsModal.hidden;
 
-  document.body.classList.toggle("modal-open", shouldLock);
+  body.classList.toggle("modal-open", shouldLock);
 }
 
 async function loadDemoLeads() {
@@ -1230,45 +1307,73 @@ leadDetailModal.addEventListener("click", (event) => {
   }
 });
 
+openSettingsDrawerButton.addEventListener("click", openSettingsDrawer);
+closeSettingsDrawerButton.addEventListener("click", closeSettingsDrawer);
+settingsDrawerOverlay.addEventListener("click", closeSettingsDrawer);
+openEmailSettingsPanel.addEventListener("click", () => setSettingsPanel("email"));
+backToSettingsHome.addEventListener("click", () => setSettingsPanel("home"));
+modeToggle.addEventListener("click", toggleThemeMode);
 
+openSenderDetailsModalButton.addEventListener("click", () => openModal(senderDetailsModal));
+openTemplateEditorModalButton.addEventListener("click", () => openModal(templateEditorModal));
+closeSenderDetailsModal.addEventListener("click", () => closeModal(senderDetailsModal));
+cancelSenderDetails.addEventListener("click", () => closeModal(senderDetailsModal));
+closeTemplateEditorModal.addEventListener("click", () => closeModal(templateEditorModal));
+cancelTemplateEditor.addEventListener("click", () => closeModal(templateEditorModal));
 
-openSettingsModal.addEventListener("click", () => {
-  settingsModal.hidden = false;
-  syncBodyLock();
+[senderDetailsModal, templateEditorModal].forEach((modalElement) => {
+  modalElement.addEventListener("click", (event) => {
+    if (event.target === modalElement) {
+      closeModal(modalElement);
+    }
+  });
 });
 
-closeSettingsModal.addEventListener("click", () => {
-  settingsModal.hidden = true;
-  syncBodyLock();
-});
-
-settingsModal.addEventListener("click", (event) => {
-  if (event.target === settingsModal) {
-    settingsModal.hidden = true;
-    syncBodyLock();
-  }
-});
-
-senderEmailForm.addEventListener("submit", (event) => {
+senderDetailsForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const formData = new FormData(senderEmailForm);
+  const formData = new FormData(senderDetailsForm);
   const senderName = String(formData.get("senderName") || "").trim();
   const senderEmail = String(formData.get("senderEmail") || "").trim();
-  const emailTemplateSubject = String(formData.get("emailTemplateSubject") || "").trim();
-  const emailTemplateBody = String(formData.get("emailTemplateBody") || "").trim();
 
-  if (!senderEmail || !emailTemplateSubject || !emailTemplateBody) {
+  if (!senderEmail) {
     return;
   }
 
   state.senderName = senderName || "Your Name";
   state.senderEmail = senderEmail;
+  state.emailDrafts = {};
+  saveSenderSettings();
+  renderSenderSettings();
+  closeModal(senderDetailsModal);
+  showNotification("Sender details updated", `Outgoing drafts will now use ${state.senderName} <${state.senderEmail}>.`);
+
+  if (state.activeEmailLeadId) {
+    const lead = state.leads.find((item) => item.id === state.activeEmailLeadId);
+    if (lead) {
+      const refreshedDraft = getEmailDraft(lead);
+      emailDetailSubject.value = refreshedDraft.subject;
+      emailDetailBody.value = refreshedDraft.body;
+    }
+  }
+});
+
+templateEditorForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const formData = new FormData(templateEditorForm);
+  const emailTemplateSubject = String(formData.get("emailTemplateSubject") || "").trim();
+  const emailTemplateBody = String(formData.get("emailTemplateBody") || "").trim();
+
+  if (!emailTemplateSubject || !emailTemplateBody) {
+    return;
+  }
+
   state.emailTemplateSubject = emailTemplateSubject;
   state.emailTemplateBody = emailTemplateBody;
   state.emailDrafts = {};
   saveSenderSettings();
   renderSenderSettings();
-  showNotification("Email settings updated", `Outgoing drafts will now use ${state.senderEmail} and the saved template.`);
+  closeModal(templateEditorModal);
+  showNotification("Email template updated", "New and refreshed drafts will use the saved template.");
 
   if (state.activeEmailLeadId) {
     const lead = state.leads.find((item) => item.id === state.activeEmailLeadId);
@@ -1360,6 +1465,7 @@ exportPreviewButton.addEventListener("click", () => {
 });
 
 loadSenderSettings();
+loadThemeMode();
 renderSenderSettings();
 updateLocationUi();
 updateRadiusDisplay();
