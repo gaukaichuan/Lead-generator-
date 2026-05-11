@@ -581,32 +581,349 @@ h3 {
 
 .import-panel {
   margin-top: 14px;
-  padding: 20px;
+}
+
+.import-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(240px, 0.72fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.import-main-card,
+.import-map-preview {
   border-radius: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+}
+
+.import-main-card {
+  padding: 22px;
   background:
-    radial-gradient(circle at 8% 10%, rgba(56, 189, 248, 0.22), transparent 20%),
-    radial-gradient(circle at 92% 18%, rgba(244, 114, 182, 0.1), transparent 18%),
-    radial-gradient(circle at 80% 85%, rgba(59, 130, 246, 0.22), transparent 28%),
-    linear-gradient(145deg, #07101f 0%, #0d1a35 36%, #17357a 72%, #1d4ed8 100%);
-  border: 1px solid rgba(191, 219, 254, 0.14);
-  box-shadow:
-    0 42px 90px rgba(8, 15, 34, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    radial-gradient(circle at 88% 16%, rgba(125, 211, 252, 0.2), transparent 18%),
+    radial-gradient(circle at 78% 68%, rgba(59, 130, 246, 0.12), transparent 20%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.94));
+  box-shadow: 0 32px 70px rgba(15, 23, 42, 0.12);
+}
+
+.import-map-preview {
+  position: relative;
   overflow: hidden;
-  position: relative;
+  min-height: 100%;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.22)),
+    linear-gradient(180deg, #dff0ff, #f7fbff);
+  box-shadow: 0 26px 56px rgba(15, 23, 42, 0.08);
 }
 
-.import-heading {
-  margin-bottom: 14px;
-  position: relative;
+.import-map-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, transparent 0 46%, rgba(255, 255, 255, 0.46) 46% 53%, transparent 53%),
+    linear-gradient(transparent 0 47%, rgba(255, 255, 255, 0.4) 47% 53%, transparent 53%),
+    radial-gradient(circle at 32% 28%, rgba(34, 197, 94, 0.22), transparent 10%),
+    radial-gradient(circle at 66% 64%, rgba(34, 197, 94, 0.2), transparent 12%),
+    radial-gradient(circle at 54% 42%, rgba(59, 130, 246, 0.16), transparent 18%);
+}
+
+.import-map-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
   z-index: 1;
+  padding: 9px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--primary-deep);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-.import-panel .eyebrow,
-.import-panel h3,
+.import-map-pin {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px 999px 999px 0;
+  transform: rotate(-45deg);
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  box-shadow: 0 10px 18px rgba(239, 68, 68, 0.24);
+}
+
+.import-map-pin::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.import-map-pin.pin-a { top: 132px; left: 58px; }
+.import-map-pin.pin-b { top: 218px; left: 126px; }
+.import-map-pin.pin-c { top: 306px; left: 84px; }
+.import-map-pin.pin-d { top: 398px; left: 138px; }
+.import-map-pin.pin-e { top: 258px; left: 194px; }
+
+.import-heading.modern {
+  margin-bottom: 16px;
+}
+
+.import-panel .eyebrow {
+  color: #64748b;
+}
+
+.import-panel h3 {
+  color: var(--text);
+  font-size: clamp(1.7rem, 2.3vw, 2.35rem);
+  line-height: 1.02;
+}
+
 .import-panel label span,
 .import-panel .form-note {
-  color: #eff6ff;
+  color: var(--muted);
+}
+
+.import-hero-copy {
+  max-width: 56ch;
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+  font-size: 0.96rem;
+}
+
+.import-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.import-form-modern {
+  gap: 16px;
+}
+
+.import-step-card {
+  padding: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.import-step-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.import-step-heading strong {
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.import-step-heading.compact-space {
+  margin-bottom: 10px;
+}
+
+.import-step-icon {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #dff7ff, #dbeafe);
+  color: #0f172a;
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.1);
+}
+
+.import-query-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+.import-form-grid,
+.import-form-grid-compact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.import-form label,
+.lead-form label,
+.search-box {
+  position: relative;
+}
+
+.import-field {
+  display: grid;
+  gap: 8px;
+}
+
+.import-field span,
+.import-radius-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.import-form input,
+.import-form select {
+  min-height: 54px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 10px 24px rgba(15, 23, 42, 0.04);
+  font-size: 0.98rem;
+  font-weight: 600;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.import-form input::placeholder {
+  color: #94a3b8;
+}
+
+.import-form input:hover,
+.import-form select:hover {
+  border-color: rgba(59, 130, 246, 0.34);
+  transform: translateY(-1px);
+}
+
+.import-field-search,
+.import-field-search-compact,
+.import-field-search-modern {
+  margin-bottom: 0;
+}
+
+.import-field-search input {
+  min-height: 56px;
+  font-size: 1rem;
+  padding-left: 16px;
+}
+
+.import-radius-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.import-radius-value {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.import-slider-shell {
+  padding: 2px 4px 0;
+}
+
+.import-form input[type="range"] {
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  accent-color: #3b82f6;
+}
+
+.import-slider-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.import-location-card {
+  display: block;
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.92), rgba(224, 242, 254, 0.76));
+  border: 1px solid rgba(191, 219, 254, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.84);
+}
+
+.import-location-card.modern {
+  margin-top: 18px;
+}
+
+.import-location-copy strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.import-location-copy p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+  max-width: 58ch;
+  font-size: 0.9rem;
+}
+
+.import-location-label {
+  margin: 0 0 6px;
+  color: var(--primary-deep);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.import-actions-modern {
+  margin-top: 2px;
+}
+
+.import-form .button.primary {
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #18c8ee, #3b82f6);
+  color: #ffffff;
+  border: 0;
+  box-shadow: 0 22px 36px rgba(59, 130, 246, 0.24);
+  font-size: 0.98rem;
+  letter-spacing: 0.02em;
+}
+
+.import-form .button.primary:hover {
+  background: linear-gradient(90deg, #10bfe8, #2563eb);
+  box-shadow: 0 26px 40px rgba(59, 130, 246, 0.28);
+}
+
+.import-note-modern,
+.import-panel .form-note {
+  margin-top: 14px;
+  color: #64748b;
+  position: relative;
+  z-index: 1;
+  line-height: 1.6;
 }
 
 .import-hero-copy {
@@ -1479,7 +1796,9 @@ th {
   .lead-form,
   .detail-grid,
   .snapshot-shell,
-  .overview-spotlight {
+  .overview-spotlight,
+  .import-shell,
+  .import-query-layout {
     grid-template-columns: 1fr;
   }
 
@@ -1545,5 +1864,6 @@ th {
     font-size: 1.5rem;
   }
 }
+
 
 

@@ -39,6 +39,7 @@ const leadForm = document.getElementById("leadForm");
 const googleMapsImportForm = document.getElementById("googleMapsImportForm");
 const googleMapsImportButton = document.getElementById("googleMapsImportButton");
 const googleMapsRadiusInput = document.getElementById("googleMapsRadiusInput");
+const googleMapsRadiusValue = document.getElementById("googleMapsRadiusValue");
 const googleMapsQueryInput = document.getElementById("googleMapsQueryInput");
 const googleMapsLatitudeInput = document.getElementById("googleMapsLatitudeInput");
 const googleMapsLongitudeInput = document.getElementById("googleMapsLongitudeInput");
@@ -310,6 +311,15 @@ function updateLocationUi() {
     `Using your live location at ${state.currentLocation.latitude.toFixed(4)}, ${state.currentLocation.longitude.toFixed(4)}.`,
     "ready"
   );
+}
+
+function updateRadiusDisplay() {
+  if (!googleMapsRadiusValue || !googleMapsRadiusInput) {
+    return;
+  }
+
+  const radiusKm = Number(googleMapsRadiusInput.value) || 15;
+  googleMapsRadiusValue.textContent = `${radiusKm} KM (Selected Range)`;
 }
 
 function readLiveLocation() {
@@ -1019,6 +1029,8 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
   }
 });
 
+googleMapsRadiusInput.addEventListener("input", updateRadiusDisplay);
+
 [googleMapsQueryInput, googleMapsRadiusInput].forEach((element) => {
   element.addEventListener("focus", () => {
     if (state.currentLocation || state.isResolvingLocation) {
@@ -1144,6 +1156,7 @@ importSelectedGoogleMapsResults.addEventListener("click", async () => {
     await loadLeads();
     googleMapsImportForm.reset();
     googleMapsRadiusInput.value = "15";
+    updateRadiusDisplay();
     googleMapsLatitudeInput.value = state.currentLocation ? String(state.currentLocation.latitude) : "";
     googleMapsLongitudeInput.value = state.currentLocation ? String(state.currentLocation.longitude) : "";
     showNotification(
@@ -1312,9 +1325,11 @@ exportPreviewButton.addEventListener("click", () => {
 loadSenderSettings();
 renderSenderSettings();
 updateLocationUi();
+updateRadiusDisplay();
 loadLeads();
 if (!state.currentLocation && !state.isResolvingLocation) {
   ensureLiveLocation().catch(() => {
     // Keep the UI passive until the user interacts with the import flow.
   });
 }
+
