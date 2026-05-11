@@ -1365,21 +1365,6 @@ th {
   box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12);
 }
 
-.floating-timeline-button {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 40;
-  width: 58px;
-  height: 58px;
-  border: 0;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0f172a, #1d4ed8);
-  color: #ffffff;
-  cursor: pointer;
-  box-shadow: var(--shadow-md);
-}
-
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -1650,6 +1635,7 @@ th {
     font-size: 1.5rem;
   }
 }
+
 
 
 

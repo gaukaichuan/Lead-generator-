@@ -578,7 +578,7 @@ function renderPageHeader() {
   const meta = workspaceMeta[state.activeWorkspace] || workspaceMeta.overview;
   pageEyebrow.textContent = meta.eyebrow;
   pageTitle.textContent = meta.title;
-  pageDescription.textContent = meta.description;
+  if (pageDescription) pageDescription.textContent = meta.description;
 }
 
 function renderWorkspace() {
@@ -980,7 +980,7 @@ function syncBodyLock() {
   const shouldLock =
     !leadDetailModal.hidden ||
     !emailDetailModal.hidden ||
-    !timelineModal.hidden ||
+    (timelineModal && !timelineModal.hidden) ||
     !settingsModal.hidden ||
     !googleMapsResultsModal.hidden;
 
@@ -1250,22 +1250,26 @@ leadDetailModal.addEventListener("click", (event) => {
   }
 });
 
-openTimelineModal.addEventListener("click", () => {
-  timelineModal.hidden = false;
-  syncBodyLock();
-});
+if (openTimelineModal && timelineModal) {
+  openTimelineModal.addEventListener("click", () => {
+    timelineModal.hidden = false;
+    syncBodyLock();
+  });
+}
 
-closeTimelineModal.addEventListener("click", () => {
-  timelineModal.hidden = true;
-  syncBodyLock();
-});
-
-timelineModal.addEventListener("click", (event) => {
-  if (event.target === timelineModal) {
+if (closeTimelineModal && timelineModal) {
+  closeTimelineModal.addEventListener("click", () => {
     timelineModal.hidden = true;
     syncBodyLock();
-  }
-});
+  });
+
+  timelineModal.addEventListener("click", (event) => {
+    if (event.target === timelineModal) {
+      timelineModal.hidden = true;
+      syncBodyLock();
+    }
+  });
+}
 
 openSettingsModal.addEventListener("click", () => {
   settingsModal.hidden = false;
@@ -1404,6 +1408,7 @@ if (!state.currentLocation && !state.isResolvingLocation) {
     // Keep the UI passive until the user interacts with the import flow.
   });
 }
+
 
 
 

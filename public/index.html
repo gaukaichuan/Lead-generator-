@@ -7,13 +7,7 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <button class="floating-timeline-button" id="openTimelineModal" type="button" aria-label="Open timeline">
-    <svg class="floating-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20Zm0 2a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm1 3a1 1 0 0 1 1 1v3.59l2.7 2.7a1 1 0 0 1-1.4 1.42l-3-3A1 1 0 0 1 12 12V8a1 1 0 0 1 1-1Z"></path>
-    </svg>
-  </button>
-
-  <div class="modal-backdrop" id="emailDetailModal" hidden>
+<div class="modal-backdrop" id="emailDetailModal" hidden>
     <div class="modal-card email-detail-card">
       <button class="modal-close-button" id="closeEmailDetail" type="button" aria-label="Close email review">&times;</button>
       <div class="section-heading compact">
@@ -37,16 +31,7 @@
       </div>
     </div>
   </div>
-
-  <div class="modal-backdrop" id="timelineModal" hidden>
-    <div class="modal-card">
-      <button class="modal-close-button" id="closeTimelineModal" type="button" aria-label="Close timeline">&times;</button>
-      <div class="section-heading compact">
-        <div>
-          <p class="eyebrow">Timeline</p>
-          <h2>Recent Activity</h2>
-        </div>
-      </div>
+</div>
       <div id="activityList" class="timeline"></div>
     </div>
   </div>
@@ -209,6 +194,7 @@
         <div class="topbar-copy">
           <p class="eyebrow" id="pageEyebrow">Overview</p>
           <h2 id="pageTitle">Lead Operations Dashboard</h2>
+          <p class="topbar-description" id="pageDescription">Track intake, qualification, outreach, and CRM follow-up from one workspace.</p>
         </div>
         <div class="topbar-actions">
           <button class="button secondary" id="openSettingsModal" type="button">Settings</button>
@@ -474,6 +460,7 @@
   <script src="/app.js"></script>
 </body>
 </html>
+
 
 
 
