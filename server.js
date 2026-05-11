@@ -95,6 +95,22 @@ function companyTypeLabel(companyType) {
   return labels[companyType] || companyType;
 }
 
+function extractWebsiteFromNotes(notes) {
+  const match = String(notes || "").match(/Website:\s*(https?:\/\/\S+)/i);
+  return match ? match[1].trim() : "";
+}
+
+function removeWebsiteFromNotes(notes) {
+  return String(notes || "")
+    .replace(/\s*Website:\s*https?:\/\/\S+/i, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function normalizeLeadWebsite(lead) {
+  return String(lead.website || "").trim() || extractWebsiteFromNotes(lead.notes);
+}
+
 function recommendProduct(lead) {
   if (lead.painPoint === "warehouse-control" || lead.companyType === "warehouse") {
     return {
@@ -132,8 +148,11 @@ function recommendProduct(lead) {
 
 function enrichLead(lead) {
   const recommendation = recommendProduct(lead);
+  const website = normalizeLeadWebsite(lead);
   return {
     ...lead,
+    website,
+    notes: removeWebsiteFromNotes(lead.notes),
     priorityArea: isPriorityArea(lead.region),
     companyTypeLabel: companyTypeLabel(lead.companyType),
     painPointLabel: humanizePainPoint(lead.painPoint),
@@ -287,7 +306,6 @@ async function searchGoogleMapsLeads(
           "Imported from Google Maps.",
           place.formattedAddress ? `Address: ${place.formattedAddress}` : "",
           distanceKm !== null ? `Distance: ${distanceKm.toFixed(1)} km` : "",
-          details.websiteUri ? `Website: ${details.websiteUri}` : ""
         ].filter(Boolean).join(" "),
         externalRef: place.id,
         distanceKm,
@@ -322,13 +340,13 @@ function sanitizePreviewLead(lead) {
     company: lead.company || "",
     contactName: lead.contactName || "",
     phone: lead.phone || "",
-    website: lead.website || "",
+    website: normalizeLeadWebsite(lead),
     industry: lead.industry || "",
     region: lead.region || "",
     companyType: lead.companyType || "",
     painPoint: lead.painPoint || "",
     source: lead.source || "Google Maps",
-    notes: lead.notes || "",
+    notes: removeWebsiteFromNotes(lead.notes),
     distanceKm: lead.distanceKm ?? null
   };
 }
@@ -845,3 +863,6 @@ if (require.main === module) {
 }
 
 module.exports = { createAppServer, startServer };
+
+
+
