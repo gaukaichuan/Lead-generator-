@@ -53,6 +53,13 @@ const googleMapsResultsEmpty = document.getElementById("googleMapsResultsEmpty")
 const selectAllGoogleMapsResults = document.getElementById("selectAllGoogleMapsResults");
 const clearGoogleMapsResults = document.getElementById("clearGoogleMapsResults");
 const importSelectedGoogleMapsResults = document.getElementById("importSelectedGoogleMapsResults");
+const inlineGoogleMapsResultsPanel = document.getElementById("inlineGoogleMapsResultsPanel");
+const inlineGoogleMapsResultsList = document.getElementById("inlineGoogleMapsResultsList");
+const inlineGoogleMapsResultsSummary = document.getElementById("inlineGoogleMapsResultsSummary");
+const inlineGoogleMapsResultsEmpty = document.getElementById("inlineGoogleMapsResultsEmpty");
+const inlineSelectAllGoogleMapsResults = document.getElementById("inlineSelectAllGoogleMapsResults");
+const inlineClearGoogleMapsResults = document.getElementById("inlineClearGoogleMapsResults");
+const inlineImportSelectedGoogleMapsResults = document.getElementById("inlineImportSelectedGoogleMapsResults");
 const loadDemoLeadsButton = document.getElementById("loadDemoLeads");
 const refreshLeadsButton = document.getElementById("refreshLeads");
 const searchInput = document.getElementById("searchInput");
@@ -319,7 +326,7 @@ function updateRadiusDisplay() {
   }
 
   const radiusKm = Number(googleMapsRadiusInput.value) || 15;
-  googleMapsRadiusValue.textContent = `${radiusKm} KM (Selected Range)`;
+  googleMapsRadiusValue.textContent = `${radiusKm} KM`;
 }
 
 function readLiveLocation() {
@@ -464,45 +471,81 @@ function googleMapsResultKey(lead) {
   return lead.externalRef || `${lead.company}-${lead.phone}-${lead.region}`;
 }
 
+function createGoogleMapsResultCard(lead, key) {
+  const card = document.createElement("label");
+  card.className = "google-result-card";
+  card.innerHTML = `
+    <input class="google-result-checkbox" type="checkbox" ${state.selectedGoogleMapsResults.has(key) ? "checked" : ""}>
+    <div class="google-result-copy">
+      <div class="google-result-top">
+        <strong>${lead.company}</strong>
+        <span class="mini-tag">${lead.distanceKm !== null && lead.distanceKm !== undefined ? `${lead.distanceKm.toFixed(1)} km` : "Nearby"}</span>
+      </div>
+      <p>${lead.notes || "Imported from Google Maps."}</p>
+      <div class="google-result-meta">
+        <span>${lead.phone || "No phone"}</span>
+        <span>${lead.website || "No website"}</span>
+      </div>
+    </div>
+  `;
+
+  const checkbox = card.querySelector(".google-result-checkbox");
+  checkbox.addEventListener("change", () => {
+    if (checkbox.checked) {
+      state.selectedGoogleMapsResults.add(key);
+    } else {
+      state.selectedGoogleMapsResults.delete(key);
+    }
+    renderGoogleMapsResultsModal();
+  });
+
+  return card;
+}
+
+function setGoogleMapsImportButtonsState(disabled, text) {
+  [importSelectedGoogleMapsResults, inlineImportSelectedGoogleMapsResults].filter(Boolean).forEach((button) => {
+    button.disabled = disabled;
+    if (text) {
+      button.textContent = text;
+    }
+  });
+}
+
 function renderGoogleMapsResultsModal() {
-  googleMapsResultsList.innerHTML = "";
+  const targets = [
+    {
+      panel: inlineGoogleMapsResultsPanel,
+      list: inlineGoogleMapsResultsList,
+      summary: inlineGoogleMapsResultsSummary,
+      empty: inlineGoogleMapsResultsEmpty
+    },
+    {
+      panel: null,
+      list: googleMapsResultsList,
+      summary: googleMapsResultsSummary,
+      empty: googleMapsResultsEmpty
+    }
+  ].filter((target) => target.list && target.summary && target.empty);
+
   const selectedCount = state.selectedGoogleMapsResults.size;
   const totalCount = state.googleMapsResults.length;
 
-  googleMapsResultsSummary.textContent = `${totalCount} nearby business${totalCount === 1 ? "" : "es"} found. ${selectedCount} selected for import.`;
-  googleMapsResultsEmpty.hidden = totalCount > 0;
-  importSelectedGoogleMapsResults.disabled = selectedCount === 0;
+  targets.forEach((target) => {
+    if (target.panel) {
+      target.panel.hidden = false;
+    }
+    target.list.innerHTML = "";
+    target.summary.textContent = `${totalCount} nearby business${totalCount === 1 ? "" : "es"} found. ${selectedCount} selected for import.`;
+    target.empty.hidden = totalCount > 0;
+  });
+
+  setGoogleMapsImportButtonsState(selectedCount === 0, null);
 
   state.googleMapsResults.forEach((lead) => {
     const key = googleMapsResultKey(lead);
-    const card = document.createElement("label");
-    card.className = "google-result-card";
-    card.innerHTML = `
-      <input class="google-result-checkbox" type="checkbox" ${state.selectedGoogleMapsResults.has(key) ? "checked" : ""}>
-      <div class="google-result-copy">
-        <div class="google-result-top">
-          <strong>${lead.company}</strong>
-          <span class="mini-tag">${lead.distanceKm !== null && lead.distanceKm !== undefined ? `${lead.distanceKm.toFixed(1)} km` : "Nearby"}</span>
-        </div>
-        <p>${lead.notes || "Imported from Google Maps."}</p>
-        <div class="google-result-meta">
-          <span>${lead.phone || "No phone"}</span>
-          <span>${lead.website || "No website"}</span>
-        </div>
-      </div>
-    `;
-
-    const checkbox = card.querySelector(".google-result-checkbox");
-    checkbox.addEventListener("change", () => {
-      if (checkbox.checked) {
-        state.selectedGoogleMapsResults.add(key);
-      } else {
-        state.selectedGoogleMapsResults.delete(key);
-      }
-      renderGoogleMapsResultsModal();
+    targets.forEach((target) => {
+      target.list.appendChild(createGoogleMapsResultCard(lead, key));
     });
-
-    googleMapsResultsList.appendChild(card);
   });
 }
 
@@ -1019,8 +1062,6 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
     state.googleMapsResults = Array.isArray(payload.leads) ? payload.leads : [];
     state.selectedGoogleMapsResults = new Set(state.googleMapsResults.map(googleMapsResultKey));
     renderGoogleMapsResultsModal();
-    googleMapsResultsModal.hidden = false;
-    syncBodyLock();
   } catch (error) {
     showNotification("Search failed", error.message || "Google Maps search could not be completed.");
   } finally {
@@ -1126,25 +1167,28 @@ googleMapsResultsModal.addEventListener("click", (event) => {
   }
 });
 
-selectAllGoogleMapsResults.addEventListener("click", () => {
-  state.selectedGoogleMapsResults = new Set(state.googleMapsResults.map(googleMapsResultKey));
-  renderGoogleMapsResultsModal();
+[selectAllGoogleMapsResults, inlineSelectAllGoogleMapsResults].filter(Boolean).forEach((button) => {
+  button.addEventListener("click", () => {
+    state.selectedGoogleMapsResults = new Set(state.googleMapsResults.map(googleMapsResultKey));
+    renderGoogleMapsResultsModal();
+  });
 });
 
-clearGoogleMapsResults.addEventListener("click", () => {
-  state.selectedGoogleMapsResults = new Set();
-  renderGoogleMapsResultsModal();
+[clearGoogleMapsResults, inlineClearGoogleMapsResults].filter(Boolean).forEach((button) => {
+  button.addEventListener("click", () => {
+    state.selectedGoogleMapsResults = new Set();
+    renderGoogleMapsResultsModal();
+  });
 });
 
-importSelectedGoogleMapsResults.addEventListener("click", async () => {
+async function handleImportSelectedGoogleMapsResults() {
   const selectedLeads = state.googleMapsResults.filter((lead) => state.selectedGoogleMapsResults.has(googleMapsResultKey(lead)));
   if (!selectedLeads.length) {
     showNotification("Nothing selected", "Select at least one shop before importing.");
     return;
   }
 
-  importSelectedGoogleMapsResults.disabled = true;
-  importSelectedGoogleMapsResults.textContent = "Importing...";
+  setGoogleMapsImportButtonsState(true, "Importing...");
 
   try {
     const payload = await request("/api/google-maps/import-selected", {
@@ -1159,6 +1203,11 @@ importSelectedGoogleMapsResults.addEventListener("click", async () => {
     updateRadiusDisplay();
     googleMapsLatitudeInput.value = state.currentLocation ? String(state.currentLocation.latitude) : "";
     googleMapsLongitudeInput.value = state.currentLocation ? String(state.currentLocation.longitude) : "";
+    state.googleMapsResults = [];
+    state.selectedGoogleMapsResults = new Set();
+    if (inlineGoogleMapsResultsPanel) {
+      inlineGoogleMapsResultsPanel.hidden = true;
+    }
     showNotification(
       "Google Maps import complete",
       `${payload.importedCount || 0} lead(s) imported${payload.duplicateCount ? `, ${payload.duplicateCount} duplicate(s) skipped` : ""}.`
@@ -1166,9 +1215,12 @@ importSelectedGoogleMapsResults.addEventListener("click", async () => {
   } catch (error) {
     showNotification("Import failed", error.message || "Selected Google Maps shops could not be imported.");
   } finally {
-    importSelectedGoogleMapsResults.disabled = false;
-    importSelectedGoogleMapsResults.textContent = "Import Selected";
+    setGoogleMapsImportButtonsState(state.selectedGoogleMapsResults.size === 0, "Import Selected");
   }
+}
+
+[importSelectedGoogleMapsResults, inlineImportSelectedGoogleMapsResults].filter(Boolean).forEach((button) => {
+  button.addEventListener("click", handleImportSelectedGoogleMapsResults);
 });
 
 leadDetailModal.addEventListener("click", (event) => {
@@ -1332,4 +1384,5 @@ if (!state.currentLocation && !state.isResolvingLocation) {
     // Keep the UI passive until the user interacts with the import flow.
   });
 }
+
 

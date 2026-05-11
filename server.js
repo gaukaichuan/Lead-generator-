@@ -229,10 +229,7 @@ async function searchGoogleMapsLeads(
     throw new Error("Google Maps API key is not configured.");
   }
 
-  const allPlaces = [];
-  let pageToken = "";
-
-  do {
+  const fetchSearchPage = async (pageToken = "") => {
     const searchResponse = await fetchImpl("https://places.googleapis.com/v1/places:searchText", {
       method: "POST",
       headers: {
@@ -242,7 +239,7 @@ async function searchGoogleMapsLeads(
       },
       body: JSON.stringify({
         textQuery: String(query || "").trim() || "businesses",
-        pageToken,
+        ...(pageToken ? { pageToken } : {}),
         maxResultCount: 20,
         regionCode: "MY",
         languageCode: "en",
@@ -259,11 +256,22 @@ async function searchGoogleMapsLeads(
       })
     });
 
-    const searchPayload = await readJsonResponse(searchResponse);
-    const places = Array.isArray(searchPayload.places) ? searchPayload.places : [];
-    allPlaces.push(...places);
-    pageToken = searchPayload.nextPageToken || "";
-  } while (pageToken && allPlaces.length < 60);
+    return readJsonResponse(searchResponse);
+  };
+
+  const allPlaces = [];
+  const firstPage = await fetchSearchPage();
+  allPlaces.push(...(Array.isArray(firstPage.places) ? firstPage.places : []));
+
+  if (firstPage.nextPageToken && allPlaces.length < 40) {
+    await new Promise((resolve) => setTimeout(resolve, 1800));
+    try {
+      const nextPage = await fetchSearchPage(firstPage.nextPageToken);
+      allPlaces.push(...(Array.isArray(nextPage.places) ? nextPage.places : []));
+    } catch (error) {
+      // Keep the first page results even if follow-up pagination fails.
+    }
+  }
 
   const detailedPlaces = await Promise.all(
     allPlaces.map(async (place) => {
@@ -289,6 +297,7 @@ async function searchGoogleMapsLeads(
               { latitude: placeLocation.latitude, longitude: placeLocation.longitude }
             )
           : null;
+
       return {
         company: place.displayName && place.displayName.text ? place.displayName.text : "Unknown business",
         contactName: "Business Contact",
@@ -305,7 +314,7 @@ async function searchGoogleMapsLeads(
         notes: [
           "Imported from Google Maps.",
           place.formattedAddress ? `Address: ${place.formattedAddress}` : "",
-          distanceKm !== null ? `Distance: ${distanceKm.toFixed(1)} km` : "",
+          distanceKm !== null ? `Distance: ${distanceKm.toFixed(1)} km` : ""
         ].filter(Boolean).join(" "),
         externalRef: place.id,
         distanceKm,
@@ -333,7 +342,6 @@ async function searchGoogleMapsLeads(
     return place.distanceKm !== null && place.distanceKm <= normalizedRadiusKm;
   });
 }
-
 function sanitizePreviewLead(lead) {
   return {
     externalRef: lead.externalRef || "",
@@ -844,7 +852,7 @@ function createAppServer(options = {}) {
       const target = pathname === "/" ? path.join(PUBLIC_DIR, "index.html") : path.join(PUBLIC_DIR, pathname);
       sendFile(response, target);
     } catch (error) {
-      sendJson(response, 500, { error: "Server error" });
+      sendJson(response, 500, { error: error.message || "Server error" });
     }
   });
 }
@@ -863,6 +871,7 @@ if (require.main === module) {
 }
 
 module.exports = { createAppServer, startServer };
+
 
 
 

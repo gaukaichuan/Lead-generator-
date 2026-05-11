@@ -298,7 +298,7 @@
                     <div>
                       <p class="eyebrow">Real Data Import</p>
                       <h3>Google Maps Lead Finder</h3>
-                      <p class="import-hero-copy">A cleaner real-time finder to discover nearby business prospects and pull them straight into your workflow.</p>
+                      <p class="import-hero-copy">Search nearby businesses, adjust your radius smoothly, and import only the companies you actually want.</p>
                     </div>
                   </div>
                   <form id="googleMapsImportForm" class="import-form import-form-modern">
@@ -322,15 +322,15 @@
                       </div>
                       <div class="import-radius-header">
                         <span class="import-radius-label">Radius (km)</span>
-                        <strong class="import-radius-value" id="googleMapsRadiusValue">15 KM (Selected Range)</strong>
+                        <strong class="import-radius-value" id="googleMapsRadiusValue">15 KM</strong>
                       </div>
                       <div class="import-slider-shell">
-                        <input id="googleMapsRadiusInput" name="radiusKm" type="range" min="5" max="20" step="1" value="15" required>
+                        <input id="googleMapsRadiusInput" name="radiusKm" class="import-radius-range" type="range" min="5" max="20" step="1" value="15" required>
                         <div class="import-slider-ticks" aria-hidden="true">
                           <span>5</span>
                           <span>10</span>
                           <span>15</span>
-                          <span>20+</span>
+                          <span>20</span>
                         </div>
                       </div>
 
@@ -349,20 +349,29 @@
                     <input id="googleMapsLatitudeInput" name="latitude" type="hidden">
                     <input id="googleMapsLongitudeInput" name="longitude" type="hidden">
                     <div class="full-span form-actions import-actions-modern">
-                      <button class="button primary" id="googleMapsImportButton" type="submit">Generate Leads From Maps</button>
+                      <button class="button primary" id="googleMapsImportButton" type="submit">Search Google Maps</button>
                     </div>
                   </form>
                   <p class="form-note import-note-modern">Using the official Google Places API. LinkedIn remains manual-only to respect platform policies against automated scraping.</p>
                 </div>
 
-                <aside class="import-map-preview" aria-hidden="true">
-                  <div class="import-map-badge">Connected Map</div>
-                  <div class="import-map-grid"></div>
-                  <span class="import-map-pin pin-a"></span>
-                  <span class="import-map-pin pin-b"></span>
-                  <span class="import-map-pin pin-c"></span>
-                  <span class="import-map-pin pin-d"></span>
-                  <span class="import-map-pin pin-e"></span>
+                <aside class="import-results-panel" id="inlineGoogleMapsResultsPanel" hidden>
+                  <div class="import-results-header">
+                    <div>
+                      <p class="eyebrow">Search Results</p>
+                      <h4>Choose Leads to Import</h4>
+                    </div>
+                    <div class="import-results-actions">
+                      <button class="button secondary" id="inlineSelectAllGoogleMapsResults" type="button">Select All</button>
+                      <button class="button secondary" id="inlineClearGoogleMapsResults" type="button">Clear</button>
+                    </div>
+                  </div>
+                  <div class="import-results-toolbar">
+                    <strong id="inlineGoogleMapsResultsSummary">No businesses loaded yet.</strong>
+                  </div>
+                  <div class="import-results-list" id="inlineGoogleMapsResultsList"></div>
+                  <p class="empty-state" id="inlineGoogleMapsResultsEmpty" hidden>No nearby businesses matched this search yet.</p>
+                  <button class="button primary import-results-import" id="inlineImportSelectedGoogleMapsResults" type="button">Import Selected</button>
                 </aside>
               </div>
             </section>
@@ -533,6 +542,7 @@
   <script src="/app.js"></script>
 </body>
 </html>
+
 
 
 

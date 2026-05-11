@@ -585,13 +585,13 @@ h3 {
 
 .import-shell {
   display: grid;
-  grid-template-columns: minmax(0, 1.28fr) minmax(240px, 0.72fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
   gap: 18px;
   align-items: stretch;
 }
 
 .import-main-card,
-.import-map-preview {
+.import-results-panel {
   border-radius: 34px;
   border: 1px solid rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(18px);
@@ -606,66 +606,53 @@ h3 {
   box-shadow: 0 32px 70px rgba(15, 23, 42, 0.12);
 }
 
-.import-map-preview {
-  position: relative;
-  overflow: hidden;
-  min-height: 100%;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.22)),
-    linear-gradient(180deg, #dff0ff, #f7fbff);
+.import-results-panel {
+  padding: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.92));
   box-shadow: 0 26px 56px rgba(15, 23, 42, 0.08);
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  gap: 12px;
+  min-height: 100%;
 }
 
-.import-map-grid {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, transparent 0 46%, rgba(255, 255, 255, 0.46) 46% 53%, transparent 53%),
-    linear-gradient(transparent 0 47%, rgba(255, 255, 255, 0.4) 47% 53%, transparent 53%),
-    radial-gradient(circle at 32% 28%, rgba(34, 197, 94, 0.22), transparent 10%),
-    radial-gradient(circle at 66% 64%, rgba(34, 197, 94, 0.2), transparent 12%),
-    radial-gradient(circle at 54% 42%, rgba(59, 130, 246, 0.16), transparent 18%);
+.import-results-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
 }
 
-.import-map-badge {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  z-index: 1;
-  padding: 9px 13px;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(255, 255, 255, 0.84);
-  color: var(--primary-deep);
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+.import-results-header h4 {
+  margin: 0.25rem 0 0;
+  font-size: 1.18rem;
 }
 
-.import-map-pin {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px 999px 999px 0;
-  transform: rotate(-45deg);
-  background: linear-gradient(135deg, #ef4444, #f97316);
-  box-shadow: 0 10px 18px rgba(239, 68, 68, 0.24);
+.import-results-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.import-map-pin::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
+.import-results-toolbar {
+  padding: 10px 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0.96), rgba(240, 246, 255, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.18);
 }
 
-.import-map-pin.pin-a { top: 132px; left: 58px; }
-.import-map-pin.pin-b { top: 218px; left: 126px; }
-.import-map-pin.pin-c { top: 306px; left: 84px; }
-.import-map-pin.pin-d { top: 398px; left: 138px; }
-.import-map-pin.pin-e { top: 258px; left: 194px; }
+.import-results-list {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  max-height: 520px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.import-results-import {
+  width: 100%;
+}
 
 .import-heading.modern {
   margin-bottom: 16px;
@@ -781,6 +768,7 @@ h3 {
 .import-form input,
 .import-form select {
   min-height: 54px;
+  width: 100%;
   padding: 14px 16px;
   border-radius: 16px;
   color: var(--text);
@@ -837,14 +825,50 @@ h3 {
   padding: 2px 4px 0;
 }
 
-.import-form input[type="range"] {
+.import-radius-range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
   min-height: auto;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.import-radius-range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22d3ee, #3b82f6);
+}
+
+.import-radius-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -7px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  background: #3b82f6;
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.3);
+}
+
+.import-radius-range::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #22d3ee, #3b82f6);
+}
+
+.import-radius-range::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  background: #3b82f6;
+  box-shadow: 0 8px 18px rgba(59, 130, 246, 0.3);
 }
 
 .import-slider-ticks {
@@ -884,15 +908,6 @@ h3 {
   font-size: 0.9rem;
 }
 
-.import-location-label {
-  margin: 0 0 6px;
-  color: var(--primary-deep);
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
 .import-actions-modern {
   margin-top: 2px;
 }
@@ -924,252 +939,6 @@ h3 {
   position: relative;
   z-index: 1;
   line-height: 1.6;
-}
-
-.import-hero-copy {
-  max-width: 48ch;
-  margin: 0.35rem 0 0;
-  color: rgba(226, 232, 240, 0.78);
-  line-height: 1.7;
-  font-size: 0.88rem;
-}
-
-.import-panel .form-note {
-  color: rgba(224, 231, 255, 0.86);
-}
-
-.import-form {
-  display: grid;
-  gap: 12px;
-  margin-top: 10px;
-  position: relative;
-  z-index: 1;
-}
-
-.import-form-grid {
-  display: grid;
-  grid-template-columns: 150px repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.import-form-grid-compact {
-  grid-template-columns: minmax(0, 1fr) 150px;
-  align-items: end;
-}
-
-.import-form label,
-.lead-form label,
-.search-box {
-  position: relative;
-}
-
-.import-field {
-  display: grid;
-  gap: 8px;
-}
-
-.import-field span {
-  font-size: 0.66rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(191, 219, 254, 0.78);
-}
-
-.lead-form label,
-.search-box {
-  display: grid;
-  gap: 8px;
-  font-weight: 700;
-}
-
-.required-star {
-  color: #dc2626;
-  font-style: normal;
-}
-
-.lead-form input,
-.lead-form select,
-.lead-form textarea,
-.search-box input,
-.compact-auth-form input,
-.email-subject-input,
-.email-body-textarea {
-  width: 100%;
-  min-height: 42px;
-  padding: 11px 13px;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
-  color: var(--text);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.76),
-    0 8px 18px rgba(15, 23, 42, 0.04);
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
-}
-
-.import-form input,
-.import-form select {
-  min-height: 46px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  color: #f8fafc;
-  background:
-    linear-gradient(180deg, rgba(10, 21, 43, 0.92), rgba(15, 30, 58, 0.82));
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 16px 30px rgba(2, 6, 23, 0.22);
-  font-size: 0.92rem;
-  font-weight: 600;
-}
-
-.import-field input[list]::-webkit-calendar-picker-indicator {
-  opacity: 0;
-}
-
-.import-form input::placeholder {
-  color: rgba(191, 219, 254, 0.34);
-}
-
-.import-form input:hover,
-.import-form select:hover {
-  border-color: rgba(125, 211, 252, 0.36);
-  transform: translateY(-1px);
-}
-
-.lead-form input:focus,
-.lead-form select:focus,
-.lead-form textarea:focus,
-.import-form input:focus,
-.import-form select:focus,
-.search-box input:focus,
-.compact-auth-form input:focus,
-.compact-auth-form textarea:focus,
-.email-subject-input:focus,
-.email-body-textarea:focus {
-  outline: none;
-  border-color: rgba(125, 211, 252, 0.82);
-  box-shadow:
-    0 0 0 4px rgba(125, 211, 252, 0.12),
-    0 20px 34px rgba(14, 165, 233, 0.2);
-}
-
-.import-field-search {
-  margin-bottom: 4px;
-}
-
-.import-field-search-compact {
-  margin-bottom: 0;
-}
-
-.import-field-search input {
-  min-height: 54px;
-  font-size: 0.98rem;
-  padding-left: 16px;
-}
-
-.import-field-radius {
-  max-width: 112px;
-}
-
-.import-field-radius input {
-  min-height: 46px;
-  text-align: center;
-  padding-left: 12px;
-  padding-right: 12px;
-  font-size: 0.94rem;
-}
-
-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-right: 44px;
-  background-image:
-    linear-gradient(45deg, transparent 50%, #64748b 50%),
-    linear-gradient(135deg, #64748b 50%, transparent 50%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
-  background-position:
-    calc(100% - 18px) calc(50% - 3px),
-    calc(100% - 12px) calc(50% - 3px),
-    0 0;
-  background-size:
-    6px 6px,
-    6px 6px,
-    100% 100%;
-  background-repeat: no-repeat;
-}
-
-.import-form .button.primary {
-  min-width: 210px;
-  min-height: 44px;
-  padding-left: 20px;
-  padding-right: 20px;
-  background: linear-gradient(135deg, #ffffff, #dbeafe 48%, #93c5fd 100%);
-  color: #0f172a;
-  border: 1px solid rgba(255, 255, 255, 0.46);
-  box-shadow:
-    0 20px 40px rgba(96, 165, 250, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  font-size: 0.92rem;
-}
-
-.import-form .button.primary:hover {
-  background: linear-gradient(135deg, #ffffff, #e0f2fe 44%, #7dd3fc 100%);
-  box-shadow:
-    0 24px 46px rgba(96, 165, 250, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.import-location-card {
-  display: block;
-  padding: 10px 14px;
-  border-radius: 16px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03)),
-    linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(125, 211, 252, 0.02));
-  border: 1px solid rgba(191, 219, 254, 0.12);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 12px 28px rgba(2, 6, 23, 0.12);
-}
-
-.import-location-copy strong {
-  display: block;
-  margin-bottom: 4px;
-  color: #f8fafc;
-  font-size: 0.84rem;
-}
-
-.import-location-copy p {
-  margin: 0;
-  color: rgba(226, 232, 240, 0.78);
-  line-height: 1.45;
-  max-width: 62ch;
-  font-size: 0.82rem;
-}
-
-.import-location-label {
-  margin: 0 0 6px;
-  color: #7dd3fc;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-.import-panel .form-actions {
-  margin-top: 6px;
-}
-
-.import-panel .form-note {
-  margin-top: 2px;
-  position: relative;
-  z-index: 1;
 }
 
 .google-results-modal-card {
@@ -1798,7 +1567,9 @@ th {
   .snapshot-shell,
   .overview-spotlight,
   .import-shell,
-  .import-query-layout {
+  .import-query-layout,
+  .import-results-header,
+  .import-results-actions {
     grid-template-columns: 1fr;
   }
 
@@ -1864,6 +1635,7 @@ th {
     font-size: 1.5rem;
   }
 }
+
 
 
 
