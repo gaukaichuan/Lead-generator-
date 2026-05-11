@@ -1497,11 +1497,16 @@ th {
 .detail-modal-card .section-heading.compact {
   gap: 8px;
   align-items: start;
+  flex-wrap: wrap;
+  padding-right: 72px;
 }
 
 .detail-modal-card .status-chip {
   padding: 5px 10px;
   font-size: 0.68rem;
+  margin-left: auto;
+  margin-right: 52px;
+  max-width: calc(100% - 64px);
 }
 
 .email-detail-card {
@@ -1519,6 +1524,8 @@ th {
 .email-detail-card .section-heading.compact {
   align-items: start;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+  padding-right: 72px;
 }
 
 .email-detail-card h2 {
@@ -1533,6 +1540,7 @@ th {
 
 .email-detail-card .header-actions {
   align-items: center;
+  margin-right: 52px;
 }
 
 .email-detail-card .button {
@@ -1975,6 +1983,7 @@ body.dark-mode .mode-toggle::before {
   cursor: pointer;
   font-size: 1.4rem;
   line-height: 1;
+  z-index: 2;
 }
 
 .notification-center {
