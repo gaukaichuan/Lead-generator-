@@ -343,6 +343,7 @@ async function searchGoogleMapsLeads(
   });
 }
 function sanitizePreviewLead(lead) {
+  const enrichedLead = enrichLead(lead);
   return {
     externalRef: lead.externalRef || "",
     company: lead.company || "",
@@ -355,7 +356,9 @@ function sanitizePreviewLead(lead) {
     painPoint: lead.painPoint || "",
     source: lead.source || "Google Maps",
     notes: removeWebsiteFromNotes(lead.notes),
-    distanceKm: lead.distanceKm ?? null
+    distanceKm: lead.distanceKm ?? null,
+    recommendation: enrichedLead.recommendation,
+    recommendedProduct: enrichedLead.recommendation.productName
   };
 }
 
@@ -871,6 +874,7 @@ if (require.main === module) {
 }
 
 module.exports = { createAppServer, startServer };
+
 
 
 

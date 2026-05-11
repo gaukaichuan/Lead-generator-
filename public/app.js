@@ -43,6 +43,7 @@ const googleMapsRadiusValue = document.getElementById("googleMapsRadiusValue");
 const googleMapsQueryInput = document.getElementById("googleMapsQueryInput");
 const googleMapsLatitudeInput = document.getElementById("googleMapsLatitudeInput");
 const googleMapsLongitudeInput = document.getElementById("googleMapsLongitudeInput");
+const retryLiveLocationButton = document.getElementById("retryLiveLocationButton");
 const locationStatusTitle = document.getElementById("locationStatusTitle");
 const locationStatusMessage = document.getElementById("locationStatusMessage");
 const googleMapsResultsModal = document.getElementById("googleMapsResultsModal");
@@ -307,7 +308,7 @@ function updateLocationUi() {
   if (!state.currentLocation) {
     setLocationStatus(
       "Waiting for location",
-      "Allow browser location access so the import only keeps leads near your current position.",
+      "Allow browser location access so the import only keeps leads near your current position. If the browser blocks it, enable device location services and try again.",
       "idle"
     );
     return;
@@ -357,7 +358,7 @@ function readLiveLocation() {
         state.currentLocation = null;
         state.isResolvingLocation = false;
         updateLocationUi();
-        reject(new Error("Location access is required for Google Maps radius filtering. Please allow location and try again."));
+        reject(new Error("Location access is required for Google Maps radius filtering. Turn on device location services, allow this browser to use your location, and try again."));
       },
       {
         enableHighAccuracy: true,
@@ -486,6 +487,7 @@ function createGoogleMapsResultCard(lead, key) {
         <span>${lead.phone || "No phone"}</span>
         <span>${lead.website || "No website"}</span>
       </div>
+      <span class="google-result-recommendation">${lead.recommendation?.productName || lead.recommendedProduct || "Recommendation pending"}</span>
     </div>
   `;
 
@@ -1060,7 +1062,7 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
     });
 
     state.googleMapsResults = Array.isArray(payload.leads) ? payload.leads : [];
-    state.selectedGoogleMapsResults = new Set(state.googleMapsResults.map(googleMapsResultKey));
+    state.selectedGoogleMapsResults = new Set();
     renderGoogleMapsResultsModal();
   } catch (error) {
     showNotification("Search failed", error.message || "Google Maps search could not be completed.");
@@ -1071,6 +1073,22 @@ googleMapsImportForm.addEventListener("submit", async (event) => {
 });
 
 googleMapsRadiusInput.addEventListener("input", updateRadiusDisplay);
+
+if (retryLiveLocationButton) {
+  retryLiveLocationButton.addEventListener("click", () => {
+    retryLiveLocationButton.disabled = true;
+    retryLiveLocationButton.textContent = "Detecting...";
+
+    readLiveLocation()
+      .catch((error) => {
+        showNotification("Location required", error.message || "Unable to detect your location.");
+      })
+      .finally(() => {
+        retryLiveLocationButton.disabled = false;
+        retryLiveLocationButton.textContent = "Detect Current Location";
+      });
+  });
+}
 
 [googleMapsQueryInput, googleMapsRadiusInput].forEach((element) => {
   element.addEventListener("focus", () => {
@@ -1171,7 +1189,7 @@ googleMapsResultsModal.addEventListener("click", (event) => {
 
 [selectAllGoogleMapsResults, inlineSelectAllGoogleMapsResults].filter(Boolean).forEach((button) => {
   button.addEventListener("click", () => {
-    state.selectedGoogleMapsResults = new Set(state.googleMapsResults.map(googleMapsResultKey));
+    state.selectedGoogleMapsResults = new Set();
     renderGoogleMapsResultsModal();
   });
 });
@@ -1386,6 +1404,8 @@ if (!state.currentLocation && !state.isResolvingLocation) {
     // Keep the UI passive until the user interacts with the import flow.
   });
 }
+
+
 
 
 
