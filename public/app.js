@@ -11,6 +11,7 @@ const state = {
   googleMapsResults: [],
   selectedGoogleMapsResults: new Set(),
   emailDrafts: {},
+  settingsReturnPanel: "home",
   senderName: "Your Name",
   senderEmail: "sales@example.com",
   emailTemplateSubject: "{{productName}} idea for {{company}}",
@@ -460,16 +461,19 @@ function setSettingsPanel(panelName) {
 }
 
 function openSettingsDrawer() {
-  setSettingsPanel("home");
+  setSettingsPanel(state.settingsReturnPanel || "home");
   settingsDrawerShell.hidden = false;
   settingsDrawer.setAttribute("aria-hidden", "false");
   syncBodyLock();
 }
 
-function closeSettingsDrawer() {
+function closeSettingsDrawer({ resetPanel = true } = {}) {
   settingsDrawerShell.hidden = true;
   settingsDrawer.setAttribute("aria-hidden", "true");
-  setSettingsPanel("home");
+  if (resetPanel) {
+    state.settingsReturnPanel = "home";
+    setSettingsPanel("home");
+  }
   syncBodyLock();
 }
 
@@ -486,6 +490,12 @@ function closeModal(modalElement) {
 function toggleThemeMode() {
   body.classList.toggle("dark-mode");
   saveThemeMode();
+}
+
+function openSettingsEditorModal(modalElement) {
+  state.settingsReturnPanel = "email";
+  closeSettingsDrawer({ resetPanel: false });
+  openModal(modalElement);
 }
 
 function formatDate(value) {
@@ -1309,13 +1319,19 @@ leadDetailModal.addEventListener("click", (event) => {
 
 openSettingsDrawerButton.addEventListener("click", openSettingsDrawer);
 closeSettingsDrawerButton.addEventListener("click", closeSettingsDrawer);
-settingsDrawerOverlay.addEventListener("click", closeSettingsDrawer);
-openEmailSettingsPanel.addEventListener("click", () => setSettingsPanel("email"));
-backToSettingsHome.addEventListener("click", () => setSettingsPanel("home"));
+settingsDrawerOverlay.addEventListener("click", () => closeSettingsDrawer());
+openEmailSettingsPanel.addEventListener("click", () => {
+  state.settingsReturnPanel = "email";
+  setSettingsPanel("email");
+});
+backToSettingsHome.addEventListener("click", () => {
+  state.settingsReturnPanel = "home";
+  setSettingsPanel("home");
+});
 modeToggle.addEventListener("click", toggleThemeMode);
 
-openSenderDetailsModalButton.addEventListener("click", () => openModal(senderDetailsModal));
-openTemplateEditorModalButton.addEventListener("click", () => openModal(templateEditorModal));
+openSenderDetailsModalButton.addEventListener("click", () => openSettingsEditorModal(senderDetailsModal));
+openTemplateEditorModalButton.addEventListener("click", () => openSettingsEditorModal(templateEditorModal));
 closeSenderDetailsModal.addEventListener("click", () => closeModal(senderDetailsModal));
 cancelSenderDetails.addEventListener("click", () => closeModal(senderDetailsModal));
 closeTemplateEditorModal.addEventListener("click", () => closeModal(templateEditorModal));
