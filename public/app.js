@@ -304,13 +304,17 @@ async function request(url, options = {}) {
 
   if (!response.ok) {
     let message = "Request failed";
+    let payload = null;
     try {
-      const payload = await response.json();
+      payload = await response.json();
       message = payload.error || message;
     } catch (error) {
       // Keep the fallback error when the response is not JSON.
     }
-    throw new Error(message);
+    const requestError = new Error(message);
+    requestError.payload = payload;
+    requestError.status = response.status;
+    throw requestError;
   }
 
   return response.json();
@@ -782,6 +786,16 @@ async function sendActiveEmailDraft() {
     emailDetailModal.hidden = false;
     syncBodyLock();
   } catch (error) {
+    console.error("EMAIL_SEND_DEBUG", {
+      leadId: lead.id,
+      company: lead.company,
+      recipient: lead.email,
+      senderName: state.senderName,
+      senderEmail: state.senderEmail,
+      status: error.status || null,
+      serverDebug: error.payload?.debug || null,
+      message: error.message || "The email could not be sent."
+    });
     showNotification("Send failed", error.message || "The email could not be sent.");
   } finally {
     sendEmailDraft.disabled = false;

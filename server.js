@@ -333,6 +333,35 @@ function sortLeads(leads) {
     });
 }
 
+function buildEmailDebugContext({ lead, senderName, senderEmail, subject }) {
+  return {
+    event: "email_send_failed",
+    leadId: lead.id,
+    company: lead.company,
+    recipient: String(lead.email || "").trim(),
+    senderName,
+    senderEmail,
+    smtpUser: process.env.GMAIL_SMTP_EMAIL || "",
+    subject,
+    timestamp: new Date().toISOString()
+  };
+}
+
+function logEmailSendFailure(logger, context, error) {
+  const logEntry = {
+    ...context,
+    errorMessage: error && error.message ? error.message : String(error || "Unknown email error"),
+    errorStack: error && error.stack ? error.stack : ""
+  };
+
+  if (typeof logger === "function") {
+    logger(logEntry);
+    return;
+  }
+
+  console.error("EMAIL_SEND_DEBUG", logEntry);
+}
+
 function buildSummary(leads) {
   const enriched = sortLeads(leads);
   return {
@@ -1113,6 +1142,7 @@ async function handleApi(request, response, pathname, options = {}) {
   const googlePlacesFetch = options.googlePlacesFetch || fetch;
   const sendEmail = options.sendEmail || sendEmailMessage;
   const biginFetch = options.biginFetch || fetch;
+  const emailDebugLogger = options.emailDebugLogger;
 
   if (request.method === "GET" && pathname === "/api/integrations/bigin/connect") {
     response.writeHead(302, { Location: buildBiginConnectUrl(request) });
@@ -1396,28 +1426,38 @@ async function handleApi(request, response, pathname, options = {}) {
       return;
     }
 
-    const mailResult = await sendEmail({
-      to: String(lead.email).trim(),
-      fromName: senderName,
-      fromEmail: senderEmail,
-      subject,
-      body: messageBody
-    });
+    try {
+      const mailResult = await sendEmail({
+        to: String(lead.email).trim(),
+        fromName: senderName,
+        fromEmail: senderEmail,
+        subject,
+        body: messageBody
+      });
 
-    lead.sent = true;
-    lead.sentAt = new Date().toISOString();
-    appendActivity(
-      store,
-      lead.id,
-      "Outreach email sent",
-      `${lead.company} received a live email send to ${lead.email}.`
-    );
-    writeStore(store);
-    sendJson(response, 200, {
-      success: true,
-      messageId: mailResult && mailResult.messageId ? mailResult.messageId : ""
-    });
-    return;
+      lead.sent = true;
+      lead.sentAt = new Date().toISOString();
+      appendActivity(
+        store,
+        lead.id,
+        "Outreach email sent",
+        `${lead.company} received a live email send to ${lead.email}.`
+      );
+      writeStore(store);
+      sendJson(response, 200, {
+        success: true,
+        messageId: mailResult && mailResult.messageId ? mailResult.messageId : ""
+      });
+      return;
+    } catch (error) {
+      const debug = buildEmailDebugContext({ lead, senderName, senderEmail, subject });
+      logEmailSendFailure(emailDebugLogger, debug, error);
+      sendJson(response, 500, {
+        error: `Email send failed: ${error.message || "Unknown SMTP error"}`,
+        debug
+      });
+      return;
+    }
   }
 
   const leadMatch = pathname.match(/^\/api\/leads\/([^/]+)\/(status|sent|crm)$/);
