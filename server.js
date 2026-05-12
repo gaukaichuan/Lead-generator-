@@ -492,7 +492,8 @@ async function getBiginAccessToken(store, fetchImpl = fetch) {
 
 async function createBiginRecord(store, moduleApiName, data, fetchImpl = fetch) {
   const { accessToken, apiDomain } = await getBiginAccessToken(store, fetchImpl);
-  const response = await fetchImpl(`${apiDomain}/bigin/v2/${moduleApiName}`, {
+  const endpoint = `${apiDomain}/bigin/v2/${moduleApiName}`;
+  const response = await fetchImpl(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -519,7 +520,8 @@ async function createBiginRecord(store, moduleApiName, data, fetchImpl = fetch) 
 async function createBiginV1DealRecord(store, data, fetchImpl = fetch) {
   const { accessToken, apiDomain } = await getBiginAccessToken(store, fetchImpl);
   const v1ApiDomain = apiDomain.replace("/bigin/v2", "").replace(/\/$/, "");
-  const response = await fetchImpl(`${v1ApiDomain}/bigin/v1/Deals`, {
+  const endpoint = `${v1ApiDomain}/bigin/v1/Deals`;
+  const response = await fetchImpl(endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -541,6 +543,13 @@ async function createBiginV1DealRecord(store, data, fetchImpl = fetch) {
   }
 
   return item.details || {};
+}
+
+function buildBiginDebugError(step, endpoint, payload, error) {
+  const errorMessage = error && error.message ? error.message : String(error || "Unknown Bigin error");
+  return new Error(
+    `Bigin ${step} failed. endpoint=${endpoint} payload=${JSON.stringify(payload)} error=${errorMessage}`
+  );
 }
 
 function splitContactName(fullName) {
@@ -619,35 +628,47 @@ async function pushLeadToBigin(store, lead, fetchImpl = fetch) {
   }
 
   if (!lead.bigin.companyId) {
-    const companyDetails = await createBiginRecord(store, "Accounts", buildBiginCompanyPayload(lead), fetchImpl);
-    lead.bigin.companyId = companyDetails.id;
-    lead.bigin.companyName = lead.company || "";
-    writeStore(store);
+    const companyPayload = buildBiginCompanyPayload(lead);
+    try {
+      const companyDetails = await createBiginRecord(store, "Accounts", companyPayload, fetchImpl);
+      lead.bigin.companyId = companyDetails.id;
+      lead.bigin.companyName = lead.company || "";
+      writeStore(store);
+    } catch (error) {
+      lead.bigin.lastSyncError = error.message || String(error);
+      writeStore(store);
+      throw buildBiginDebugError("company create", "POST /bigin/v2/Accounts", companyPayload, error);
+    }
   }
 
   const shouldCreateContact = Boolean(
     String(lead.contactName || "").trim() || String(lead.email || "").trim() || String(lead.phone || "").trim()
   );
   if (shouldCreateContact && !lead.bigin.contactId) {
-    const contactDetails = await createBiginRecord(
-      store,
-      "Contacts",
-      buildBiginContactPayload(lead, lead.bigin.companyId),
-      fetchImpl
-    );
-    lead.bigin.contactId = contactDetails.id;
-    writeStore(store);
+    const contactPayload = buildBiginContactPayload(lead, lead.bigin.companyId);
+    try {
+      const contactDetails = await createBiginRecord(store, "Contacts", contactPayload, fetchImpl);
+      lead.bigin.contactId = contactDetails.id;
+      writeStore(store);
+    } catch (error) {
+      lead.bigin.lastSyncError = error.message || String(error);
+      writeStore(store);
+      throw buildBiginDebugError("contact create", "POST /bigin/v2/Contacts", contactPayload, error);
+    }
   }
 
   if (!lead.bigin.dealId) {
-    const dealDetails = await createBiginV1DealRecord(
-      store,
-      buildBiginDealPayload(lead, lead.bigin.companyId, lead.bigin.contactId),
-      fetchImpl
-    );
-    lead.bigin.dealId = dealDetails.id;
-    lead.bigin.dealStage = BIGIN_DEFAULT_STAGE;
-    writeStore(store);
+    const dealPayload = buildBiginDealPayload(lead, lead.bigin.companyId, lead.bigin.contactId);
+    try {
+      const dealDetails = await createBiginV1DealRecord(store, dealPayload, fetchImpl);
+      lead.bigin.dealId = dealDetails.id;
+      lead.bigin.dealStage = BIGIN_DEFAULT_STAGE;
+      writeStore(store);
+    } catch (error) {
+      lead.bigin.lastSyncError = error.message || String(error);
+      writeStore(store);
+      throw buildBiginDebugError("deal create", "POST /bigin/v1/Deals", dealPayload, error);
+    }
   }
 
   lead.crmLogged = true;
