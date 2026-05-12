@@ -333,6 +333,43 @@ function sortLeads(leads) {
     });
 }
 
+function describeError(error, fallback = "Unknown error") {
+  if (!error) {
+    return fallback;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (typeof error.message === "string" && error.message.trim()) {
+    return error.message.trim();
+  }
+
+  if (typeof error.code === "string" && error.code.trim()) {
+    return error.code.trim();
+  }
+
+  if (typeof error.name === "string" && error.name.trim()) {
+    return error.name.trim();
+  }
+
+  try {
+    const serialized = JSON.stringify(error);
+    if (serialized && serialized !== "{}") {
+      return serialized;
+    }
+  } catch (serializationError) {
+    // Fall through to the final fallback.
+  }
+
+  return fallback;
+}
+
 function buildEmailDebugContext({ lead, senderName, senderEmail, subject }) {
   return {
     event: "email_send_failed",
@@ -350,7 +387,7 @@ function buildEmailDebugContext({ lead, senderName, senderEmail, subject }) {
 function logEmailSendFailure(logger, context, error) {
   const logEntry = {
     ...context,
-    errorMessage: error && error.message ? error.message : String(error || "Unknown email error"),
+    errorMessage: describeError(error, "Unknown email error"),
     errorStack: error && error.stack ? error.stack : ""
   };
 
@@ -1453,7 +1490,7 @@ async function handleApi(request, response, pathname, options = {}) {
       const debug = buildEmailDebugContext({ lead, senderName, senderEmail, subject });
       logEmailSendFailure(emailDebugLogger, debug, error);
       sendJson(response, 500, {
-        error: `Email send failed: ${error.message || "Unknown SMTP error"}`,
+        error: `Email send failed: ${describeError(error, "Unknown SMTP error")}`,
         debug
       });
       return;
