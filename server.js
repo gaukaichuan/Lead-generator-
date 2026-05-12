@@ -10,8 +10,9 @@ const PUBLIC_DIR = path.join(__dirname, "public");
 const EXPORT_DIR = path.join(__dirname, "exports");
 const BIGIN_DEFAULT_STAGE = process.env.BIGIN_DEFAULT_STAGE || "Qualification";
 const BIGIN_DEFAULT_PIPELINE_NAME = process.env.BIGIN_PIPELINE_NAME || "";
+const BIGIN_DEFAULT_SUB_PIPELINE = process.env.BIGIN_SUB_PIPELINE_NAME || "";
 const BIGIN_SCOPES =
-  process.env.BIGIN_SCOPES || "ZohoBigin.modules.ALL";
+  process.env.BIGIN_SCOPES || "ZohoBigin.modules.ALL,ZohoBigin.settings.layouts.READ,ZohoBigin.settings.fields.READ";
 
 const priorityAreas = [
   "kuala lumpur",
@@ -517,32 +518,112 @@ async function createBiginRecord(store, moduleApiName, data, fetchImpl = fetch) 
   return item.details || {};
 }
 
-async function createBiginV1DealRecord(store, data, fetchImpl = fetch) {
+async function getBiginJson(store, path, fetchImpl = fetch) {
   const { accessToken, apiDomain } = await getBiginAccessToken(store, fetchImpl);
-  const v1ApiDomain = apiDomain.replace("/bigin/v2", "").replace(/\/$/, "");
-  const endpoint = `${v1ApiDomain}/bigin/v1/Deals`;
+  const normalizedPath = String(path || "").startsWith("/") ? path : `/${path}`;
+  const endpoint = `${apiDomain}${normalizedPath}`;
   const response = await fetchImpl(endpoint, {
-    method: "POST",
+    method: "GET",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Zoho-oauthtoken ${accessToken}`
-    },
-    body: JSON.stringify({
-      data: [data],
-      trigger: []
-    })
+    }
   });
 
-  const payload = await readJsonErrorAware(response);
-  const item = Array.isArray(payload.data) ? payload.data[0] : null;
+  return readJsonErrorAware(response);
+}
 
-  if (!item || item.status !== "success") {
-    throw new Error(
-      (item && (item.message || item.code)) || payload.message || "Bigin rejected the deal creation request."
-    );
+async function getBiginPipelineMetadata(store, fetchImpl = fetch) {
+  const [layoutsPayload, fieldsPayload] = await Promise.all([
+    getBiginJson(store, "/bigin/v2/settings/layouts?module=Pipelines", fetchImpl),
+    getBiginJson(store, "/bigin/v2/settings/fields?module=Pipelines", fetchImpl)
+  ]);
+
+  const layouts = Array.isArray(layoutsPayload.layouts) ? layoutsPayload.layouts : [];
+  const fields = Array.isArray(fieldsPayload.fields) ? fieldsPayload.fields : [];
+  const pipelineField = fields.find((field) => field.api_name === "Pipeline") || null;
+  const subPipelineField = fields.find((field) => field.api_name === "Sub_Pipeline") || null;
+  const stageField = fields.find((field) => field.api_name === "Stage") || null;
+
+  return { layouts, pipelineField, subPipelineField, stageField };
+}
+
+function choosePipelineLayout(layouts) {
+  const preferredName = BIGIN_DEFAULT_PIPELINE_NAME.trim().toLowerCase();
+  if (preferredName) {
+    const exactMatch = layouts.find((layout) => String(layout.display_label || layout.name || "").trim().toLowerCase() === preferredName);
+    if (exactMatch) {
+      return exactMatch;
+    }
   }
 
-  return item.details || {};
+  return (
+    layouts.find((layout) => layout.status === "active" && layout.visible !== false) ||
+    layouts.find((layout) => layout.visible !== false) ||
+    layouts[0] ||
+    null
+  );
+}
+
+function chooseSubPipelineValue(subPipelineField) {
+  const values = Array.isArray(subPipelineField && subPipelineField.pick_list_values)
+    ? subPipelineField.pick_list_values
+    : [];
+  const preferredName = BIGIN_DEFAULT_SUB_PIPELINE.trim().toLowerCase();
+  if (preferredName) {
+    const exactMatch = values.find((value) => String(value.actual_value || value.display_value || "").trim().toLowerCase() === preferredName);
+    if (exactMatch) {
+      return exactMatch.actual_value || exactMatch.display_value;
+    }
+  }
+
+  const defaultMatch = values.find((value) =>
+    /sales pipeline standard/i.test(String(value.actual_value || value.display_value || ""))
+  );
+  if (defaultMatch) {
+    return defaultMatch.actual_value || defaultMatch.display_value;
+  }
+
+  const fallback = values[0];
+  return fallback ? fallback.actual_value || fallback.display_value : "";
+}
+
+function chooseStageValue(stageField) {
+  const values = Array.isArray(stageField && stageField.pick_list_values) ? stageField.pick_list_values : [];
+  const preferredStage = BIGIN_DEFAULT_STAGE.trim().toLowerCase();
+
+  const exactMatch = values.find((value) => String(value.actual_value || value.display_value || "").trim().toLowerCase() === preferredStage);
+  if (exactMatch) {
+    return exactMatch.actual_value || exactMatch.display_value;
+  }
+
+  const fallback = values[0];
+  return fallback ? fallback.actual_value || fallback.display_value : BIGIN_DEFAULT_STAGE;
+}
+
+async function resolveBiginPipelineDefaults(store, fetchImpl = fetch) {
+  const metadata = await getBiginPipelineMetadata(store, fetchImpl);
+  const pipelineLayout = choosePipelineLayout(metadata.layouts);
+  const subPipeline = chooseSubPipelineValue(metadata.subPipelineField);
+  const stage = chooseStageValue(metadata.stageField);
+
+  if (!pipelineLayout) {
+    throw new Error("No visible Bigin pipeline layout was found for deal creation.");
+  }
+
+  if (!subPipeline) {
+    throw new Error("No Bigin Sub_Pipeline value was found for deal creation.");
+  }
+
+  if (!stage) {
+    throw new Error("No Bigin Stage value was found for deal creation.");
+  }
+
+  return {
+    pipelineId: pipelineLayout.id,
+    pipelineName: pipelineLayout.display_label || pipelineLayout.name || "",
+    subPipeline,
+    stage
+  };
 }
 
 function buildBiginDebugError(step, endpoint, payload, error) {
@@ -600,12 +681,14 @@ function buildBiginContactPayload(lead, companyId) {
   };
 }
 
-function buildBiginDealPayload(lead, companyId, contactId) {
+function buildBiginDealPayload(lead, companyId, contactId, pipelineDefaults) {
   const enrichedLead = enrichLead(lead);
   const closeDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const payload = {
     Deal_Name: `${lead.company || "Lead"} - ${enrichedLead.recommendation.productName}`,
-    Stage: BIGIN_DEFAULT_STAGE,
+    Pipeline: pipelineDefaults.pipelineId,
+    Sub_Pipeline: pipelineDefaults.subPipeline,
+    Stage: pipelineDefaults.stage,
     Closing_Date: closeDate,
     Account_Name: companyId ? { id: companyId } : undefined,
     Contact_Name: contactId ? { id: contactId } : undefined,
@@ -658,16 +741,20 @@ async function pushLeadToBigin(store, lead, fetchImpl = fetch) {
   }
 
   if (!lead.bigin.dealId) {
-    const dealPayload = buildBiginDealPayload(lead, lead.bigin.companyId, lead.bigin.contactId);
+    const pipelineDefaults = await resolveBiginPipelineDefaults(store, fetchImpl);
+    const dealPayload = buildBiginDealPayload(lead, lead.bigin.companyId, lead.bigin.contactId, pipelineDefaults);
     try {
-      const dealDetails = await createBiginV1DealRecord(store, dealPayload, fetchImpl);
+      const dealDetails = await createBiginRecord(store, "Pipelines", dealPayload, fetchImpl);
       lead.bigin.dealId = dealDetails.id;
-      lead.bigin.dealStage = BIGIN_DEFAULT_STAGE;
+      lead.bigin.pipelineId = pipelineDefaults.pipelineId;
+      lead.bigin.pipelineName = pipelineDefaults.pipelineName;
+      lead.bigin.subPipeline = pipelineDefaults.subPipeline;
+      lead.bigin.dealStage = pipelineDefaults.stage;
       writeStore(store);
     } catch (error) {
       lead.bigin.lastSyncError = error.message || String(error);
       writeStore(store);
-      throw buildBiginDebugError("deal create", "POST /bigin/v1/Deals", dealPayload, error);
+      throw buildBiginDebugError("deal create", "POST /bigin/v2/Pipelines", dealPayload, error);
     }
   }
 
