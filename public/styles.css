@@ -1481,6 +1481,10 @@ th {
   width: min(620px, 100%);
 }
 
+.crm-error-modal-card {
+  width: min(760px, 100%);
+}
+
 .detail-modal-card {
   width: min(920px, 100%);
 }
@@ -1625,6 +1629,26 @@ th {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.66);
   box-shadow: 0 12px 22px rgba(15, 23, 42, 0.08);
+}
+
+.crm-error-card {
+  margin-top: 14px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.crm-error-message {
+  margin: 0;
+  padding: 18px 20px;
+  min-height: 180px;
+  max-height: 52vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: #0f172a;
+  background: rgba(241, 245, 249, 0.82);
 }
 
 .settings-card {

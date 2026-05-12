@@ -85,6 +85,9 @@ const detailTitle = document.getElementById("detailTitle");
 const detailBadge = document.getElementById("detailBadge");
 const detailStatusStrip = document.getElementById("detailStatusStrip");
 const detailCard = document.getElementById("detailCard");
+const crmErrorModal = document.getElementById("crmErrorModal");
+const closeCrmErrorModal = document.getElementById("closeCrmErrorModal");
+const crmErrorMessage = document.getElementById("crmErrorMessage");
 
 const metricTotal = document.getElementById("metricTotal");
 const metricQualified = document.getElementById("metricQualified");
@@ -554,6 +557,11 @@ function showNotification(title, message) {
   }, 3200);
 }
 
+function showCrmErrorDetails(message) {
+  crmErrorMessage.textContent = message || "No CRM error details were captured.";
+  openModal(crmErrorModal);
+}
+
 function googleMapsResultKey(lead) {
   return lead.externalRef || `${lead.company}-${lead.phone}-${lead.region}`;
 }
@@ -968,6 +976,7 @@ function renderLeadDetail() {
       } catch (error) {
         if (button.dataset.action === "crm") {
           showNotification("CRM sync failed", error.message || "This lead could not be pushed into Bigin.");
+          showCrmErrorDetails(error.message || "This lead could not be pushed into Bigin.");
         } else {
           showNotification("Action failed", error.message || "This lead update could not be completed.");
         }
@@ -1122,6 +1131,7 @@ function syncBodyLock() {
     !settingsDrawerShell.hidden ||
     !senderDetailsModal.hidden ||
     !templateEditorModal.hidden ||
+    !crmErrorModal.hidden ||
     !googleMapsResultsModal.hidden;
 
   body.classList.toggle("modal-open", shouldLock);
@@ -1319,10 +1329,18 @@ closeGoogleMapsResultsModal.addEventListener("click", () => {
   syncBodyLock();
 });
 
+closeCrmErrorModal.addEventListener("click", () => closeModal(crmErrorModal));
+
 googleMapsResultsModal.addEventListener("click", (event) => {
   if (event.target === googleMapsResultsModal) {
     googleMapsResultsModal.hidden = true;
     syncBodyLock();
+  }
+});
+
+crmErrorModal.addEventListener("click", (event) => {
+  if (event.target === crmErrorModal) {
+    closeModal(crmErrorModal);
   }
 });
 

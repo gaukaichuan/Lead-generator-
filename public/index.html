@@ -208,6 +208,22 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="crmErrorModal" hidden>
+    <div class="modal-card settings-editor-modal-card crm-error-modal-card">
+      <button class="modal-close-button" id="closeCrmErrorModal" type="button" aria-label="Close CRM error details">&times;</button>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">CRM Error Details</p>
+          <h2>CRM Sync Failed</h2>
+          <p class="topbar-description">This window keeps the full Bigin error visible so you can review or copy it.</p>
+        </div>
+      </div>
+      <div class="detail-card tone-soft crm-error-card">
+        <pre id="crmErrorMessage" class="crm-error-message">No CRM error captured yet.</pre>
+      </div>
+    </div>
+  </div>
+
   <div class="app-shell">
     <aside class="sidebar-shell">
       <div class="sidebar-brand">
