@@ -8,6 +8,11 @@ const PORT = Number(process.env.PORT || 3000);
 const DATA_PATH = path.join(__dirname, "data", "store.json");
 const PUBLIC_DIR = path.join(__dirname, "public");
 const EXPORT_DIR = path.join(__dirname, "exports");
+const BIGIN_DEFAULT_STAGE = process.env.BIGIN_DEFAULT_STAGE || "Qualification";
+const BIGIN_DEFAULT_PIPELINE_NAME = process.env.BIGIN_PIPELINE_NAME || "";
+const BIGIN_SCOPES =
+  process.env.BIGIN_SCOPES ||
+  "ZohoBigin.modules.accounts.CREATE,ZohoBigin.modules.contacts.CREATE,ZohoBigin.modules.pipelines.CREATE";
 
 const priorityAreas = [
   "kuala lumpur",
@@ -48,11 +53,39 @@ const products = {
 const EARTH_RADIUS_KM = 6371;
 
 function readStore() {
-  return JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
+  return ensureStoreShape(JSON.parse(fs.readFileSync(DATA_PATH, "utf8")));
 }
 
 function writeStore(store) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(store, null, 2));
+  fs.writeFileSync(DATA_PATH, JSON.stringify(ensureStoreShape(store), null, 2));
+}
+
+function ensureStoreShape(store) {
+  if (!store || typeof store !== "object") {
+    return {
+      leads: [],
+      activities: [],
+      integrations: { bigin: {} }
+    };
+  }
+
+  if (!Array.isArray(store.leads)) {
+    store.leads = [];
+  }
+
+  if (!Array.isArray(store.activities)) {
+    store.activities = [];
+  }
+
+  if (!store.integrations || typeof store.integrations !== "object") {
+    store.integrations = {};
+  }
+
+  if (!store.integrations.bigin || typeof store.integrations.bigin !== "object") {
+    store.integrations.bigin = {};
+  }
+
+  return store;
 }
 
 function createSmtpClient(socket) {
@@ -318,6 +351,288 @@ async function readJsonResponse(response) {
   }
 
   return response.json();
+}
+
+function readTextResponse(response) {
+  return response.text();
+}
+
+function getBaseUrl(request) {
+  const host = request.headers.host || `localhost:${PORT}`;
+  const protocol =
+    request.headers["x-forwarded-proto"] ||
+    (String(host).includes("localhost") || String(host).startsWith("127.0.0.1") ? "http" : "https");
+  return `${protocol}://${host}`;
+}
+
+function getBiginAccountsServer() {
+  return process.env.BIGIN_ACCOUNTS_SERVER || "https://accounts.zoho.com";
+}
+
+function getBiginRedirectUri(request) {
+  return process.env.BIGIN_REDIRECT_URI || `${getBaseUrl(request)}/oauth/callback`;
+}
+
+function getBiginClientId() {
+  return process.env.BIGIN_CLIENT_ID || "";
+}
+
+function getBiginClientSecret() {
+  return process.env.BIGIN_CLIENT_SECRET || "";
+}
+
+function getBiginConnection(store) {
+  ensureStoreShape(store);
+  return store.integrations.bigin;
+}
+
+function getBiginApiDomain(store) {
+  return process.env.BIGIN_API_DOMAIN || getBiginConnection(store).apiDomain || "https://www.zohoapis.com";
+}
+
+function getBiginRefreshToken(store) {
+  return process.env.BIGIN_REFRESH_TOKEN || getBiginConnection(store).refreshToken || "";
+}
+
+function ensureBiginClientConfig() {
+  if (!getBiginClientId() || !getBiginClientSecret()) {
+    throw new Error("Bigin OAuth is not configured. Set BIGIN_CLIENT_ID and BIGIN_CLIENT_SECRET on the server.");
+  }
+}
+
+function buildBiginConnectUrl(request) {
+  ensureBiginClientConfig();
+  const authUrl = new URL("/oauth/v2/auth", getBiginAccountsServer());
+  authUrl.searchParams.set("client_id", getBiginClientId());
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("access_type", "offline");
+  authUrl.searchParams.set("prompt", "consent");
+  authUrl.searchParams.set("scope", BIGIN_SCOPES);
+  authUrl.searchParams.set("redirect_uri", getBiginRedirectUri(request));
+  authUrl.searchParams.set("state", "bigin-connect");
+  return authUrl.toString();
+}
+
+async function readJsonErrorAware(response) {
+  const raw = await readTextResponse(response);
+  let payload = null;
+
+  try {
+    payload = raw ? JSON.parse(raw) : {};
+  } catch (error) {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      (payload && (payload.error_description || payload.error || payload.message)) || raw || `HTTP ${response.status}`
+    );
+  }
+
+  return payload || {};
+}
+
+async function exchangeBiginAuthorizationCode(request, store, code, fetchImpl = fetch) {
+  ensureBiginClientConfig();
+
+  const tokenResponse = await fetchImpl(`${getBiginAccountsServer()}/oauth/v2/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({
+      grant_type: "authorization_code",
+      client_id: getBiginClientId(),
+      client_secret: getBiginClientSecret(),
+      redirect_uri: getBiginRedirectUri(request),
+      code
+    })
+  });
+
+  const payload = await readJsonErrorAware(tokenResponse);
+  const connection = getBiginConnection(store);
+  connection.refreshToken = payload.refresh_token || connection.refreshToken || "";
+  connection.apiDomain = payload.api_domain || connection.apiDomain || "https://www.zohoapis.com";
+  connection.connectedAt = new Date().toISOString();
+  connection.accountsServer = getBiginAccountsServer();
+  writeStore(store);
+  return connection;
+}
+
+async function getBiginAccessToken(store, fetchImpl = fetch) {
+  ensureBiginClientConfig();
+  const refreshToken = getBiginRefreshToken(store);
+
+  if (!refreshToken) {
+    throw new Error("Bigin is not connected yet. Open /api/integrations/bigin/connect once to authorize it first.");
+  }
+
+  const tokenResponse = await fetchImpl(`${getBiginAccountsServer()}/oauth/v2/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: getBiginClientId(),
+      client_secret: getBiginClientSecret(),
+      refresh_token: refreshToken
+    })
+  });
+
+  const payload = await readJsonErrorAware(tokenResponse);
+  const connection = getBiginConnection(store);
+  connection.apiDomain = payload.api_domain || connection.apiDomain || "https://www.zohoapis.com";
+  connection.lastTokenAt = new Date().toISOString();
+  writeStore(store);
+  return {
+    accessToken: payload.access_token,
+    apiDomain: getBiginApiDomain(store)
+  };
+}
+
+async function createBiginRecord(store, moduleApiName, data, fetchImpl = fetch) {
+  const { accessToken, apiDomain } = await getBiginAccessToken(store, fetchImpl);
+  const response = await fetchImpl(`${apiDomain}/bigin/v2/${moduleApiName}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Zoho-oauthtoken ${accessToken}`
+    },
+    body: JSON.stringify({
+      data: [data],
+      trigger: []
+    })
+  });
+
+  const payload = await readJsonErrorAware(response);
+  const item = Array.isArray(payload.data) ? payload.data[0] : null;
+
+  if (!item || item.status !== "success") {
+    throw new Error(
+      (item && (item.message || item.code)) || payload.message || "Bigin rejected the record creation request."
+    );
+  }
+
+  return item.details || {};
+}
+
+function splitContactName(fullName) {
+  const normalized = String(fullName || "").trim();
+  if (!normalized || /^business contact$/i.test(normalized)) {
+    return { firstName: "", lastName: "" };
+  }
+
+  const parts = normalized.split(/\s+/);
+  if (parts.length === 1) {
+    return { firstName: "", lastName: parts[0] };
+  }
+
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts[parts.length - 1]
+  };
+}
+
+function buildBiginCompanyPayload(lead) {
+  const website = normalizeLeadWebsite(lead);
+  return {
+    Account_Name: lead.company || "Unnamed Company",
+    Phone: lead.phone || undefined,
+    Website: website || undefined,
+    Industry: lead.industry || undefined,
+    Description: [
+      lead.source ? `Source: ${lead.source}` : "",
+      lead.region ? `Region: ${lead.region}` : "",
+      removeWebsiteFromNotes(lead.notes)
+    ]
+      .filter(Boolean)
+      .join("\n"),
+    Billing_City: lead.region || undefined
+  };
+}
+
+function buildBiginContactPayload(lead, companyId) {
+  const { firstName, lastName } = splitContactName(lead.contactName);
+  const fallbackLastName = lastName || lead.company || "Business Contact";
+  return {
+    First_Name: firstName || undefined,
+    Last_Name: fallbackLastName,
+    Email: lead.email || undefined,
+    Phone: lead.phone || undefined,
+    Account_Name: companyId ? { id: companyId } : undefined,
+    Description: lead.role || undefined
+  };
+}
+
+function buildBiginDealPayload(lead, companyId, contactId) {
+  const enrichedLead = enrichLead(lead);
+  const closeDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const payload = {
+    Deal_Name: `${lead.company || "Lead"} - ${enrichedLead.recommendation.productName}`,
+    Stage: BIGIN_DEFAULT_STAGE,
+    Closing_Date: closeDate,
+    Account_Name: companyId ? { id: companyId } : undefined,
+    Contact_Name: contactId ? { id: contactId } : undefined,
+    Description: [
+      `Recommended product: ${enrichedLead.recommendation.productName}`,
+      `Reason: ${enrichedLead.recommendation.reason}`,
+      lead.source ? `Source: ${lead.source}` : "",
+      normalizeLeadWebsite(lead) ? `Website: ${normalizeLeadWebsite(lead)}` : "",
+      removeWebsiteFromNotes(lead.notes)
+    ]
+      .filter(Boolean)
+      .join("\n")
+  };
+
+  if (BIGIN_DEFAULT_PIPELINE_NAME) {
+    payload.Pipeline = BIGIN_DEFAULT_PIPELINE_NAME;
+  }
+
+  return payload;
+}
+
+async function pushLeadToBigin(store, lead, fetchImpl = fetch) {
+  if (!lead.bigin || typeof lead.bigin !== "object") {
+    lead.bigin = {};
+  }
+
+  if (!lead.bigin.companyId) {
+    const companyDetails = await createBiginRecord(store, "Accounts", buildBiginCompanyPayload(lead), fetchImpl);
+    lead.bigin.companyId = companyDetails.id;
+    lead.bigin.companyName = lead.company || "";
+    writeStore(store);
+  }
+
+  const shouldCreateContact = Boolean(
+    String(lead.contactName || "").trim() || String(lead.email || "").trim() || String(lead.phone || "").trim()
+  );
+  if (shouldCreateContact && !lead.bigin.contactId) {
+    const contactDetails = await createBiginRecord(
+      store,
+      "Contacts",
+      buildBiginContactPayload(lead, lead.bigin.companyId),
+      fetchImpl
+    );
+    lead.bigin.contactId = contactDetails.id;
+    writeStore(store);
+  }
+
+  if (!lead.bigin.dealId) {
+    const dealDetails = await createBiginRecord(
+      store,
+      "Pipelines",
+      buildBiginDealPayload(lead, lead.bigin.companyId, lead.bigin.contactId),
+      fetchImpl
+    );
+    lead.bigin.dealId = dealDetails.id;
+    lead.bigin.dealStage = BIGIN_DEFAULT_STAGE;
+    writeStore(store);
+  }
+
+  lead.crmLogged = true;
+  lead.bigin.lastSyncedAt = new Date().toISOString();
+  lead.bigin.lastSyncError = "";
 }
 
 function toRadians(value) {
@@ -613,6 +928,11 @@ function sendFile(response, filePath) {
   }
 }
 
+function sendHtml(response, statusCode, html) {
+  response.writeHead(statusCode, { "Content-Type": "text/html; charset=utf-8" });
+  response.end(html);
+}
+
 function readRequestBody(request) {
   return new Promise((resolve, reject) => {
     let body = "";
@@ -664,6 +984,24 @@ async function handleApi(request, response, pathname, options = {}) {
   const store = readStore();
   const googlePlacesFetch = options.googlePlacesFetch || fetch;
   const sendEmail = options.sendEmail || sendEmailMessage;
+  const biginFetch = options.biginFetch || fetch;
+
+  if (request.method === "GET" && pathname === "/api/integrations/bigin/connect") {
+    response.writeHead(302, { Location: buildBiginConnectUrl(request) });
+    response.end();
+    return;
+  }
+
+  if (request.method === "GET" && pathname === "/api/integrations/bigin/status") {
+    const connection = getBiginConnection(store);
+    sendJson(response, 200, {
+      connected: Boolean(getBiginRefreshToken(store)),
+      apiDomain: getBiginApiDomain(store),
+      connectedAt: connection.connectedAt || null,
+      lastTokenAt: connection.lastTokenAt || null
+    });
+    return;
+  }
 
   if (request.method === "GET" && pathname === "/api/leads") {
     sendJson(response, 200, {
@@ -981,8 +1319,10 @@ async function handleApi(request, response, pathname, options = {}) {
 
     if (action === "crm" && request.method === "PATCH") {
       if (!lead.crmLogged) {
-        lead.crmLogged = true;
+        await pushLeadToBigin(store, lead, biginFetch);
         appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`);
+      } else if (lead.bigin && lead.bigin.dealId) {
+        appendActivity(store, lead.id, "CRM sync skipped", `${lead.company} already has an existing Bigin deal.`);
       }
     }
 
@@ -1024,6 +1364,44 @@ function createAppServer(options = {}) {
 
       if (pathname.startsWith("/api/")) {
         await handleApi(request, response, pathname, options);
+        return;
+      }
+
+      if (pathname === "/oauth/callback") {
+        const store = readStore();
+
+        if (url.searchParams.get("state") === "bigin-connect" && url.searchParams.get("code")) {
+          try {
+            await exchangeBiginAuthorizationCode(request, store, url.searchParams.get("code"));
+            response.writeHead(302, { Location: "/?bigin=connected" });
+            response.end();
+            return;
+          } catch (error) {
+            const failureUrl = `/?bigin=error&message=${encodeURIComponent(error.message || "Authorization failed")}`;
+            response.writeHead(302, { Location: failureUrl });
+            response.end();
+            return;
+          }
+        }
+
+        const params = url.searchParams.toString();
+        const destination = params ? `/?${params}` : "/";
+        sendHtml(
+          response,
+          200,
+          `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="0; url=${destination}">
+    <title>OAuth callback received</title>
+  </head>
+  <body>
+    <p>Authorization received. Returning to the app...</p>
+    <p><a href="${destination}">Continue</a></p>
+  </body>
+</html>`
+        );
         return;
       }
 
