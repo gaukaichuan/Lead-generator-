@@ -922,47 +922,56 @@ function renderLeadDetail() {
 
   detailCard.querySelectorAll("[data-action]").forEach((button) => {
     button.addEventListener("click", async () => {
-      const action = button.dataset.action;
-      if (action === "email") {
-        openEmailEditor(lead);
-        return;
-      }
-
-      if (action === "delete") {
-        const shouldDelete = window.confirm(`Remove ${lead.company} from the lead queue?`);
-        if (!shouldDelete) {
+      try {
+        const action = button.dataset.action;
+        if (action === "email") {
+          openEmailEditor(lead);
           return;
         }
-        await request(`/api/leads/${lead.id}`, { method: "DELETE" });
-        state.selectedLeadId = null;
-        leadDetailModal.hidden = true;
-        await loadLeads();
-        showNotification("Lead removed", `${lead.company} was deleted from the lead queue.`);
-        return;
-      } else if (action === "sent") {
-        await request(`/api/leads/${lead.id}/sent`, { method: "PATCH" });
-        showNotification("Email sent", `${lead.company} was added to Email Activity.`);
-      } else if (action === "crm") {
-        await request(`/api/leads/${lead.id}/crm`, { method: "PATCH" });
-        showNotification("CRM updated", `${lead.company} was logged to the CRM timeline.`);
-      } else {
-        const statusResponse = await request(`/api/leads/${lead.id}/status`, {
-          method: "PATCH",
-          body: JSON.stringify({ status: action })
-        });
 
-        if (action === "qualified" && !statusResponse.lead.sent) {
+        if (action === "delete") {
+          const shouldDelete = window.confirm(`Remove ${lead.company} from the lead queue?`);
+          if (!shouldDelete) {
+            return;
+          }
+          await request(`/api/leads/${lead.id}`, { method: "DELETE" });
+          state.selectedLeadId = null;
+          leadDetailModal.hidden = true;
+          await loadLeads();
+          showNotification("Lead removed", `${lead.company} was deleted from the lead queue.`);
+          return;
+        } else if (action === "sent") {
           await request(`/api/leads/${lead.id}/sent`, { method: "PATCH" });
+          showNotification("Email sent", `${lead.company} was added to Email Activity.`);
+        } else if (action === "crm") {
+          await request(`/api/leads/${lead.id}/crm`, { method: "PATCH" });
+          showNotification("CRM updated", `${lead.company} was logged to Bigin CRM.`);
+        } else {
+          const statusResponse = await request(`/api/leads/${lead.id}/status`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: action })
+          });
+
+          if (action === "qualified" && !statusResponse.lead.sent) {
+            await request(`/api/leads/${lead.id}/sent`, { method: "PATCH" });
+          }
+
+          if (action === "qualified") {
+            showNotification("Lead qualified", `${lead.company} is now qualified and the email was auto-sent.`);
+          } else {
+            showNotification("Lead updated", `${lead.company} is now marked as ${action}.`);
+          }
         }
 
-        if (action === "qualified") {
-          showNotification("Lead qualified", `${lead.company} is now qualified and the email was auto-sent.`);
+        await loadLeads();
+        leadDetailModal.hidden = false;
+      } catch (error) {
+        if (button.dataset.action === "crm") {
+          showNotification("CRM sync failed", error.message || "This lead could not be pushed into Bigin.");
         } else {
-          showNotification("Lead updated", `${lead.company} is now marked as ${action}.`);
+          showNotification("Action failed", error.message || "This lead update could not be completed.");
         }
       }
-      await loadLeads();
-      leadDetailModal.hidden = false;
     });
   });
 }

@@ -11,8 +11,7 @@ const EXPORT_DIR = path.join(__dirname, "exports");
 const BIGIN_DEFAULT_STAGE = process.env.BIGIN_DEFAULT_STAGE || "Qualification";
 const BIGIN_DEFAULT_PIPELINE_NAME = process.env.BIGIN_PIPELINE_NAME || "";
 const BIGIN_SCOPES =
-  process.env.BIGIN_SCOPES ||
-  "ZohoBigin.modules.accounts.CREATE,ZohoBigin.modules.contacts.CREATE,ZohoBigin.modules.pipelines.CREATE";
+  process.env.BIGIN_SCOPES || "ZohoBigin.modules.ALL";
 
 const priorityAreas = [
   "kuala lumpur",
@@ -517,6 +516,33 @@ async function createBiginRecord(store, moduleApiName, data, fetchImpl = fetch) 
   return item.details || {};
 }
 
+async function createBiginV1DealRecord(store, data, fetchImpl = fetch) {
+  const { accessToken, apiDomain } = await getBiginAccessToken(store, fetchImpl);
+  const v1ApiDomain = apiDomain.replace("/bigin/v2", "").replace(/\/$/, "");
+  const response = await fetchImpl(`${v1ApiDomain}/bigin/v1/Deals`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Zoho-oauthtoken ${accessToken}`
+    },
+    body: JSON.stringify({
+      data: [data],
+      trigger: []
+    })
+  });
+
+  const payload = await readJsonErrorAware(response);
+  const item = Array.isArray(payload.data) ? payload.data[0] : null;
+
+  if (!item || item.status !== "success") {
+    throw new Error(
+      (item && (item.message || item.code)) || payload.message || "Bigin rejected the deal creation request."
+    );
+  }
+
+  return item.details || {};
+}
+
 function splitContactName(fullName) {
   const normalized = String(fullName || "").trim();
   if (!normalized || /^business contact$/i.test(normalized)) {
@@ -584,11 +610,6 @@ function buildBiginDealPayload(lead, companyId, contactId) {
       .filter(Boolean)
       .join("\n")
   };
-
-  if (BIGIN_DEFAULT_PIPELINE_NAME) {
-    payload.Pipeline = BIGIN_DEFAULT_PIPELINE_NAME;
-  }
-
   return payload;
 }
 
@@ -619,9 +640,8 @@ async function pushLeadToBigin(store, lead, fetchImpl = fetch) {
   }
 
   if (!lead.bigin.dealId) {
-    const dealDetails = await createBiginRecord(
+    const dealDetails = await createBiginV1DealRecord(
       store,
-      "Pipelines",
       buildBiginDealPayload(lead, lead.bigin.companyId, lead.bigin.contactId),
       fetchImpl
     );
