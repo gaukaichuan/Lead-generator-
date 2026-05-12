@@ -1274,11 +1274,13 @@ if (leadForm) {
       return;
     }
 
-    await request("/api/leads", {
+    const payload = await request("/api/leads", {
       method: "POST",
       body: JSON.stringify(body)
     });
     leadForm.reset();
+    state.queuePage = 1;
+    state.selectedLeadId = payload.lead?.id || null;
     await loadLeads();
     showNotification("Lead saved", `${body.company} was added to the lead queue.`);
   });
