@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const tls = require("tls");
 const { URL } = require("url");
+const nodemailer = require("nodemailer");
 
 const PORT = Number(process.env.PORT || 3000);
 const DEFAULT_DATA_PATH = path.join(__dirname, "data", "store.json");
@@ -199,51 +200,50 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
   }
 
   const smtpHost = process.env.GMAIL_SMTP_HOST || "smtp.gmail.com";
-  const smtpPort = Number(process.env.GMAIL_SMTP_PORT || 465);
-  const replyTo = fromEmail && fromEmail !== user ? fromEmail : "";
-  const envelopeFrom = user;
-  const messageLines = [
-    `From: ${formatMailbox(fromName, user)}`,
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    ...(replyTo ? [`Reply-To: ${replyTo}`] : []),
-    `Date: ${new Date().toUTCString()}`,
-    "MIME-Version: 1.0",
-    "Content-Type: text/plain; charset=utf-8",
-    "Content-Transfer-Encoding: 8bit",
-    "",
-    ...String(body || "").split(/\r?\n/).map(smtpSafeLine)
-  ];
+  const smtpPort = Number(process.env.GMAIL_SMTP_PORT || 587);
+  const timeoutMs = Number(process.env.GMAIL_SMTP_TIMEOUT_MS || 20000);
+  const socketTimeoutMs = Number(process.env.GMAIL_SMTP_SOCKET_TIMEOUT_MS || 20000);
 
-  const socket = tls.connect({
+  const secure =
+    typeof process.env.GMAIL_SMTP_SECURE === "string"
+      ? process.env.GMAIL_SMTP_SECURE.trim().toLowerCase() === "true"
+      : smtpPort === 465;
+
+  const replyTo = fromEmail && fromEmail !== user ? fromEmail : "";
+
+  const transporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
-    servername: smtpHost
+    secure,
+    auth: { user, pass },
+    requireTLS: !secure,
+    connectionTimeout: timeoutMs,
+    greetingTimeout: timeoutMs,
+    socketTimeout: socketTimeoutMs,
+    tls: {
+      servername: smtpHost
+    }
   });
-
-  await new Promise((resolve, reject) => {
-    socket.once("secureConnect", resolve);
-    socket.once("error", reject);
-  });
-
-  const client = createSmtpClient(socket);
 
   try {
-    await client.expectCode(220);
-    await client.sendCommand("EHLO localhost", 250);
-    await client.sendCommand("AUTH LOGIN", 334);
-    await client.sendCommand(Buffer.from(user).toString("base64"), 334);
-    await client.sendCommand(Buffer.from(pass).toString("base64"), 235);
-    await client.sendCommand(`MAIL FROM:<${envelopeFrom}>`, 250);
-    await client.sendCommand(`RCPT TO:<${to}>`, 250);
-    await client.sendCommand("DATA", 354);
-    socket.write(`${messageLines.join("\r\n")}\r\n.\r\n`);
-    const dataResponse = await client.expectCode(250);
-    await client.sendCommand("QUIT", 221);
-    const idMatch = dataResponse.match(/([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+)/);
-    return { messageId: idMatch ? idMatch[1] : "" };
-  } finally {
-    socket.end();
+    const result = await transporter.sendMail({
+      from: formatMailbox(fromName, user),
+      to,
+      ...(replyTo ? { replyTo } : {}),
+      subject,
+      text: String(body || "")
+    });
+
+    return { messageId: result && result.messageId ? String(result.messageId) : "" };
+  } catch (error) {
+    const hostLabel = `${smtpHost}:${smtpPort}`;
+    const hint = smtpPort === 465
+      ? "Hint: many cloud hosts block outbound port 465; try GMAIL_SMTP_PORT=587 and GMAIL_SMTP_SECURE=false."
+      : smtpPort === 587
+        ? "Hint: use STARTTLS on 587 (GMAIL_SMTP_SECURE=false)."
+        : "";
+    const message = error && error.message ? error.message : String(error || "Unknown SMTP error");
+    throw new Error(`SMTP send failed via ${hostLabel}: ${message}${hint ? ` ${hint}` : ""}`);
   }
 }
 
