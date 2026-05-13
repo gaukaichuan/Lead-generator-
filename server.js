@@ -1016,10 +1016,129 @@ function calculateDistanceKm(from, to) {
   return EARTH_RADIUS_KM * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+function unique(values) {
+  return Array.from(new Set(values));
+}
+
+function normalizeWebsiteUrl(rawUrl) {
+  const normalized = String(rawUrl || "").trim();
+  if (!normalized) {
+    return "";
+  }
+
+  if (/^https?:\/\//i.test(normalized)) {
+    return normalized;
+  }
+
+  return `https://${normalized}`;
+}
+
+function websiteOrigin(urlString) {
+  try {
+    return new URL(urlString).origin;
+  } catch (error) {
+    return "";
+  }
+}
+
+function websiteHost(urlString) {
+  try {
+    return new URL(urlString).hostname.toLowerCase();
+  } catch (error) {
+    return "";
+  }
+}
+
+async function fetchWithTimeout(fetchImpl, url, options = {}, timeoutMs = 4500) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchImpl(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function extractEmailsFromText(text) {
+  const matches = String(text || "").match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [];
+  const blacklist = ["example.com", "sentry.io", "wix.com", "godaddy.com", "cloudflare.com"];
+  return unique(
+    matches
+      .map((email) => email.trim().toLowerCase())
+      .filter((email) => {
+        const domain = email.split("@")[1] || "";
+        if (!domain) {
+          return false;
+        }
+        return !blacklist.some((blocked) => domain.endsWith(blocked));
+      })
+  );
+}
+
+function pickBestWebsiteEmail(emails, siteHost) {
+  if (!emails.length) {
+    return "";
+  }
+
+  const normalizedHost = String(siteHost || "").replace(/^www\./i, "").toLowerCase();
+  const sorted = [...emails].sort((left, right) => {
+    const leftDomain = (left.split("@")[1] || "").replace(/^www\./i, "");
+    const rightDomain = (right.split("@")[1] || "").replace(/^www\./i, "");
+    const leftMatch = normalizedHost && leftDomain.endsWith(normalizedHost);
+    const rightMatch = normalizedHost && rightDomain.endsWith(normalizedHost);
+    if (leftMatch !== rightMatch) {
+      return leftMatch ? -1 : 1;
+    }
+    return left.length - right.length;
+  });
+
+  return sorted[0] || "";
+}
+
+async function discoverEmailFromWebsite(websiteUrl, fetchImpl = fetch) {
+  const url = normalizeWebsiteUrl(websiteUrl);
+  if (!url) {
+    return "";
+  }
+
+  const origin = websiteOrigin(url);
+  const host = websiteHost(url);
+  if (!origin || !host) {
+    return "";
+  }
+
+  const candidates = unique([url, `${origin}/contact`, `${origin}/contact-us`, `${origin}/about`]);
+  const collected = [];
+
+  for (const candidate of candidates) {
+    try {
+      const response = await fetchWithTimeout(fetchImpl, candidate, {
+        method: "GET",
+        headers: {
+          "User-Agent": "LeadGenAI/1.0 (+email-discovery)"
+        }
+      });
+      if (!response.ok) {
+        continue;
+      }
+      const html = await response.text();
+      collected.push(...extractEmailsFromText(html));
+      if (collected.length) {
+        break;
+      }
+    } catch (error) {
+      // Ignore website lookup failures and keep import flow moving.
+    }
+  }
+
+  return pickBestWebsiteEmail(unique(collected), host);
+}
+
 async function searchGoogleMapsLeads(
   { query, region, companyType, painPoint, latitude, longitude, radiusKm },
   fetchImpl = fetch,
-  apiKey = ""
+  apiKey = "",
+  websiteFetchImpl = fetch
 ) {
   apiKey = apiKey || process.env.GOOGLE_MAPS_API_KEY || "";
   if (!apiKey) {
@@ -1098,7 +1217,7 @@ async function searchGoogleMapsLeads(
       return {
         company: place.displayName && place.displayName.text ? place.displayName.text : "Unknown business",
         contactName: "Business Contact",
-        email: "",
+        email: await discoverEmailFromWebsite(place.websiteUri || details.websiteUri || "", websiteFetchImpl),
         phone: details.nationalPhoneNumber || "",
         website: place.websiteUri || details.websiteUri || "",
         role: "",
@@ -1339,6 +1458,7 @@ function getEmailActivityLeads(leads) {
 async function handleApi(request, response, pathname, options = {}) {
   const store = readStore();
   const googlePlacesFetch = options.googlePlacesFetch || fetch;
+  const websiteFetch = options.websiteFetch || googlePlacesFetch;
   const sendEmail = options.sendEmail || sendEmailMessage;
   const biginFetch = options.biginFetch || fetch;
   const emailDebugLogger = options.emailDebugLogger;
@@ -1496,7 +1616,9 @@ async function handleApi(request, response, pathname, options = {}) {
         longitude,
         radiusKm
       },
-      googlePlacesFetch
+      googlePlacesFetch,
+      "",
+      websiteFetch
     );
 
     const { imported, duplicateCount } = importExternalLeads(store, externalLeads);
@@ -1540,7 +1662,9 @@ async function handleApi(request, response, pathname, options = {}) {
         longitude,
         radiusKm
       },
-      googlePlacesFetch
+      googlePlacesFetch,
+      "",
+      websiteFetch
     );
 
     sendJson(response, 200, {

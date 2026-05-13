@@ -595,7 +595,7 @@ function createGoogleMapsResultCard(lead, key) {
       </div>
       <label class="google-result-email-field">
         <span>Company Email</span>
-        <input class="google-result-email-input" type="email" placeholder="sales@company.com" value="${lead.email || ""}">
+        <input class="google-result-email-input" type="email" placeholder="Auto-detected from website (editable)" value="${lead.email || ""}">
       </label>
       <span class="google-result-recommendation">${lead.recommendation?.productName || lead.recommendedProduct || "Recommendation pending"}</span>
     </div>
