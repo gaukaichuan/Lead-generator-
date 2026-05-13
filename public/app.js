@@ -579,7 +579,7 @@ function googleMapsResultKey(lead) {
 }
 
 function createGoogleMapsResultCard(lead, key) {
-  const card = document.createElement("label");
+  const card = document.createElement("article");
   card.className = "google-result-card";
   card.innerHTML = `
     <input class="google-result-checkbox" type="checkbox" ${state.selectedGoogleMapsResults.has(key) ? "checked" : ""}>
@@ -593,11 +593,16 @@ function createGoogleMapsResultCard(lead, key) {
         <span>${lead.phone || "No phone"}</span>
         <span>${lead.website || "No website"}</span>
       </div>
+      <label class="google-result-email-field">
+        <span>Company Email</span>
+        <input class="google-result-email-input" type="email" placeholder="sales@company.com" value="${lead.email || ""}">
+      </label>
       <span class="google-result-recommendation">${lead.recommendation?.productName || lead.recommendedProduct || "Recommendation pending"}</span>
     </div>
   `;
 
   const checkbox = card.querySelector(".google-result-checkbox");
+  const emailInput = card.querySelector(".google-result-email-input");
   checkbox.addEventListener("change", () => {
     if (checkbox.checked) {
       state.selectedGoogleMapsResults.add(key);
@@ -605,6 +610,14 @@ function createGoogleMapsResultCard(lead, key) {
       state.selectedGoogleMapsResults.delete(key);
     }
     renderGoogleMapsResultsModal();
+  });
+
+  emailInput.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+
+  emailInput.addEventListener("input", () => {
+    lead.email = emailInput.value.trim();
   });
 
   return card;

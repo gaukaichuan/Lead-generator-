@@ -1148,6 +1148,28 @@ body.dark-mode .settings-icon-button {
   font-size: 0.76rem;
 }
 
+.google-result-email-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.google-result-email-field span {
+  color: var(--muted-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.google-result-email-input {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
+}
+
 .lead-form textarea,
 .email-body-textarea {
   resize: vertical;
