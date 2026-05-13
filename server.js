@@ -6,12 +6,33 @@ const { URL } = require("url");
 const nodemailer = require("nodemailer");
 
 const PORT = Number(process.env.PORT || 3000);
-const DEFAULT_DATA_PATH = path.join(__dirname, "data", "store.json");
-const DATA_PATH = process.env.LEAD_DATA_PATH
-  ? path.resolve(process.env.LEAD_DATA_PATH)
-  : process.env.LEAD_DATA_DIR
-    ? path.join(path.resolve(process.env.LEAD_DATA_DIR), "store.json")
-    : DEFAULT_DATA_PATH;
+const LOCAL_DEFAULT_DATA_PATH = path.join(__dirname, "data", "store.json");
+
+function resolveDataPath() {
+  if (process.env.LEAD_DATA_PATH) {
+    return path.resolve(process.env.LEAD_DATA_PATH);
+  }
+
+  if (process.env.LEAD_DATA_DIR) {
+    return path.join(path.resolve(process.env.LEAD_DATA_DIR), "store.json");
+  }
+
+  const persistentCandidates = [process.env.RAILWAY_VOLUME_MOUNT_PATH, process.env.RAILWAY_PERSISTENT_DIR, "/data"];
+  for (const candidate of persistentCandidates) {
+    if (!candidate) {
+      continue;
+    }
+
+    const resolved = path.resolve(candidate);
+    if (fs.existsSync(resolved)) {
+      return path.join(resolved, "store.json");
+    }
+  }
+
+  return LOCAL_DEFAULT_DATA_PATH;
+}
+
+const DATA_PATH = resolveDataPath();
 const PUBLIC_DIR = path.join(__dirname, "public");
 const EXPORT_DIR = path.join(__dirname, "exports");
 const BIGIN_DEFAULT_STAGE = process.env.BIGIN_DEFAULT_STAGE || "Qualification";
@@ -76,8 +97,8 @@ function ensureDataFile() {
     return;
   }
 
-  if (DATA_PATH !== DEFAULT_DATA_PATH && fs.existsSync(DEFAULT_DATA_PATH)) {
-    fs.copyFileSync(DEFAULT_DATA_PATH, DATA_PATH);
+  if (DATA_PATH !== LOCAL_DEFAULT_DATA_PATH && fs.existsSync(LOCAL_DEFAULT_DATA_PATH)) {
+    fs.copyFileSync(LOCAL_DEFAULT_DATA_PATH, DATA_PATH);
     return;
   }
 
