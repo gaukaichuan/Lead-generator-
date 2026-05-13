@@ -74,6 +74,10 @@ async function main() {
     const unchangedLead = store.leads.find((lead) => lead.id === "lead-send-fail-001");
     assert.equal(unchangedLead.sent, false);
     assert.equal(unchangedLead.sentAt, null);
+    assert.equal(unchangedLead.emailStatus, "failed");
+    assert.equal(unchangedLead.emailLastError, "535-5.7.8 Username and Password not accepted.");
+    assert.ok(unchangedLead.emailLastAttemptAt);
+    assert.ok(store.activities.some((activity) => activity.title === "Outreach email failed"));
     console.log("PASS");
   } finally {
     await new Promise((resolve, reject) => {

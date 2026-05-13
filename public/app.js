@@ -4,6 +4,7 @@ const state = {
   selectedLeadId: null,
   activeWorkspace: "overview",
   activeExportView: null,
+  emailActivityFilter: "all",
   queuePage: 1,
   activeEmailLeadId: null,
   currentLocation: null,
@@ -128,6 +129,8 @@ const exportPreviewPanel = document.getElementById("exportPreviewPanel");
 const exportPreviewEyebrow = document.getElementById("exportPreviewEyebrow");
 const exportPreviewTitle = document.getElementById("exportPreviewTitle");
 const exportPreviewButton = document.getElementById("exportPreviewButton");
+const emailActivityFilterWrap = document.getElementById("emailActivityFilterWrap");
+const emailActivityFilter = document.getElementById("emailActivityFilter");
 const exportQueueTable = document.getElementById("exportQueueTable");
 const exportEmailTable = document.getElementById("exportEmailTable");
 const exportQueueBody = document.getElementById("exportQueueBody");
@@ -701,6 +704,28 @@ function getSentLeads() {
   return state.leads.filter((lead) => lead.sent);
 }
 
+function getEmailActivityLeads() {
+  return state.leads.filter((lead) => lead.emailStatus === "sent" || lead.emailStatus === "failed").filter((lead) => {
+    if (state.emailActivityFilter === "all") {
+      return true;
+    }
+
+    return lead.emailStatus === state.emailActivityFilter;
+  });
+}
+
+function formatEmailStatus(status) {
+  if (status === "sent") {
+    return "Sent";
+  }
+
+  if (status === "failed") {
+    return "Failed";
+  }
+
+  return "Pending";
+}
+
 function applyTemplate(template, lead) {
   const replacements = {
     contactName: lead.contactName || "there",
@@ -1006,10 +1031,10 @@ function renderLeadDetail() {
 
 
 function renderExportEmailTable() {
-  const sentLeads = getSentLeads();
+  const activityLeads = getEmailActivityLeads();
   exportEmailBody.innerHTML = "";
 
-  sentLeads.forEach((lead) => {
+  activityLeads.forEach((lead) => {
     const row = document.createElement("tr");
     row.className = "clickable-row";
     row.innerHTML = `
@@ -1018,7 +1043,13 @@ function renderExportEmailTable() {
       <td>${lead.email}</td>
       <td>${lead.region}</td>
       <td>${lead.source}</td>
-      <td>${lead.sentAt ? formatDate(lead.sentAt) : "Marked sent"}</td>
+      <td>
+        <div class="email-status-cell">
+          <span class="state-pill ${lead.emailStatus === "failed" ? "state-unqualified" : "state-sent"}">${formatEmailStatus(lead.emailStatus)}</span>
+          ${lead.emailLastError ? `<small>${lead.emailLastError}</small>` : ""}
+        </div>
+      </td>
+      <td>${lead.emailLastAttemptAt ? formatDate(lead.emailLastAttemptAt) : lead.sentAt ? formatDate(lead.sentAt) : "Not attempted"}</td>
     `;
     row.addEventListener("click", () => {
       openEmailEditor(lead);
@@ -1055,6 +1086,7 @@ function renderExportPreview() {
   exportPreviewPanel.hidden = !isQueue && !isEmail;
   exportQueueTable.hidden = !isQueue;
   exportEmailTable.hidden = !isEmail;
+  emailActivityFilterWrap.hidden = !isEmail;
 
   showExportQueue.classList.toggle("active", isQueue);
   showExportEmailActivity.classList.toggle("active", isEmail);
@@ -1075,7 +1107,7 @@ function renderExportPreview() {
   }
 
   renderExportEmailTable();
-  const hasRows = getSentLeads().length > 0;
+  const hasRows = getEmailActivityLeads().length > 0;
   exportPreviewEyebrow.textContent = "Email Activity";
   exportPreviewTitle.textContent = "Email Activity Table";
   exportPreviewButton.textContent = "Export Email Activity";
@@ -1679,6 +1711,13 @@ showExportQueue.addEventListener("click", () => {
 showExportEmailActivity.addEventListener("click", () => {
   state.activeExportView = "email";
   renderExportPreview();
+});
+
+emailActivityFilter.addEventListener("change", () => {
+  state.emailActivityFilter = emailActivityFilter.value;
+  if (state.activeExportView === "email") {
+    renderExportPreview();
+  }
 });
 
 exportPreviewButton.addEventListener("click", () => {

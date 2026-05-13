@@ -589,7 +589,7 @@
               </button>
               <button class="export-workspace-card" id="showExportEmailActivity" type="button">
                 <strong>Email Activity</strong>
-                <span>Review sent outreach records and export them to Excel.</span>
+                <span>Review sent and failed outreach records and export them to Excel.</span>
               </button>
             </div>
             <section class="export-preview-panel" id="exportPreviewPanel" hidden>
@@ -599,6 +599,14 @@
                   <h3 id="exportPreviewTitle">Choose a table to preview</h3>
                 </div>
                 <div class="header-actions">
+                  <label class="email-activity-filter" id="emailActivityFilterWrap" hidden>
+                    <span>Status</span>
+                    <select id="emailActivityFilter">
+                      <option value="all">All Attempts</option>
+                      <option value="sent">Sent</option>
+                      <option value="failed">Failed</option>
+                    </select>
+                  </label>
                   <button class="button primary" id="exportPreviewButton" type="button">Export Excel</button>
                 </div>
               </div>
@@ -627,7 +635,8 @@
                       <th>Email</th>
                       <th>Region</th>
                       <th>Source</th>
-                      <th>Sent</th>
+                      <th>Status</th>
+                      <th>Attempted</th>
                     </tr>
                   </thead>
                   <tbody id="exportEmailBody"></tbody>

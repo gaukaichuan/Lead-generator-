@@ -85,6 +85,13 @@ function ensureStoreShape(store) {
     store.integrations.bigin = {};
   }
 
+  store.leads = store.leads.map((lead) => ({
+    ...lead,
+    emailStatus: lead.emailStatus || (lead.sent ? "sent" : "not_sent"),
+    emailLastError: lead.emailLastError || "",
+    emailLastAttemptAt: lead.emailLastAttemptAt || lead.sentAt || null
+  }));
+
   return store;
 }
 
@@ -716,6 +723,13 @@ function splitContactName(fullName) {
   };
 }
 
+function buildBusinessNatureDetails(lead) {
+  return [
+    lead.industry ? `Business nature (industry): ${lead.industry}` : "",
+    lead.companyType ? `Business nature (type): ${companyTypeLabel(lead.companyType)}` : ""
+  ].filter(Boolean);
+}
+
 function buildBiginCompanyPayload(lead) {
   const website = normalizeLeadWebsite(lead);
   return {
@@ -726,6 +740,7 @@ function buildBiginCompanyPayload(lead) {
     Description: [
       lead.source ? `Source: ${lead.source}` : "",
       lead.region ? `Region: ${lead.region}` : "",
+      ...buildBusinessNatureDetails(lead),
       removeWebsiteFromNotes(lead.notes)
     ]
       .filter(Boolean)
@@ -762,6 +777,7 @@ function buildBiginDealPayload(lead, companyId, contactId, pipelineDefaults) {
       `Recommended product: ${enrichedLead.recommendation.productName}`,
       `Reason: ${enrichedLead.recommendation.reason}`,
       lead.source ? `Source: ${lead.source}` : "",
+      ...buildBusinessNatureDetails(lead),
       normalizeLeadWebsite(lead) ? `Website: ${normalizeLeadWebsite(lead)}` : "",
       removeWebsiteFromNotes(lead.notes)
     ]
@@ -1018,6 +1034,9 @@ function importExternalLeads(store, incomingLeads) {
       notes: incomingLead.notes || "",
       sent: false,
       sentAt: null,
+      emailStatus: "not_sent",
+      emailLastError: "",
+      emailLastAttemptAt: null,
       crmLogged: false,
       createdAt: new Date().toISOString(),
       externalRef: incomingLead.externalRef || ""
@@ -1166,12 +1185,19 @@ function autoSendQualifiedLead(store, lead) {
 
   lead.sent = true;
   lead.sentAt = new Date().toISOString();
+  lead.emailStatus = "sent";
+  lead.emailLastError = "";
+  lead.emailLastAttemptAt = lead.sentAt;
   appendActivity(
     store,
     lead.id,
     "Outreach auto-sent",
     `${lead.company} was automatically moved to the sent email list after being manually marked as qualified.`
   );
+}
+
+function getEmailActivityLeads(leads) {
+  return sortLeads(leads).filter((lead) => lead.emailStatus === "sent" || lead.emailStatus === "failed");
 }
 
 async function handleApi(request, response, pathname, options = {}) {
@@ -1230,18 +1256,20 @@ async function handleApi(request, response, pathname, options = {}) {
   }
 
   if (request.method === "GET" && pathname === "/api/export/sent.csv") {
-    const leads = sortLeads(store.leads).filter((lead) => lead.sent);
+    const leads = getEmailActivityLeads(store.leads);
     sendExcel(
       response,
       "sent-email-export.csv",
-      ["Company", "Contact", "Email", "Region", "Source", "Sent Time"],
+      ["Company", "Contact", "Email", "Region", "Source", "Status", "Attempted Time", "Error"],
       leads.map((lead) => [
         lead.company,
         lead.contactName,
         lead.email,
         lead.region,
         lead.source,
-        lead.sentAt || "Marked sent"
+        lead.emailStatus,
+        lead.emailLastAttemptAt || lead.sentAt || "Not attempted",
+        lead.emailLastError || ""
       ])
     );
     return;
@@ -1273,17 +1301,19 @@ async function handleApi(request, response, pathname, options = {}) {
     }
 
     if (body.type === "sent") {
-      const leads = sortLeads(store.leads).filter((lead) => lead.sent);
+      const leads = getEmailActivityLeads(store.leads);
       const filePath = saveExcelFile(
         `sent-email-export-${timestamp}.csv`,
-        ["Company", "Contact", "Email", "Region", "Source", "Sent Time"],
+        ["Company", "Contact", "Email", "Region", "Source", "Status", "Attempted Time", "Error"],
         leads.map((lead) => [
           lead.company,
           lead.contactName,
           lead.email,
           lead.region,
           lead.source,
-          lead.sentAt || "Marked sent"
+          lead.emailStatus,
+          lead.emailLastAttemptAt || lead.sentAt || "Not attempted",
+          lead.emailLastError || ""
         ])
       );
       sendJson(response, 200, { filePath });
@@ -1421,6 +1451,9 @@ async function handleApi(request, response, pathname, options = {}) {
       notes: body.notes || "",
       sent: false,
       sentAt: null,
+      emailStatus: "not_sent",
+      emailLastError: "",
+      emailLastAttemptAt: null,
       crmLogged: false,
       createdAt: new Date().toISOString()
     };
@@ -1474,6 +1507,9 @@ async function handleApi(request, response, pathname, options = {}) {
 
       lead.sent = true;
       lead.sentAt = new Date().toISOString();
+      lead.emailStatus = "sent";
+      lead.emailLastError = "";
+      lead.emailLastAttemptAt = lead.sentAt;
       appendActivity(
         store,
         lead.id,
@@ -1487,10 +1523,21 @@ async function handleApi(request, response, pathname, options = {}) {
       });
       return;
     } catch (error) {
+      const failureMessage = describeError(error, "Unknown SMTP error");
+      lead.emailStatus = "failed";
+      lead.emailLastError = failureMessage;
+      lead.emailLastAttemptAt = new Date().toISOString();
+      appendActivity(
+        store,
+        lead.id,
+        "Outreach email failed",
+        `${lead.company} email send failed: ${failureMessage}`
+      );
+      writeStore(store);
       const debug = buildEmailDebugContext({ lead, senderName, senderEmail, subject });
       logEmailSendFailure(emailDebugLogger, debug, error);
       sendJson(response, 500, {
-        error: `Email send failed: ${describeError(error, "Unknown SMTP error")}`,
+        error: `Email send failed: ${failureMessage}`,
         debug
       });
       return;
@@ -1518,6 +1565,9 @@ async function handleApi(request, response, pathname, options = {}) {
       if (!lead.sent) {
         lead.sent = true;
         lead.sentAt = new Date().toISOString();
+        lead.emailStatus = "sent";
+        lead.emailLastError = "";
+        lead.emailLastAttemptAt = lead.sentAt;
         appendActivity(store, lead.id, "Outreach marked as sent", `${lead.company} was added to the sent email list.`);
       }
     }

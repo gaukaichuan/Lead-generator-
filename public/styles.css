@@ -1323,6 +1323,35 @@ body.dark-mode .settings-icon-button {
   overflow-x: auto;
 }
 
+.email-activity-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.email-activity-filter select {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.email-status-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.email-status-cell small {
+  color: var(--muted);
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

@@ -67,6 +67,9 @@ async function main() {
     const updatedLead = store.leads.find((lead) => lead.id === "lead-send-001");
     assert.equal(updatedLead.sent, true);
     assert.ok(updatedLead.sentAt);
+    assert.equal(updatedLead.emailStatus, "sent");
+    assert.equal(updatedLead.emailLastError, "");
+    assert.equal(updatedLead.emailLastAttemptAt, updatedLead.sentAt);
     assert.ok(store.activities.some((activity) => activity.title === "Outreach email sent"));
     console.log("PASS");
   } finally {
