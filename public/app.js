@@ -962,6 +962,7 @@ function renderLeadDetail() {
     <div class="detail-grid">
       <div class="detail-box"><strong>Lead Source</strong><p>${lead.source}</p></div>
       <div class="detail-box"><strong>Region</strong><p>${lead.region}</p></div>
+      <div class="detail-box"><strong>Email</strong><p>${lead.email || "Not stored"}</p></div>
       <div class="detail-box"><strong>Phone</strong><p>${lead.phone || "Not stored"}</p></div>
       <div class="detail-box"><strong>Website</strong><p>${lead.website ? `<a class="detail-link" href="${lead.website}" target="_blank" rel="noreferrer">${lead.website}</a>` : "Not stored"}</p></div>
       <div class="detail-box"><strong>Recommended Product</strong><p>${lead.recommendation.productName}</p></div>
