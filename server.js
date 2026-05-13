@@ -197,6 +197,55 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
   const messageSubject = String(subject || "");
   const messageBody = String(body || "");
 
+  if (provider === "brevo") {
+    const apiKey = process.env.BREVO_API_KEY || "";
+    const brevoFromEmail = String(process.env.BREVO_FROM_EMAIL || fromEmail || "").trim();
+    const brevoFromName = String(fromName || process.env.BREVO_FROM_NAME || "LeadGen AI").replace(/"/g, "");
+    const replyTo = String(fromEmail || "").trim();
+
+    if (!apiKey) {
+      throw new Error("Brevo is not configured. Set BREVO_API_KEY on the server.");
+    }
+
+    if (!brevoFromEmail) {
+      throw new Error("Brevo is not configured. Set BREVO_FROM_EMAIL on the server.");
+    }
+
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "api-key": apiKey
+      },
+      body: JSON.stringify({
+        sender: {
+          name: brevoFromName,
+          email: brevoFromEmail
+        },
+        to: [{ email: recipient }],
+        subject: messageSubject,
+        textContent: messageBody,
+        ...(replyTo ? { replyTo: { email: replyTo, name: brevoFromName } } : {})
+      })
+    });
+
+    const rawPayload = await response.text();
+    let payload = {};
+    try {
+      payload = rawPayload ? JSON.parse(rawPayload) : {};
+    } catch (parseError) {
+      payload = {};
+    }
+
+    if (!response.ok) {
+      throw new Error(`Brevo send failed: ${payload.message || rawPayload || `HTTP ${response.status}`}`);
+    }
+
+    const messageId = payload.messageId || payload.messageIds?.[0] || "";
+    return { messageId: messageId ? String(messageId) : "" };
+  }
+
   if (provider === "resend") {
     const apiKey = process.env.RESEND_API_KEY || "";
     const resendFromEmail = process.env.RESEND_FROM_EMAIL || "";
