@@ -1208,21 +1208,9 @@ function appendActivity(store, leadId, title, body) {
 }
 
 function autoSendQualifiedLead(store, lead) {
-  if (lead.status !== "qualified" || lead.sent) {
+  if (lead.status !== "qualified") {
     return;
   }
-
-  lead.sent = true;
-  lead.sentAt = new Date().toISOString();
-  lead.emailStatus = "sent";
-  lead.emailLastError = "";
-  lead.emailLastAttemptAt = lead.sentAt;
-  appendActivity(
-    store,
-    lead.id,
-    "Outreach auto-sent",
-    `${lead.company} was automatically moved to the sent email list after being manually marked as qualified.`
-  );
 }
 
 function getEmailActivityLeads(leads) {

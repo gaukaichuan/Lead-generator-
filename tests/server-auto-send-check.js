@@ -50,10 +50,11 @@ async function main() {
     const lead = payload.leads.find((item) => item.id === "lead-test-001");
 
     assert.equal(lead.status, "qualified");
-    assert.equal(lead.sent, true);
-    assert.ok(lead.sentAt);
-    assert.equal(payload.summary.sentLeads, 1);
-    assert.ok(payload.activities.some((activity) => activity.title === "Outreach auto-sent"));
+    assert.equal(lead.sent, false);
+    assert.equal(lead.sentAt, null);
+    assert.equal(lead.emailStatus, "not_sent");
+    assert.equal(payload.summary.sentLeads, 0);
+    assert.ok(payload.activities.some((activity) => activity.title === "Lead status updated"));
     console.log("PASS");
   } finally {
     await new Promise((resolve, reject) => {

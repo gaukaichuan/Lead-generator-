@@ -999,17 +999,13 @@ function renderLeadDetail() {
           await request(`/api/leads/${lead.id}/crm`, { method: "PATCH" });
           showNotification("CRM updated", `${lead.company} was logged to Bigin CRM.`);
         } else {
-          const statusResponse = await request(`/api/leads/${lead.id}/status`, {
+          await request(`/api/leads/${lead.id}/status`, {
             method: "PATCH",
             body: JSON.stringify({ status: action })
           });
 
-          if (action === "qualified" && !statusResponse.lead.sent) {
-            await request(`/api/leads/${lead.id}/sent`, { method: "PATCH" });
-          }
-
           if (action === "qualified") {
-            showNotification("Lead qualified", `${lead.company} is now qualified and the email was auto-sent.`);
+            showNotification("Lead qualified", `${lead.company} is now qualified. Send the email separately when you're ready.`);
           } else {
             showNotification("Lead updated", `${lead.company} is now marked as ${action}.`);
           }
