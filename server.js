@@ -1049,6 +1049,20 @@ function websiteHost(urlString) {
   }
 }
 
+function guessEmailFromWebsite(websiteUrl) {
+  const host = websiteHost(websiteUrl).replace(/^www\./i, "");
+  if (!host) {
+    return "";
+  }
+
+  const blockedHosts = ["facebook.com", "instagram.com", "x.com", "twitter.com", "tiktok.com", "linkedin.com"];
+  if (blockedHosts.some((blocked) => host.endsWith(blocked))) {
+    return "";
+  }
+
+  return `info@${host}`;
+}
+
 async function fetchWithTimeout(fetchImpl, url, options = {}, timeoutMs = 4500) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -1217,7 +1231,9 @@ async function searchGoogleMapsLeads(
       return {
         company: place.displayName && place.displayName.text ? place.displayName.text : "Unknown business",
         contactName: "Business Contact",
-        email: await discoverEmailFromWebsite(place.websiteUri || details.websiteUri || "", websiteFetchImpl),
+        email:
+          (await discoverEmailFromWebsite(place.websiteUri || details.websiteUri || "", websiteFetchImpl)) ||
+          guessEmailFromWebsite(place.websiteUri || details.websiteUri || ""),
         phone: details.nationalPhoneNumber || "",
         website: place.websiteUri || details.websiteUri || "",
         role: "",
