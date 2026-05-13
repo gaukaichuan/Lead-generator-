@@ -148,6 +148,11 @@ const overviewLeadCount = document.getElementById("overviewLeadCount");
 const overviewPriorityCount = document.getElementById("overviewPriorityCount");
 const overviewLeadTable = document.getElementById("overviewLeadTable");
 const overviewActivityList = document.getElementById("overviewActivityList");
+const biginConnectGate = document.getElementById("biginConnectGate");
+const biginConnectMessage = document.getElementById("biginConnectMessage");
+const connectBiginButton = document.getElementById("connectBiginButton");
+const retryBiginStatusButton = document.getElementById("retryBiginStatusButton");
+const appShell = document.getElementById("appShell");
 
 const demoLeadTemplates = [
   {
@@ -1146,9 +1151,90 @@ function syncBodyLock() {
     !senderDetailsModal.hidden ||
     !templateEditorModal.hidden ||
     !crmErrorModal.hidden ||
-    !googleMapsResultsModal.hidden;
+    !googleMapsResultsModal.hidden ||
+    !biginConnectGate.hidden;
 
   body.classList.toggle("modal-open", shouldLock);
+}
+
+function getBiginUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    status: params.get("bigin") || "",
+    message: params.get("message") || ""
+  };
+}
+
+function clearBiginUrlState() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("bigin");
+  url.searchParams.delete("message");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+function showBiginConnectGate(message) {
+  biginConnectMessage.textContent =
+    message || "Authorize Bigin once and the system will keep using the saved CRM refresh token automatically on later visits.";
+  biginConnectGate.hidden = false;
+  if (appShell) {
+    appShell.hidden = true;
+  }
+  syncBodyLock();
+}
+
+function hideBiginConnectGate() {
+  biginConnectGate.hidden = true;
+  if (appShell) {
+    appShell.hidden = false;
+  }
+  syncBodyLock();
+}
+
+async function checkBiginConnection() {
+  const urlState = getBiginUrlState();
+
+  try {
+    const payload = await request("/api/integrations/bigin/status");
+
+    if (payload.connected) {
+      hideBiginConnectGate();
+      if (urlState.status === "connected") {
+        showNotification("CRM connected", "Zoho Bigin is ready and the workspace has been unlocked.");
+      }
+      if (urlState.status || urlState.message) {
+        clearBiginUrlState();
+      }
+      return true;
+    }
+
+    const defaultMessage = "Connect Zoho Bigin before using the system. After the first login, the saved CRM refresh token will be reused automatically.";
+    const errorMessage =
+      urlState.status === "error" && urlState.message
+        ? `Bigin authorization failed: ${urlState.message}`
+        : defaultMessage;
+    showBiginConnectGate(errorMessage);
+    if (urlState.status || urlState.message) {
+      clearBiginUrlState();
+    }
+    return false;
+  } catch (error) {
+    showBiginConnectGate(`Unable to check Bigin connection: ${error.message || "Unknown CRM status error"}`);
+    return false;
+  }
+}
+
+async function startApp() {
+  const connected = await checkBiginConnection();
+  if (!connected) {
+    return;
+  }
+
+  await loadLeads();
+  if (!state.currentLocation && !state.isResolvingLocation) {
+    ensureLiveLocation().catch(() => {
+      // Keep the UI passive until the user interacts with the import flow.
+    });
+  }
 }
 
 async function loadDemoLeads() {
@@ -1567,6 +1653,24 @@ resetEmailDraft.addEventListener("click", () => {
 
 sendEmailDraft.addEventListener("click", sendActiveEmailDraft);
 
+connectBiginButton.addEventListener("click", () => {
+  window.location.href = "/api/integrations/bigin/connect";
+});
+
+retryBiginStatusButton.addEventListener("click", async () => {
+  retryBiginStatusButton.disabled = true;
+  retryBiginStatusButton.textContent = "Checking...";
+  try {
+    const connected = await checkBiginConnection();
+    if (connected) {
+      await loadLeads();
+    }
+  } finally {
+    retryBiginStatusButton.disabled = false;
+    retryBiginStatusButton.textContent = "Retry Connection Check";
+  }
+});
+
 showExportQueue.addEventListener("click", () => {
   state.activeExportView = "queue";
   renderExportPreview();
@@ -1593,12 +1697,7 @@ loadThemeMode();
 renderSenderSettings();
 updateLocationUi();
 updateRadiusDisplay();
-loadLeads();
-if (!state.currentLocation && !state.isResolvingLocation) {
-  ensureLiveLocation().catch(() => {
-    // Keep the UI passive until the user interacts with the import flow.
-  });
-}
+startApp();
 
 
 

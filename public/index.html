@@ -224,7 +224,19 @@
     </div>
   </div>
 
-  <div class="app-shell">
+  <div class="bigin-connect-gate" id="biginConnectGate" hidden>
+    <div class="bigin-connect-card">
+      <p class="eyebrow">CRM Login Required</p>
+      <h2>Connect Zoho Bigin Before Using the System</h2>
+      <p class="bigin-connect-copy" id="biginConnectMessage">Authorize Bigin once and the system will keep using the saved CRM refresh token automatically on later visits.</p>
+      <div class="bigin-connect-actions">
+        <button class="button primary" id="connectBiginButton" type="button">Connect Bigin CRM</button>
+        <button class="button secondary" id="retryBiginStatusButton" type="button">Retry Connection Check</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell" id="appShell" hidden>
     <aside class="sidebar-shell">
       <div class="sidebar-brand">
         <div class="sidebar-mark">LG</div>
