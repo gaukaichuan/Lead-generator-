@@ -5,7 +5,12 @@ const tls = require("tls");
 const { URL } = require("url");
 
 const PORT = Number(process.env.PORT || 3000);
-const DATA_PATH = path.join(__dirname, "data", "store.json");
+const DEFAULT_DATA_PATH = path.join(__dirname, "data", "store.json");
+const DATA_PATH = process.env.LEAD_DATA_PATH
+  ? path.resolve(process.env.LEAD_DATA_PATH)
+  : process.env.LEAD_DATA_DIR
+    ? path.join(path.resolve(process.env.LEAD_DATA_DIR), "store.json")
+    : DEFAULT_DATA_PATH;
 const PUBLIC_DIR = path.join(__dirname, "public");
 const EXPORT_DIR = path.join(__dirname, "exports");
 const BIGIN_DEFAULT_STAGE = process.env.BIGIN_DEFAULT_STAGE || "Qualification";
@@ -52,21 +57,45 @@ const products = {
 
 const EARTH_RADIUS_KM = 6371;
 
+function defaultStore() {
+  return {
+    leads: [],
+    activities: [],
+    integrations: { bigin: {} }
+  };
+}
+
+function ensureDataFile() {
+  const dataDir = path.dirname(DATA_PATH);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+
+  if (fs.existsSync(DATA_PATH)) {
+    return;
+  }
+
+  if (DATA_PATH !== DEFAULT_DATA_PATH && fs.existsSync(DEFAULT_DATA_PATH)) {
+    fs.copyFileSync(DEFAULT_DATA_PATH, DATA_PATH);
+    return;
+  }
+
+  fs.writeFileSync(DATA_PATH, JSON.stringify(defaultStore(), null, 2));
+}
+
 function readStore() {
+  ensureDataFile();
   return ensureStoreShape(JSON.parse(fs.readFileSync(DATA_PATH, "utf8")));
 }
 
 function writeStore(store) {
+  ensureDataFile();
   fs.writeFileSync(DATA_PATH, JSON.stringify(ensureStoreShape(store), null, 2));
 }
 
 function ensureStoreShape(store) {
   if (!store || typeof store !== "object") {
-    return {
-      leads: [],
-      activities: [],
-      integrations: { bigin: {} }
-    };
+    return defaultStore();
   }
 
   if (!Array.isArray(store.leads)) {
