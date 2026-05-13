@@ -1280,6 +1280,7 @@ function sanitizePreviewLead(lead) {
     externalRef: lead.externalRef || "",
     company: lead.company || "",
     contactName: lead.contactName || "",
+    email: lead.email || "",
     phone: lead.phone || "",
     website: normalizeLeadWebsite(lead),
     industry: lead.industry || "",
