@@ -43,6 +43,40 @@
 </div>
   </div>
 
+  <div class="modal-backdrop" id="bulkEmailModal" hidden>
+    <div class="modal-card email-detail-card">
+      <button class="modal-close-button" id="closeBulkEmailModal" type="button" aria-label="Close bulk email review">&times;</button>
+      <div class="section-heading compact">
+        <div>
+          <p class="eyebrow">Bulk Email</p>
+          <h2 id="bulkEmailTitle">Compose and Send to Selected Leads</h2>
+        </div>
+        <div class="header-actions">
+          <button class="button secondary" id="resetBulkEmailDraft" type="button">Reset Draft</button>
+          <button class="button primary" id="sendBulkEmailDraft" type="button">Send Bulk Email</button>
+        </div>
+      </div>
+      <div class="detail-card tone-soft email-review-card">
+        <div class="detail-box email-recipient-box">
+          <strong>Recipients</strong>
+          <p id="bulkEmailRecipients">No leads selected</p>
+        </div>
+        <div class="detail-box email-subject-box">
+          <strong>Subject Template</strong>
+          <input class="email-subject-input" id="bulkEmailSubject" type="text">
+        </div>
+        <div class="detail-box email-body-box">
+          <div class="email-body-heading">
+            <strong>Message Template</strong>
+            <span class="email-draft-pill">Dynamic by lead</span>
+          </div>
+          <textarea class="email-body-textarea" id="bulkEmailBody" rows="12"></textarea>
+        </div>
+        <p class="form-note">Placeholders supported per selected lead: <code>{{contactName}}</code>, <code>{{company}}</code>, <code>{{source}}</code>, <code>{{region}}</code>, <code>{{industry}}</code>, <code>{{productName}}</code>, <code>{{pitch}}</code>, <code>{{reason}}</code>, <code>{{senderName}}</code>, <code>{{senderEmail}}</code></p>
+      </div>
+    </div>
+  </div>
+
   <div class="settings-drawer-shell" id="settingsDrawerShell" hidden>
     <div class="settings-drawer-overlay" id="settingsDrawerOverlay"></div>
     <aside class="settings-drawer" id="settingsDrawer" aria-hidden="true">
@@ -561,9 +595,23 @@
                 <h3>Lead Queue</h3>
               </div>
               <label class="search-box">
+                <span>Recommended Product</span>
+                <select id="queueProductFilter">
+                  <option value="all">All products</option>
+                </select>
+              </label>
+              <label class="search-box">
                 <span>Search</span>
                 <input id="searchInput" placeholder="Search company, source, area, product">
               </label>
+            </div>
+            <div class="queue-bulk-toolbar">
+              <span class="queue-bulk-summary" id="queueBulkSummary">0 selected</span>
+              <div class="header-actions">
+                <button class="button secondary" id="selectVisibleQueueLeads" type="button">Select Visible</button>
+                <button class="button secondary" id="clearSelectedQueueLeads" type="button">Clear</button>
+                <button class="button primary" id="openBulkEmailComposer" type="button">Compose Bulk Email</button>
+              </div>
             </div>
             <div id="leadList" class="lead-list"></div>
             <div class="queue-pagination">

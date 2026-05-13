@@ -1303,6 +1303,36 @@ body.dark-mode .settings-icon-button {
   font-size: 0.72rem;
 }
 
+.queue-bulk-toolbar {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.92));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.queue-bulk-summary {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.lead-select {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+}
+
+.lead-card-header {
+  display: flex;
+  align-items: center;
+}
+
 .export-workspace-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -5,8 +5,10 @@ const state = {
   activeWorkspace: "overview",
   activeExportView: null,
   emailActivityFilter: "all",
+  queueProductFilter: "all",
   queuePage: 1,
   activeEmailLeadId: null,
+  selectedQueueLeadIds: new Set(),
   currentLocation: null,
   isResolvingLocation: false,
   googleMapsResults: [],
@@ -68,7 +70,12 @@ const inlineImportSelectedGoogleMapsResults = document.getElementById("inlineImp
 const loadDemoLeadsButton = document.getElementById("loadDemoLeads");
 const refreshLeadsButton = document.getElementById("refreshLeads");
 const searchInput = document.getElementById("searchInput");
+const queueProductFilter = document.getElementById("queueProductFilter");
 const leadList = document.getElementById("leadList");
+const queueBulkSummary = document.getElementById("queueBulkSummary");
+const selectVisibleQueueLeads = document.getElementById("selectVisibleQueueLeads");
+const clearSelectedQueueLeads = document.getElementById("clearSelectedQueueLeads");
+const openBulkEmailComposer = document.getElementById("openBulkEmailComposer");
 const previousQueuePage = document.getElementById("previousQueuePage");
 const nextQueuePage = document.getElementById("nextQueuePage");
 const queuePageIndicator = document.getElementById("queuePageIndicator");
@@ -146,6 +153,13 @@ const emailDetailSubject = document.getElementById("emailDetailSubject");
 const emailDetailBody = document.getElementById("emailDetailBody");
 const sendEmailDraft = document.getElementById("sendEmailDraft");
 const resetEmailDraft = document.getElementById("resetEmailDraft");
+const bulkEmailModal = document.getElementById("bulkEmailModal");
+const closeBulkEmailModal = document.getElementById("closeBulkEmailModal");
+const bulkEmailRecipients = document.getElementById("bulkEmailRecipients");
+const bulkEmailSubject = document.getElementById("bulkEmailSubject");
+const bulkEmailBody = document.getElementById("bulkEmailBody");
+const sendBulkEmailDraft = document.getElementById("sendBulkEmailDraft");
+const resetBulkEmailDraft = document.getElementById("resetBulkEmailDraft");
 const notificationCenter = document.getElementById("notificationCenter");
 const overviewLeadCount = document.getElementById("overviewLeadCount");
 const overviewPriorityCount = document.getElementById("overviewPriorityCount");
@@ -529,6 +543,9 @@ function selectedLead() {
 function getFilteredLeads() {
   const query = searchInput.value.trim().toLowerCase();
   return state.leads.filter((lead) => {
+    if (state.queueProductFilter !== "all" && lead.recommendation.productName !== state.queueProductFilter) {
+      return false;
+    }
     const searchable = [
       lead.company,
       lead.contactName,
@@ -553,6 +570,10 @@ function getQueuePageCount() {
 
 function clampQueuePage() {
   state.queuePage = Math.min(Math.max(state.queuePage, 1), getQueuePageCount());
+}
+
+function selectedQueueLeads() {
+  return state.leads.filter((lead) => state.selectedQueueLeadIds.has(lead.id));
 }
 
 function showNotification(title, message) {
@@ -739,6 +760,24 @@ function formatEmailStatus(status) {
   return "Pending";
 }
 
+function renderQueueProductFilter() {
+  const currentValue = state.queueProductFilter;
+  const options = ["all", ...new Set(state.leads.map((lead) => lead.recommendation.productName).filter(Boolean))];
+  queueProductFilter.innerHTML = "";
+  options.forEach((option) => {
+    const node = document.createElement("option");
+    node.value = option;
+    node.textContent = option === "all" ? "All products" : option;
+    queueProductFilter.appendChild(node);
+  });
+  if (options.includes(currentValue)) {
+    queueProductFilter.value = currentValue;
+  } else {
+    state.queueProductFilter = "all";
+    queueProductFilter.value = "all";
+  }
+}
+
 function applyTemplate(template, lead) {
   const replacements = {
     contactName: lead.contactName || "there",
@@ -909,6 +948,7 @@ function renderLeadList() {
   filtered.forEach((lead) => {
     const card = document.createElement("article");
     card.className = `lead-card${lead.id === state.selectedLeadId ? " active" : ""}${lead.sent ? " sent-card" : ""}${lead.crmLogged ? " crm-card" : ""}`;
+    const isSelected = state.selectedQueueLeadIds.has(lead.id);
     card.innerHTML = `
       <div class="lead-meta">
         <span class="pill">${lead.region}</span>
@@ -917,11 +957,26 @@ function renderLeadList() {
         ${lead.sent ? '<span class="pill sent-pill">Email Sent</span>' : ""}
         ${lead.crmLogged ? '<span class="pill crm-pill">CRM Logged</span>' : ""}
       </div>
-      <h3>${lead.company}</h3>
+      <div class="lead-card-header">
+        <input class="lead-select" type="checkbox" ${isSelected ? "checked" : ""}>
+        <h3>${lead.company}</h3>
+      </div>
       <p>${lead.contactName} | ${lead.industry}</p>
       <p>Recommended: ${lead.recommendation.productName}</p>
       <p>Status: ${lead.status}</p>
     `;
+    const checkbox = card.querySelector(".lead-select");
+    checkbox.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        state.selectedQueueLeadIds.add(lead.id);
+      } else {
+        state.selectedQueueLeadIds.delete(lead.id);
+      }
+      renderQueueBulkSummary();
+    });
     card.addEventListener("click", () => {
       state.selectedLeadId = lead.id;
       renderLeadList();
@@ -936,6 +991,73 @@ function renderLeadList() {
   queuePageIndicator.textContent = `Page ${state.queuePage} of ${pageCount}`;
   previousQueuePage.disabled = state.queuePage <= 1;
   nextQueuePage.disabled = state.queuePage >= pageCount;
+  renderQueueBulkSummary();
+}
+
+function renderQueueBulkSummary() {
+  const selected = selectedQueueLeads();
+  const withEmail = selected.filter((lead) => String(lead.email || "").trim());
+  queueBulkSummary.textContent = `${selected.length} selected (${withEmail.length} with email)`;
+  openBulkEmailComposer.disabled = withEmail.length === 0;
+}
+
+function openBulkEmailModal() {
+  const leadsWithEmail = selectedQueueLeads().filter((lead) => String(lead.email || "").trim());
+  if (!leadsWithEmail.length) {
+    showNotification("No recipients", "Select one or more leads with email addresses first.");
+    return;
+  }
+  bulkEmailRecipients.textContent = leadsWithEmail.map((lead) => `${lead.company} <${lead.email}>`).join(", ");
+  bulkEmailSubject.value = state.emailTemplateSubject;
+  bulkEmailBody.value = state.emailTemplateBody;
+  openModal(bulkEmailModal);
+}
+
+function closeBulkEmailEditor() {
+  closeModal(bulkEmailModal);
+}
+
+async function sendBulkEmails() {
+  const leadsWithEmail = selectedQueueLeads().filter((lead) => String(lead.email || "").trim());
+  if (!leadsWithEmail.length) {
+    showNotification("No recipients", "Select one or more leads with email addresses first.");
+    return;
+  }
+
+  const subjectTemplate = bulkEmailSubject.value.trim();
+  const bodyTemplate = bulkEmailBody.value.trim();
+  if (!subjectTemplate || !bodyTemplate) {
+    showNotification("Template missing", "Subject and message template are required.");
+    return;
+  }
+
+  sendBulkEmailDraft.disabled = true;
+  sendBulkEmailDraft.textContent = "Sending...";
+  let successCount = 0;
+  let failureCount = 0;
+
+  for (const lead of leadsWithEmail) {
+    try {
+      await request(`/api/leads/${lead.id}/send-email`, {
+        method: "POST",
+        body: JSON.stringify({
+          senderName: state.senderName,
+          senderEmail: state.senderEmail,
+          subject: applyTemplate(subjectTemplate, lead).trim(),
+          body: applyTemplate(bodyTemplate, lead).trim()
+        })
+      });
+      successCount += 1;
+    } catch (error) {
+      failureCount += 1;
+    }
+  }
+
+  sendBulkEmailDraft.disabled = false;
+  sendBulkEmailDraft.textContent = "Send Bulk Email";
+  closeBulkEmailEditor();
+  await loadLeads();
+  showNotification("Bulk email completed", `${successCount} sent, ${failureCount} failed.`);
 }
 
 function renderLeadDetail() {
@@ -1189,6 +1311,7 @@ function syncBodyLock() {
   const shouldLock =
     !leadDetailModal.hidden ||
     !emailDetailModal.hidden ||
+    !bulkEmailModal.hidden ||
     !settingsDrawerShell.hidden ||
     !senderDetailsModal.hidden ||
     !templateEditorModal.hidden ||
@@ -1312,6 +1435,7 @@ async function loadLeads() {
   const payload = await request("/api/leads");
   state.leads = payload.leads;
   state.activities = payload.activities;
+  state.selectedQueueLeadIds = new Set(Array.from(state.selectedQueueLeadIds).filter((id) => state.leads.some((lead) => lead.id === id)));
 
   if (!selectedLead() && state.leads.length > 0) {
     state.selectedLeadId = state.leads[0].id;
@@ -1321,6 +1445,7 @@ async function loadLeads() {
 
   renderMetrics(payload.summary);
   renderOverview();
+  renderQueueProductFilter();
   renderLeadList();
   renderLeadDetail();
   renderWorkspace();
@@ -1437,6 +1562,20 @@ searchInput.addEventListener("input", () => {
     renderExportPreview();
   }
 });
+queueProductFilter.addEventListener("change", () => {
+  state.queueProductFilter = queueProductFilter.value;
+  state.queuePage = 1;
+  renderLeadList();
+});
+selectVisibleQueueLeads.addEventListener("click", () => {
+  getQueueLeads().forEach((lead) => state.selectedQueueLeadIds.add(lead.id));
+  renderLeadList();
+});
+clearSelectedQueueLeads.addEventListener("click", () => {
+  state.selectedQueueLeadIds = new Set();
+  renderLeadList();
+});
+openBulkEmailComposer.addEventListener("click", openBulkEmailModal);
 previousQueuePage.addEventListener("click", () => {
   if (state.queuePage > 1) {
     state.queuePage -= 1;
@@ -1640,6 +1779,17 @@ closeEmailDetail.addEventListener("click", () => {
   emailDetailModal.hidden = true;
   syncBodyLock();
 });
+closeBulkEmailModal.addEventListener("click", closeBulkEmailEditor);
+bulkEmailModal.addEventListener("click", (event) => {
+  if (event.target === bulkEmailModal) {
+    closeBulkEmailEditor();
+  }
+});
+resetBulkEmailDraft.addEventListener("click", () => {
+  bulkEmailSubject.value = state.emailTemplateSubject;
+  bulkEmailBody.value = state.emailTemplateBody;
+});
+sendBulkEmailDraft.addEventListener("click", sendBulkEmails);
 
 emailDetailModal.addEventListener("click", (event) => {
   if (event.target === emailDetailModal) {
