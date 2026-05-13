@@ -192,6 +192,55 @@ function formatMailbox(name, email) {
 }
 
 async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
+  const provider = String(process.env.EMAIL_PROVIDER || "smtp").trim().toLowerCase();
+  const recipient = String(to || "").trim();
+  const messageSubject = String(subject || "");
+  const messageBody = String(body || "");
+
+  if (provider === "resend") {
+    const apiKey = process.env.RESEND_API_KEY || "";
+    const resendFromEmail = process.env.RESEND_FROM_EMAIL || "";
+    const resendFromName = String(fromName || process.env.RESEND_FROM_NAME || "LeadGen AI").replace(/"/g, "");
+    const replyTo = String(fromEmail || "").trim();
+
+    if (!apiKey) {
+      throw new Error("Resend is not configured. Set RESEND_API_KEY on the server.");
+    }
+
+    if (!resendFromEmail) {
+      throw new Error("Resend is not configured. Set RESEND_FROM_EMAIL on the server.");
+    }
+
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: `"${resendFromName}" <${resendFromEmail}>`,
+        to: [recipient],
+        subject: messageSubject,
+        text: messageBody,
+        ...(replyTo ? { reply_to: replyTo } : {})
+      })
+    });
+
+    const rawPayload = await response.text();
+    let payload = {};
+    try {
+      payload = rawPayload ? JSON.parse(rawPayload) : {};
+    } catch (parseError) {
+      payload = {};
+    }
+
+    if (!response.ok) {
+      throw new Error(`Resend send failed: ${payload.message || rawPayload || `HTTP ${response.status}`}`);
+    }
+
+    return { messageId: payload.id ? String(payload.id) : "" };
+  }
+
   const user = process.env.GMAIL_SMTP_EMAIL || "";
   const pass = process.env.GMAIL_APP_PASSWORD || "";
 
@@ -228,10 +277,10 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
   try {
     const result = await transporter.sendMail({
       from: formatMailbox(fromName, user),
-      to,
+      to: recipient,
       ...(replyTo ? { replyTo } : {}),
-      subject,
-      text: String(body || "")
+      subject: messageSubject,
+      text: messageBody
     });
 
     return { messageId: result && result.messageId ? String(result.messageId) : "" };
