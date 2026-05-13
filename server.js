@@ -423,38 +423,128 @@ function normalizeLeadWebsite(lead) {
   return String(lead.website || "").trim() || extractWebsiteFromNotes(lead.notes);
 }
 
+const PRODUCT_REASONS = {
+  "autocount-accounting": "Finance control and reporting are a strong fit for this lead profile.",
+  "autocount-pos": "Retail counters, outlet reporting, and stock sync are the main leverage points.",
+  "presoft-mobile-stock": "Sales teams often need live stock visibility while closing orders.",
+  "cubehous-wms-system": "Warehouse movement, picking, and stock control look like the core challenge.",
+  "autocount-cloud-payroll": "Payroll admin and compliance pressure tends to grow with team size."
+};
+
+const BASE_PRODUCT_WEIGHTS = {
+  "autocount-accounting": 26,
+  "autocount-pos": 22,
+  "presoft-mobile-stock": 18,
+  "cubehous-wms-system": 18,
+  "autocount-cloud-payroll": 16
+};
+
+function hashToUnitInterval(seed) {
+  const str = String(seed || "");
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i += 1) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return ((h >>> 0) % 1000000) / 1000000;
+}
+
+function weightedRandomProductKey(weights, seed) {
+  const entries = Object.entries(weights).filter(([, w]) => w > 0);
+  const total = entries.reduce((sum, [, w]) => sum + w, 0);
+  if (!entries.length || total <= 0) {
+    return "autocount-accounting";
+  }
+
+  let r = hashToUnitInterval(seed) * total;
+  for (const [key, w] of entries) {
+    r -= w;
+    if (r <= 0) {
+      return key;
+    }
+  }
+
+  return entries[entries.length - 1][0];
+}
+
+function mergeWeights(base, boosts) {
+  const merged = { ...base };
+  Object.entries(boosts).forEach(([key, delta]) => {
+    if (merged[key] !== undefined) {
+      merged[key] = Math.max(0, merged[key] + delta);
+    }
+  });
+  return merged;
+}
+
 function recommendProduct(lead) {
-  if (lead.painPoint === "warehouse-control" || lead.companyType === "warehouse") {
+  const painPoint = String(lead.painPoint || "").trim();
+  const companyType = String(lead.companyType || "").trim().toLowerCase();
+  const industry = String(lead.industry || "").toLowerCase();
+
+  if (painPoint === "warehouse-control" || companyType === "warehouse") {
     return {
       productKey: "cubehous-wms-system",
-      reason: "Warehouse movement, picking, and stock control are the primary issues."
+      reason: PRODUCT_REASONS["cubehous-wms-system"]
     };
   }
 
-  if (lead.painPoint === "checkout-pos" || lead.companyType === "retail" || lead.companyType === "fnb") {
+  if (painPoint === "checkout-pos" || companyType === "retail" || companyType === "fnb") {
     return {
       productKey: "autocount-pos",
-      reason: "The business depends on retail counters, outlet reporting, and stock sync."
+      reason: PRODUCT_REASONS["autocount-pos"]
     };
   }
 
-  if (lead.painPoint === "stock-visibility" || lead.companyType === "wholesale") {
+  if (painPoint === "stock-visibility" || companyType === "wholesale") {
     return {
       productKey: "presoft-mobile-stock",
-      reason: "The sales team needs live stock visibility while taking customer orders."
+      reason: PRODUCT_REASONS["presoft-mobile-stock"]
     };
   }
 
-  if (lead.painPoint === "payroll-compliance") {
+  if (painPoint === "payroll-compliance") {
     return {
       productKey: "autocount-cloud-payroll",
-      reason: "Payroll admin and compliance are becoming harder as the team grows."
+      reason: PRODUCT_REASONS["autocount-cloud-payroll"]
     };
   }
 
+  if (painPoint === "manual-accounting") {
+    return {
+      productKey: "autocount-accounting",
+      reason: PRODUCT_REASONS["autocount-accounting"]
+    };
+  }
+
+  const seedBase = [lead.id, lead.company, lead.phone, lead.region, lead.externalRef].filter(Boolean).join("::") || String(Math.random());
+
+  const boosts = {};
+  if (/warehouse|fulfillment|logistics|storage|pick\b|picking/i.test(industry)) {
+    boosts["cubehous-wms-system"] = 28;
+    boosts["presoft-mobile-stock"] = 6;
+  }
+  if (/retail|restaurant|f&b|cafe|boutique|salon|store\b|outlet/i.test(industry)) {
+    boosts["autocount-pos"] = 26;
+  }
+  if (/wholesale|distributor|dealer|trading\b/i.test(industry)) {
+    boosts["presoft-mobile-stock"] = 26;
+    boosts["autocount-accounting"] = 8;
+  }
+  if (/manufacturing|factory|production/i.test(industry)) {
+    boosts["autocount-accounting"] = 14;
+    boosts["cubehous-wms-system"] = 10;
+  }
+  if (/clinic|hospital|hr\b|payroll|staffing/i.test(industry)) {
+    boosts["autocount-cloud-payroll"] = 22;
+  }
+
+  const weights = mergeWeights(BASE_PRODUCT_WEIGHTS, boosts);
+  const productKey = weightedRandomProductKey(weights, `${seedBase}|weighted-v1`);
+
   return {
-    productKey: "autocount-accounting",
-    reason: "Finance control and reporting are the best starting point for this lead."
+    productKey,
+    reason: PRODUCT_REASONS[productKey] || PRODUCT_REASONS["autocount-accounting"]
   };
 }
 
@@ -1239,8 +1329,8 @@ async function searchGoogleMapsLeads(
         role: "",
         industry: place.primaryType || "Business",
         region: region || "Other",
-        companyType: companyType || "service",
-        painPoint: painPoint || "manual-accounting",
+        companyType: companyType || "",
+        painPoint: painPoint || "",
         source: "Google Maps",
         status: "new",
         notes: [
