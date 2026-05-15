@@ -1555,7 +1555,7 @@ function sanitizePreviewLead(lead) {
   };
 }
 
-function importExternalLeads(store, incomingLeads) {
+function importExternalLeads(store, incomingLeads, assignedTo) {
   const existingKeys = new Set(store.leads.map(makeLeadIdentity));
   const imported = [];
   let duplicateCount = 0;
@@ -1582,6 +1582,7 @@ function importExternalLeads(store, incomingLeads) {
       emailLastError: "",
       emailLastAttemptAt: null,
       crmLogged: false,
+      assignedTo: assignedTo || "system",
       createdAt: new Date().toISOString(),
       externalRef: incomingLead.externalRef || ""
     };
@@ -2091,7 +2092,7 @@ async function handleApi(request, response, pathname, options = {}) {
       return;
     }
 
-    const { imported, duplicateCount } = importExternalLeads(store, selectedLeads);
+    const { imported, duplicateCount } = importExternalLeads(store, selectedLeads, session.username);
     writeStore(store);
     sendJson(response, 201, {
       importedCount: imported.length,
@@ -2124,6 +2125,7 @@ async function handleApi(request, response, pathname, options = {}) {
       emailLastError: "",
       emailLastAttemptAt: null,
       crmLogged: false,
+      assignedTo: session.username,
       createdAt: new Date().toISOString()
     };
 

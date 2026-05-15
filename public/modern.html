@@ -817,7 +817,8 @@ Best,
       if (l.recommendation?.productName) tags += `<span class="tag tag-product">${l.recommendation.productName}</span>`;
       if (l.sent) tags += `<span class="tag tag-sent">Sent</span>`;
       if (l.crmLogged) tags += `<span class="tag tag-crm">CRM</span>`;
-      return `<div class="lead-card ${l.id === selId ? 'active' : ''}" onclick="openDetail('${l.id}')">${cb ? `<input class="checkbox" type="checkbox" ${sel.has(l.id) ? 'checked' : ''} onclick="event.stopPropagation();togSel('${l.id}',this.checked)">` : ''}<div class="lead-avatar">${init}</div><div class="lead-info"><div class="lead-name">${l.company}</div><div class="lead-sub">${l.contactName || 'No contact'} · ${l.region}</div></div><div class="lead-tags">${tags}</div></div>`;
+      const aInit = (l.assignedTo || '?')[0].toUpperCase();
+      return `<div class="lead-card ${l.id === selId ? 'active' : ''}" onclick="openDetail('${l.id}')">${cb ? `<input class="checkbox" type="checkbox" ${sel.has(l.id) ? 'checked' : ''} onclick="event.stopPropagation();togSel('${l.id}',this.checked)">` : ''}<div class="lead-avatar">${init}</div><div class="lead-info"><div class="lead-name">${l.company}</div><div class="lead-sub">${l.contactName || 'No contact'} · ${l.region}</div></div><div class="lead-tags">${tags}</div><div style="width:24px;height:24px;border-radius:50%;background:var(--indigo);color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0" title="Assigned to ${l.assignedTo || 'unknown'}">${aInit}</div></div>`;
     }
 
     function renderQueue() {
@@ -903,6 +904,7 @@ Best,
 
       // Profile section
       document.getElementById('ld-profile').innerHTML = `
+        <div class="ld-field"><div class="ld-field-label">Assigned To</div><div class="ld-field-value"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;background:var(--blue-600);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${(l.assignedTo || '?')[0].toUpperCase()}</span>${l.assignedTo || 'Unassigned'}</span></div></div>
         <div class="ld-field"><div class="ld-field-label">Source</div><div class="ld-field-value">${l.source}</div></div>
         <div class="ld-field"><div class="ld-field-label">Region</div><div class="ld-field-value">${l.region}</div></div>
         <div class="ld-field"><div class="ld-field-label">Industry</div><div class="ld-field-value">${l.industry || 'N/A'}</div></div>
