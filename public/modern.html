@@ -267,7 +267,13 @@
       <button class="nav-item" onclick="go('outbound', this)">
         <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> Outbound Tools
       </button>
-      <div class="sidebar-footer"><strong>Pro Tip</strong><span>Connect Zoho Bigin to enable full pipeline sync and automated CRM updates.</span></div>
+      <div class="sidebar-footer" style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue-600),var(--purple));display:grid;place-items:center;font-size:13px;font-weight:700;color:white;flex-shrink:0" id="user-avatar">A</div>
+          <div style="flex:1;min-width:0"><strong id="user-display-name" style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:1px">Admin</strong><span id="user-role" style="font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">admin</span></div>
+        </div>
+        <button class="btn" style="font-size:11px;padding:6px 10px;gap:6px;width:100%" onclick="doLogout()"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:var(--text-secondary)"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>Log Out</button>
+      </div>
     </aside>
 
     <main class="main">
@@ -470,8 +476,37 @@ Best,
     let detectedLat = null, detectedLng = null;
 
     // ===== API =====
+    // ===== AUTH CHECK =====
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/auth/session');
+        if (!res.ok) { window.location.href = '/login.html'; return null; }
+        const data = await res.json();
+        // Update user display
+        const avatar = document.getElementById('user-avatar');
+        const name = document.getElementById('user-display-name');
+        const role = document.getElementById('user-role');
+        if (avatar) avatar.textContent = (data.displayName || data.username || '?')[0].toUpperCase();
+        if (name) name.textContent = data.displayName || data.username;
+        if (role) role.textContent = data.role;
+        return data;
+      } catch(e) {
+        window.location.href = '/login.html';
+        return null;
+      }
+    }
+
+    async function doLogout() {
+      try { await fetch('/api/auth/logout', { method: 'POST' }); } catch(e) {}
+      window.location.href = '/login.html';
+    }
+
+    // Run auth check on page load
+    checkAuth();
+
     async function api(url, opts = {}) {
       const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...opts });
+      if (res.status === 401) { window.location.href = '/login.html'; throw new Error('Session expired'); }
       if (!res.ok) {
         let msg = 'Request failed';
         try { const j = await res.json(); msg = j.error || msg; } catch(e) {}

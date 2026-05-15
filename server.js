@@ -4,6 +4,82 @@ const path = require("path");
 const tls = require("tls");
 const { URL } = require("url");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcryptjs");
+const cookie = require("cookie");
+
+// ===== SESSION MANAGEMENT =====
+const SESSION_COOKIE_NAME = "lg_session";
+const SESSION_DURATION_DAYS = 7;
+const activeSessions = new Map(); // sessionId -> { username, role, createdAt, lastAccess }
+
+function createSession(username, role) {
+  const sessionId = generateSessionId();
+  activeSessions.set(sessionId, { username, role, createdAt: Date.now(), lastAccess: Date.now() });
+  return sessionId;
+}
+
+function getSession(sessionId) {
+  if (!sessionId) return null;
+  const session = activeSessions.get(sessionId);
+  if (!session) return null;
+  // Check expiry (7 days)
+  if (Date.now() - session.lastAccess > SESSION_DURATION_DAYS * 86400000) {
+    activeSessions.delete(sessionId);
+    return null;
+  }
+  session.lastAccess = Date.now();
+  return session;
+}
+
+function destroySession(sessionId) {
+  if (sessionId) activeSessions.delete(sessionId);
+}
+
+function generateSessionId() {
+  const bytes = new Uint8Array(32);
+  for (let i = 0; i < 32; i++) bytes[i] = Math.floor(Math.random() * 256);
+  return Buffer.from(bytes).toString("base64url");
+}
+
+function parseSessionCookie(request) {
+  const cookieHeader = request.headers.cookie || "";
+  const parsed = cookie.parse(cookieHeader);
+  return parsed[SESSION_COOKIE_NAME] || null;
+}
+
+function serializeSessionCookie(sessionId) {
+  return cookie.serialize(SESSION_COOKIE_NAME, sessionId, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: SESSION_DURATION_DAYS * 86400
+  });
+}
+
+function setAuthCookie(response, sessionId) {
+  response.setHeader("Set-Cookie", serializeSessionCookie(sessionId));
+}
+
+function clearAuthCookie(response) {
+  response.setHeader("Set-Cookie", cookie.serialize(SESSION_COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0
+  }));
+}
+
+function requireAuth(request, response, store) {
+  const sessionId = parseSessionCookie(request);
+  const session = getSession(sessionId);
+  if (!session) {
+    sendJson(response, 401, { error: "Not authenticated" });
+    return null;
+  }
+  return session;
+}
 
 const PORT = Number(process.env.PORT || 3000);
 const LOCAL_DEFAULT_DATA_PATH = path.join(__dirname, "data", "store.json");
@@ -89,12 +165,60 @@ const products = {
 
 const EARTH_RADIUS_KM = 6371;
 
+async function hashPassword(password) {
+  return bcrypt.hash(password, 10);
+}
+
 function defaultStore() {
   return {
     leads: [],
     activities: [],
-    integrations: { bigin: {} }
+    users: []
   };
+}
+
+async function ensureDefaultUsers(store) {
+  if (!Array.isArray(store.users)) {
+    store.users = [];
+  }
+
+  // Check if admin exists
+  const hasAdmin = store.users.some(u => u.username === "admin");
+  const hasUser = store.users.some(u => u.username === "user");
+
+  if (!hasAdmin) {
+    store.users.push({
+      username: "admin",
+      passwordHash: await hashPassword("admin123"),
+      role: "admin",
+      displayName: "Admin",
+      bigin: {}
+    });
+  }
+
+  if (!hasUser) {
+    store.users.push({
+      username: "user",
+      passwordHash: await hashPassword("user123"),
+      role: "user",
+      displayName: "Staff User",
+      bigin: {}
+    });
+  }
+}
+
+// Migrate old global bigin to admin user
+function migrateGlobalBigin(store) {
+  if (store.integrations && store.integrations.bigin) {
+    const adminUser = store.users.find(u => u.username === "admin");
+    if (adminUser) {
+      adminUser.bigin = { ...store.integrations.bigin };
+    }
+    delete store.integrations.bigin;
+    if (Object.keys(store.integrations).length === 0) {
+      delete store.integrations;
+    }
+  }
 }
 
 function ensureDataFile() {
@@ -115,9 +239,24 @@ function ensureDataFile() {
   fs.writeFileSync(DATA_PATH, JSON.stringify(defaultStore(), null, 2));
 }
 
-function readStore() {
+async function readStore() {
   ensureDataFile();
-  return ensureStoreShape(JSON.parse(fs.readFileSync(DATA_PATH, "utf8")));
+  let store = JSON.parse(fs.readFileSync(DATA_PATH, "utf8"));
+  store = ensureStoreShape(store);
+
+  // Migrate old global bigin on first read
+  if (store.integrations && store.integrations.bigin) {
+    migrateGlobalBigin(store);
+    writeStore(store);
+  }
+
+  // Ensure default users exist (first run)
+  if (!store.users || store.users.length === 0) {
+    await ensureDefaultUsers(store);
+    writeStore(store);
+  }
+
+  return store;
 }
 
 function writeStore(store) {
@@ -127,7 +266,7 @@ function writeStore(store) {
 
 function ensureStoreShape(store) {
   if (!store || typeof store !== "object") {
-    return defaultStore();
+    return { leads: [], activities: [], users: [] };
   }
 
   if (!Array.isArray(store.leads)) {
@@ -138,12 +277,23 @@ function ensureStoreShape(store) {
     store.activities = [];
   }
 
-  if (!store.integrations || typeof store.integrations !== "object") {
-    store.integrations = {};
+  if (!Array.isArray(store.users)) {
+    store.users = [];
   }
 
-  if (!store.integrations.bigin || typeof store.integrations.bigin !== "object") {
-    store.integrations.bigin = {};
+  // Ensure each user has a bigin object
+  store.users.forEach(user => {
+    if (!user.bigin || typeof user.bigin !== "object") {
+      user.bigin = {};
+    }
+  });
+
+  // Clean up old integrations structure
+  if (store.integrations && store.integrations.bigin) {
+    delete store.integrations.bigin;
+    if (Object.keys(store.integrations).length === 0) {
+      delete store.integrations;
+    }
   }
 
   store.leads = store.leads.map((lead) => ({
@@ -702,17 +852,22 @@ function getBiginClientSecret() {
   return process.env.BIGIN_CLIENT_SECRET || "";
 }
 
-function getBiginConnection(store) {
-  ensureStoreShape(store);
-  return store.integrations.bigin;
+// ===== PER-USER BIGIN =====
+function getUserBigin(store, username) {
+  const user = store.users.find(u => u.username === username);
+  if (!user) throw new Error("User not found");
+  if (!user.bigin || typeof user.bigin !== "object") {
+    user.bigin = {};
+  }
+  return user.bigin;
 }
 
-function getBiginApiDomain(store) {
-  return process.env.BIGIN_API_DOMAIN || getBiginConnection(store).apiDomain || "https://www.zohoapis.com";
+function getUserBiginApiDomain(store, username) {
+  return process.env.BIGIN_API_DOMAIN || getUserBigin(store, username).apiDomain || "https://www.zohoapis.com";
 }
 
-function getBiginRefreshToken(store) {
-  return process.env.BIGIN_REFRESH_TOKEN || getBiginConnection(store).refreshToken || "";
+function getUserBiginRefreshToken(store, username) {
+  return process.env.BIGIN_REFRESH_TOKEN || getUserBigin(store, username).refreshToken || "";
 }
 
 function ensureBiginClientConfig() {
@@ -753,7 +908,7 @@ async function readJsonErrorAware(response) {
   return payload || {};
 }
 
-async function exchangeBiginAuthorizationCode(request, store, code, fetchImpl = fetch) {
+async function exchangeBiginAuthorizationCode(request, store, username, code, fetchImpl = fetch) {
   ensureBiginClientConfig();
 
   const tokenResponse = await fetchImpl(`${getBiginAccountsServer()}/oauth/v2/token`, {
@@ -771,7 +926,7 @@ async function exchangeBiginAuthorizationCode(request, store, code, fetchImpl = 
   });
 
   const payload = await readJsonErrorAware(tokenResponse);
-  const connection = getBiginConnection(store);
+  const connection = getUserBigin(store, username);
   connection.refreshToken = payload.refresh_token || connection.refreshToken || "";
   connection.apiDomain = payload.api_domain || connection.apiDomain || "https://www.zohoapis.com";
   connection.connectedAt = new Date().toISOString();
@@ -780,9 +935,9 @@ async function exchangeBiginAuthorizationCode(request, store, code, fetchImpl = 
   return connection;
 }
 
-async function getBiginAccessToken(store, fetchImpl = fetch) {
+async function getUserBiginAccessToken(store, username, fetchImpl = fetch) {
   ensureBiginClientConfig();
-  const refreshToken = getBiginRefreshToken(store);
+  const refreshToken = getUserBiginRefreshToken(store, username);
 
   if (!refreshToken) {
     throw new Error("Bigin is not connected yet. Open /api/integrations/bigin/connect once to authorize it first.");
@@ -802,18 +957,18 @@ async function getBiginAccessToken(store, fetchImpl = fetch) {
   });
 
   const payload = await readJsonErrorAware(tokenResponse);
-  const connection = getBiginConnection(store);
+  const connection = getUserBigin(store, username);
   connection.apiDomain = payload.api_domain || connection.apiDomain || "https://www.zohoapis.com";
   connection.lastTokenAt = new Date().toISOString();
   writeStore(store);
   return {
     accessToken: payload.access_token,
-    apiDomain: getBiginApiDomain(store)
+    apiDomain: getUserBiginApiDomain(store, username)
   };
 }
 
-async function createBiginRecord(store, moduleApiName, data, fetchImpl = fetch) {
-  const { accessToken, apiDomain } = await getBiginAccessToken(store, fetchImpl);
+async function createBiginRecord(store, username, moduleApiName, data, fetchImpl = fetch) {
+  const { accessToken, apiDomain } = await getUserBiginAccessToken(store, username, fetchImpl);
   const endpoint = `${apiDomain}/bigin/v2/${moduleApiName}`;
   const response = await fetchImpl(endpoint, {
     method: "POST",
@@ -839,8 +994,8 @@ async function createBiginRecord(store, moduleApiName, data, fetchImpl = fetch) 
   return item.details || {};
 }
 
-async function getBiginJson(store, path, fetchImpl = fetch) {
-  const { accessToken, apiDomain } = await getBiginAccessToken(store, fetchImpl);
+async function getUserBiginJson(store, username, path, fetchImpl = fetch) {
+  const { accessToken, apiDomain } = await getUserBiginAccessToken(store, username, fetchImpl);
   const normalizedPath = String(path || "").startsWith("/") ? path : `/${path}`;
   const endpoint = `${apiDomain}${normalizedPath}`;
   const response = await fetchImpl(endpoint, {
@@ -853,10 +1008,10 @@ async function getBiginJson(store, path, fetchImpl = fetch) {
   return readJsonErrorAware(response);
 }
 
-async function getBiginPipelineMetadata(store, fetchImpl = fetch) {
+async function getUserBiginPipelineMetadata(store, username, fetchImpl = fetch) {
   const [layoutsPayload, fieldsPayload] = await Promise.all([
-    getBiginJson(store, "/bigin/v2/settings/layouts?module=Pipelines", fetchImpl),
-    getBiginJson(store, "/bigin/v2/settings/fields?module=Pipelines", fetchImpl)
+    getUserBiginJson(store, username, "/bigin/v2/settings/layouts?module=Pipelines", fetchImpl),
+    getUserBiginJson(store, username, "/bigin/v2/settings/fields?module=Pipelines", fetchImpl)
   ]);
 
   const layouts = Array.isArray(layoutsPayload.layouts) ? layoutsPayload.layouts : [];
@@ -921,8 +1076,8 @@ function chooseStageValue(stageField) {
   return fallback ? fallback.actual_value || fallback.display_value : BIGIN_DEFAULT_STAGE;
 }
 
-async function resolveBiginPipelineDefaults(store, fetchImpl = fetch) {
-  const metadata = await getBiginPipelineMetadata(store, fetchImpl);
+async function resolveBiginPipelineDefaults(store, username, fetchImpl = fetch) {
+  const metadata = await getUserBiginPipelineMetadata(store, username, fetchImpl);
   const pipelineLayout = choosePipelineLayout(metadata.layouts);
   const subPipeline = chooseSubPipelineValue(metadata.subPipelineField);
   const stage = chooseStageValue(metadata.stageField);
@@ -1035,7 +1190,7 @@ function buildBiginDealPayload(lead, companyId, contactId, pipelineDefaults) {
   return payload;
 }
 
-async function pushLeadToBigin(store, lead, fetchImpl = fetch) {
+async function pushLeadToBigin(store, username, lead, fetchImpl = fetch) {
   if (!lead.bigin || typeof lead.bigin !== "object") {
     lead.bigin = {};
   }
@@ -1043,7 +1198,7 @@ async function pushLeadToBigin(store, lead, fetchImpl = fetch) {
   if (!lead.bigin.companyId) {
     const companyPayload = buildBiginCompanyPayload(lead);
     try {
-      const companyDetails = await createBiginRecord(store, "Accounts", companyPayload, fetchImpl);
+      const companyDetails = await createBiginRecord(store, username, "Accounts", companyPayload, fetchImpl);
       lead.bigin.companyId = companyDetails.id;
       lead.bigin.companyName = lead.company || "";
       writeStore(store);
@@ -1060,7 +1215,7 @@ async function pushLeadToBigin(store, lead, fetchImpl = fetch) {
   if (shouldCreateContact && !lead.bigin.contactId) {
     const contactPayload = buildBiginContactPayload(lead, lead.bigin.companyId);
     try {
-      const contactDetails = await createBiginRecord(store, "Contacts", contactPayload, fetchImpl);
+      const contactDetails = await createBiginRecord(store, username, "Contacts", contactPayload, fetchImpl);
       lead.bigin.contactId = contactDetails.id;
       writeStore(store);
     } catch (error) {
@@ -1071,10 +1226,10 @@ async function pushLeadToBigin(store, lead, fetchImpl = fetch) {
   }
 
   if (!lead.bigin.dealId) {
-    const pipelineDefaults = await resolveBiginPipelineDefaults(store, fetchImpl);
+    const pipelineDefaults = await resolveBiginPipelineDefaults(store, username, fetchImpl);
     const dealPayload = buildBiginDealPayload(lead, lead.bigin.companyId, lead.bigin.contactId, pipelineDefaults);
     try {
-      const dealDetails = await createBiginRecord(store, "Pipelines", dealPayload, fetchImpl);
+      const dealDetails = await createBiginRecord(store, username, "Pipelines", dealPayload, fetchImpl);
       lead.bigin.dealId = dealDetails.id;
       lead.bigin.pipelineId = pipelineDefaults.pipelineId;
       lead.bigin.pipelineName = pipelineDefaults.pipelineName;
@@ -1587,7 +1742,6 @@ async function handleApi(request, response, pathname, options = {}) {
   try {
     store = readStore();
   } catch (err) {
-    // If data file fails, use in-memory fallback
     console.error('Data file error, using fallback:', err.message);
     store = defaultStore();
   }
@@ -1597,6 +1751,63 @@ async function handleApi(request, response, pathname, options = {}) {
   const biginFetch = options.biginFetch || fetch;
   const emailDebugLogger = options.emailDebugLogger;
 
+  // ===== AUTH ENDPOINTS (no auth required) =====
+
+  if (request.method === "POST" && pathname === "/api/auth/login") {
+    const body = await readRequestBody(request);
+    const username = String(body.username || "").trim().toLowerCase();
+    const password = String(body.password || "");
+
+    if (!username || !password) {
+      sendJson(response, 400, { error: "Username and password are required." });
+      return;
+    }
+
+    const user = store.users.find(u => u.username === username);
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      sendJson(response, 401, { error: "Invalid username or password." });
+      return;
+    }
+
+    const sessionId = createSession(user.username, user.role);
+    setAuthCookie(response, sessionId);
+    sendJson(response, 200, {
+      username: user.username,
+      role: user.role,
+      displayName: user.displayName || user.username
+    });
+    return;
+  }
+
+  if (request.method === "POST" && pathname === "/api/auth/logout") {
+    const sessionId = parseSessionCookie(request);
+    destroySession(sessionId);
+    clearAuthCookie(response);
+    sendJson(response, 200, { message: "Logged out." });
+    return;
+  }
+
+  if (request.method === "GET" && pathname === "/api/auth/session") {
+    const sessionId = parseSessionCookie(request);
+    const session = getSession(sessionId);
+    if (!session) {
+      sendJson(response, 401, { error: "Not authenticated" });
+      return;
+    }
+    sendJson(response, 200, {
+      username: session.username,
+      role: session.role,
+      displayName: session.username
+    });
+    return;
+  }
+
+  // ===== ALL OTHER API ROUTES REQUIRE AUTH =====
+  const session = requireAuth(request, response, store);
+  if (!session) return;
+
+  // ===== BIGIN ENDPOINTS =====
+
   if (request.method === "GET" && pathname === "/api/integrations/bigin/connect") {
     response.writeHead(302, { Location: buildBiginConnectUrl(request) });
     response.end();
@@ -1604,10 +1815,10 @@ async function handleApi(request, response, pathname, options = {}) {
   }
 
   if (request.method === "GET" && pathname === "/api/integrations/bigin/status") {
-    const connection = getBiginConnection(store);
+    const connection = getUserBigin(store, session.username);
     sendJson(response, 200, {
-      connected: Boolean(getBiginRefreshToken(store)),
-      apiDomain: getBiginApiDomain(store),
+      connected: Boolean(getUserBiginRefreshToken(store, session.username)),
+      apiDomain: getUserBiginApiDomain(store, session.username),
       connectedAt: connection.connectedAt || null,
       lastTokenAt: connection.lastTokenAt || null
     });
@@ -1984,7 +2195,7 @@ async function handleApi(request, response, pathname, options = {}) {
 
     if (action === "crm" && request.method === "PATCH") {
       if (!lead.crmLogged) {
-        await pushLeadToBigin(store, lead, biginFetch);
+        await pushLeadToBigin(store, session.username, lead, biginFetch);
         appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`);
       } else if (lead.bigin && lead.bigin.dealId) {
         appendActivity(store, lead.id, "CRM sync skipped", `${lead.company} already has an existing Bigin deal.`);
@@ -2033,24 +2244,32 @@ function createAppServer(options = {}) {
       }
 
       if (pathname === "/oauth/callback") {
+        const sessionId = parseSessionCookie(request);
+        const session = getSession(sessionId);
+        const destination = "/login.html";
+        const failureDestination = `/login.html?error=${encodeURIComponent("OAuth authorization failed")}`;
+
+        if (!session) {
+          response.writeHead(302, { Location: destination });
+          response.end();
+          return;
+        }
+
         const store = readStore();
 
         if (url.searchParams.get("state") === "bigin-connect" && url.searchParams.get("code")) {
           try {
-            await exchangeBiginAuthorizationCode(request, store, url.searchParams.get("code"));
-            response.writeHead(302, { Location: "/?bigin=connected" });
+            await exchangeBiginAuthorizationCode(request, store, session.username, url.searchParams.get("code"));
+            response.writeHead(302, { Location: `${destination}?bigin=connected` });
             response.end();
             return;
           } catch (error) {
-            const failureUrl = `/?bigin=error&message=${encodeURIComponent(error.message || "Authorization failed")}`;
-            response.writeHead(302, { Location: failureUrl });
+            response.writeHead(302, { Location: `${failureDestination}&message=${encodeURIComponent(error.message || "Authorization failed")}` });
             response.end();
             return;
           }
         }
 
-        const params = url.searchParams.toString();
-        const destination = params ? `/?${params}` : "/";
         sendHtml(
           response,
           200,
@@ -2070,7 +2289,7 @@ function createAppServer(options = {}) {
         return;
       }
 
-      const target = pathname === "/" ? path.join(PUBLIC_DIR, "modern.html") : path.join(PUBLIC_DIR, pathname);
+      const target = pathname === "/" ? path.join(PUBLIC_DIR, "login.html") : path.join(PUBLIC_DIR, pathname);
       sendFile(response, target);
     } catch (error) {
       sendJson(response, 500, { error: error.message || "Server error" });
@@ -2087,19 +2306,21 @@ function startServer(port = PORT, options = {}) {
 
 if (require.main === module) {
   // Ensure data directory and file exist before starting
-  try {
-    ensureDataFile();
-    const store = readStore();
-    process.stdout.write(`Lead automation app running on http://localhost:${PORT}\n`);
-    process.stdout.write(`Data file: ${DATA_PATH}\n`);
-  } catch (err) {
-    process.stderr.write(`Warning: Could not initialize data file: ${err.message}\n`);
-    process.stderr.write(`Falling back to in-memory store.\n`);
-  }
-  startServer().catch((err) => {
-    process.stderr.write(`Server failed to start: ${err.message}\n`);
-    process.exit(1);
-  });
+  (async () => {
+    try {
+      ensureDataFile();
+      await readStore();
+      process.stdout.write(`Lead automation app running on http://localhost:${PORT}\n`);
+      process.stdout.write(`Data file: ${DATA_PATH}\n`);
+    } catch (err) {
+      process.stderr.write(`Warning: Could not initialize data file: ${err.message}\n`);
+      process.stderr.write(`Falling back to in-memory store.\n`);
+    }
+    startServer().catch((err) => {
+      process.stderr.write(`Server failed to start: ${err.message}\n`);
+      process.exit(1);
+    });
+  })();
 }
 
 module.exports = { createAppServer, startServer };

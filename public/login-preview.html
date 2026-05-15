@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeadGen AI — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fc; --surface: #ffffff; --surface-hover: #f8f9fc;
+      --border: #e8eaef; --border-light: #f1f3f8;
+      --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+      --blue: #3b82f6; --blue-50: #eff6ff; --blue-100: #dbeafe; --blue-600: #2563eb; --blue-700: #1d4ed8;
+      --green: #10b981; --green-50: #ecfdf5; --green-100: #d1fae5;
+      --amber: #f59e0b; --amber-50: #fffbeb; --amber-100: #fef3c7;
+      --red: #ef4444; --red-50: #fef2f2; --red-100: #fee2e2;
+      --purple: #8b5cf6; --purple-50: #f5f3ff; --purple-100: #ede9fe;
+      --indigo: #6366f1; --cyan: #06b6d4;
+      --radius-sm: 8px; --radius: 12px; --radius-lg: 16px; --radius-xl: 20px;
+      --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.03); --shadow: 0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px -1px rgba(0,0,0,0.03);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.03);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.07), 0 8px 10px -6px rgba(0,0,0,0.04);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(59,130,246,0.04) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,92,246,0.03) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+
+    /* ===== LOGIN PAGE ===== */
+    .login-page { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+    .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 40px 48px; width: 100%; max-width: 420px; box-shadow: var(--shadow-xl); }
+    .login-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 32px; }
+    .login-brand-icon { width: 48px; height: 48px; border-radius: var(--radius-lg); background: linear-gradient(135deg, var(--blue), var(--indigo)); display: grid; place-items: center; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+    .login-brand-icon svg { width: 24px; height: 24px; fill: #ffffff; }
+    .login-brand h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+    .login-brand p { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .login-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .login-card .subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 28px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; color: var(--text); background: var(--surface); transition: all 150ms ease; outline: none; }
+    .form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+    .form-input::placeholder { color: var(--text-muted); }
+    .input-wrap { position: relative; }
+    .input-wrap .toggle-pw { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; display: flex; align-items: center; }
+    .input-wrap .toggle-pw:hover { color: var(--text-secondary); }
+    .input-wrap .toggle-pw svg { width: 18px; height: 18px; fill: currentColor; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 20px; border-radius: var(--radius-sm); font-weight: 600; font-size: 14px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: all 150ms ease; font-family: inherit; white-space: nowrap; box-shadow: var(--shadow-sm); width: 100%; }
+    .btn:hover { background: var(--surface-hover); box-shadow: var(--shadow); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-primary { background: var(--blue-600); border-color: var(--blue-600); color: white; box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
+    .btn-primary:hover { background: var(--blue-700); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn svg { width: 16px; height: 16px; fill: currentColor; }
+    .btn-primary svg { fill: white; }
+
+    .login-error { background: var(--red-50); border: 1px solid var(--red-100); color: var(--red); font-size: 12px; font-weight: 500; padding: 10px 14px; border-radius: var(--radius-sm); margin-bottom: 18px; display: none; align-items: center; gap: 8px; }
+    .login-error svg { width: 16px; height: 16px; fill: var(--red); flex-shrink: 0; }
+    .login-error.show { display: flex; }
+
+    .login-footer { text-align: center; margin-top: 24px; font-size: 11px; color: var(--text-muted); }
+
+    /* ===== LOADING SPINNER ===== */
+    .loading-spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== HIDDEN ===== */
+    [hidden] { display: none !important; }
+
+    /* ===== APP (shown after login) ===== */
+    .app { position: relative; z-index: 1; }
+    .app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .app-header-left { display: flex; align-items: center; gap: 14px; }
+    .app-logo { width: 32px; height: 32px; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--blue), var(--indigo)); display: grid; place-items: center; }
+    .app-logo svg { width: 18px; height: 18px; fill: white; }
+    .app-header h1 { font-size: 16px; font-weight: 700; }
+    .app-header-right { display: flex; align-items: center; gap: 16px; }
+    .user-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--blue-50); display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--blue-600); }
+    .user-badge .role-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .role-admin { background: var(--purple-50); color: var(--purple); }
+    .role-user { background: var(--green-50); color: var(--green); }
+    .btn-logout { font-size: 12px; padding: 6px 14px; }
+
+    .app-body { padding: 24px; }
+    .welcome-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; max-width: 600px; margin: 60px auto; text-align: center; }
+    .welcome-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .welcome-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; }
+    .welcome-card .preview-note { font-size: 12px; color: var(--amber); background: var(--amber-50); padding: 10px 16px; border-radius: var(--radius-sm); border: 1px solid var(--amber-100); display: inline-block; }
+
+    .switch-account { display: flex; justify-content: center; margin-top: 16px; }
+    .switch-account button { background: none; border: none; color: var(--blue); cursor: pointer; font-size: 12px; font-weight: 600; font-family: inherit; text-decoration: underline; }
+    .switch-account button:hover { color: var(--blue-700); }
+  </style>
+</head>
+<body>
+
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div class="login-page" id="login-screen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        </div>
+        <div><h1>LeadGen AI</h1><p>Lead Management Platform</p></div>
+      </div>
+
+      <h2 id="login-title">Welcome back</h2>
+      <p class="subtitle" id="login-subtitle">Sign in to your account to continue.</p>
+
+      <div class="login-error" id="login-error">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <span id="login-error-text">Invalid username or password.</span>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <input class="form-input" id="username" type="text" placeholder="Enter your username" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-wrap">
+            <input class="form-input" id="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <button type="button" class="toggle-pw" onclick="togglePassword()" tabindex="-1">
+              <svg id="eye-icon" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" id="login-btn">
+          <svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg>
+          Sign In
+        </button>
+      </form>
+
+      <p class="login-footer">This is a preview — no real authentication yet.</p>
+    </div>
+  </div>
+
+  <!-- ===== APP SCREEN (shown after login) ===== -->
+  <div class="app" id="app-screen" hidden>
+    <div class="app-header">
+      <div class="app-header-left">
+        <div class="app-logo"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+        <h1>LeadGen AI</h1>
+      </div>
+      <div class="app-header-right">
+        <div class="user-badge">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div>
+            <div style="font-weight:600;font-size:13px" id="user-display-name">Admin</div>
+            <span class="role-tag role-admin" id="user-role-tag">Admin</span>
+          </div>
+        </div>
+        <button class="btn btn-logout" onclick="handleLogout()">Log Out</button>
+      </div>
+    </div>
+    <div class="app-body">
+      <div class="welcome-card">
+        <h2 id="welcome-msg">Welcome, Admin!</h2>
+        <p>You're logged in and ready to go. This is a preview — the real authentication is not connected yet.</p>
+        <div class="preview-note"> Preview mode — no backend authentication connected</div>
+        <div class="switch-account">
+          <button onclick="handleLogout()">Switch Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== DEMO CREDENTIALS (hardcoded for preview only) =====
+    const DEMO_USERS = {
+      admin: { password: 'admin123', role: 'admin', displayName: 'Admin' },
+      user:  { password: 'user123',  role: 'user',  displayName: 'Staff User' }
+    };
+
+    const loginScreen  = document.getElementById('login-screen');
+    const appScreen    = document.getElementById('app-screen');
+    const loginForm    = document.getElementById('login-form');
+    const loginError   = document.getElementById('login-error');
+    const loginBtn     = document.getElementById('login-btn');
+    const usernameInput = document.getElementById('username');
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const username = usernameInput.value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      // Hide any previous error
+      loginError.classList.remove('show');
+
+      const user = DEMO_USERS[username];
+
+      // Simulate loading
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<div class="loading-spinner"></div> Signing in...';
+
+      setTimeout(() => {
+        if (!user || user.password !== password) {
+          // Wrong credentials
+          loginError.classList.add('show');
+          document.getElementById('login-error-text').textContent = 'Invalid username or password.';
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg> Sign In';
+          return;
+        }
+
+        // Success — show app screen
+        document.getElementById('user-avatar').textContent = user.displayName[0];
+        document.getElementById('user-display-name').textContent = user.displayName;
+
+        const roleTag = document.getElementById('user-role-tag');
+        roleTag.textContent = user.role === 'admin' ? 'Admin' : 'User';
+        roleTag.className = 'role-tag ' + (user.role === 'admin' ? 'role-admin' : 'role-user');
+
+        document.getElementById('welcome-msg').textContent = 'Welcome, ' + user.displayName + '!';
+
+        loginScreen.hidden = true;
+        appScreen.hidden = false;
+
+        // Reset button
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg> Sign In';
+      }, 800);
+    }
+
+    function handleLogout() {
+      appScreen.hidden = true;
+      loginScreen.hidden = false;
+      loginForm.reset();
+      loginError.classList.remove('show');
+      loginBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg> Sign In';
+      usernameInput.focus();
+    }
+
+    function togglePassword() {
+      const pw = document.getElementById('password');
+      const icon = document.getElementById('eye-icon');
+      if (pw.type === 'password') {
+        pw.type = 'text';
+        icon.innerHTML = '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
+      } else {
+        pw.type = 'password';
+        icon.innerHTML = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
+      }
+    }
+  </script>
+</body>
+</html>

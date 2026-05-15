@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadGen AI — Login (Style 1: Split Screen)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+  background: #f8f9fc;
+  color: #111827;
+}
+
+/* ===== LEFT PANEL ===== */
+.left-panel {
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1e1b4b 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle at 30% 40%, rgba(59,130,246,0.15) 0%, transparent 50%),
+              radial-gradient(circle at 70% 70%, rgba(139,92,246,0.1) 0%, transparent 40%);
+  animation: float 15s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -20px) rotate(2deg); }
+  66% { transform: translate(-20px, 20px) rotate(-1deg); }
+}
+
+.left-panel .content {
+  position: relative;
+  z-index: 1;
+}
+
+.left-panel .logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.left-panel .logo-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(59,130,246,0.2);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+}
+
+.left-panel .logo-icon svg { width: 22px; height: 22px; fill: #60a5fa; }
+.left-panel .logo h2 { font-size: 18px; font-weight: 700; color: #f1f5f9; }
+
+.left-panel h1 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #f1f5f9;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  margin-bottom: 16px;
+}
+
+.left-panel h1 span {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.left-panel .desc {
+  font-size: 15px;
+  color: #94a3b8;
+  line-height: 1.7;
+  max-width: 420px;
+  margin-bottom: 48px;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  gap: 32px;
+}
+
+.stat {
+  text-align: left;
+}
+
+.stat .number {
+  font-size: 28px;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: -0.03em;
+}
+
+.stat .label {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Floating shapes */
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.06;
+  background: #60a5fa;
+}
+
+.shape-1 { width: 300px; height: 300px; bottom: -80px; right: -60px; }
+.shape-2 { width: 150px; height: 150px; top: 60px; right: 40px; opacity: 0.04; }
+
+/* ===== RIGHT PANEL ===== */
+.right-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-card h2 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.login-card .subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 32px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background: #fff;
+  transition: all 150ms ease;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.08);
+}
+
+.form-input::placeholder { color: #9ca3af; }
+
+.input-wrap { position: relative; }
+
+.input-wrap .toggle-pw {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+.input-wrap .toggle-pw:hover { color: #6b7280; }
+.input-wrap .toggle-pw svg { width: 18px; height: 18px; fill: currentColor; }
+
+.btn {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(37,99,235,0.45);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-primary svg { width: 16px; height: 16px; fill: white; }
+
+.login-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-error svg { width: 16px; height: 16px; fill: #dc2626; flex-shrink: 0; }
+.login-error.show { display: flex; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.checkbox-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.checkbox-wrap input {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.forgot-link {
+  font-size: 13px;
+  color: #3b82f6;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.forgot-link:hover { text-decoration: underline; }
+
+.loading-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== APP SCREEN ===== */
+.app-screen {
+  display: none;
+  min-height: 100vh;
+  background: #f8f9fc;
+  padding: 24px;
+}
+
+.app-screen.show { display: block; }
+.login-page.hide { display: none; }
+
+.app-header {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.app-header-left { display: flex; align-items: center; gap: 12px; }
+.app-header-left .logo-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  display: grid;
+  place-items: center;
+}
+.app-header-left .logo-sm svg { width: 18px; height: 18px; fill: white; }
+.app-header h1 { font-size: 16px; font-weight: 700; }
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #eff6ff;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.user-info { text-align: right; }
+.user-info .name { font-size: 13px; font-weight: 600; }
+.user-info .role {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.role-admin { background: #f5f3ff; color: #7c3aed; }
+.role-user { background: #ecfdf5; color: #059669; }
+
+.welcome-box {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 800px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+.welcome-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.welcome-box p { font-size: 14px; color: #6b7280; margin-bottom: 20px; }
+.preview-tag {
+  display: inline-block;
+  font-size: 12px;
+  color: #d97706;
+  background: #fffbeb;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #fde68a;
+}
+
+.switch-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  margin-top: 16px;
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  body { grid-template-columns: 1fr; }
+  .left-panel { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div class="login-page" id="login-page">
+  <div class="left-panel">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="content">
+      <div class="logo">
+        <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+        <h2>LeadGen AI</h2>
+      </div>
+      <h1>Find & convert leads<br><span>faster than ever</span></h1>
+      <p class="desc">Search businesses by location and category, import them into your CRM, and launch targeted email campaigns — all from one dashboard.</p>
+      <div class="stats">
+        <div class="stat"><div class="number">65M+</div><div class="label">Business Leads</div></div>
+        <div class="stat"><div class="number">40K+</div><div class="label">Active Users</div></div>
+        <div class="stat"><div class="number">98%</div><div class="label">Data Accuracy</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="login-card">
+      <h2>Sign in</h2>
+      <p class="subtitle">Enter your credentials to access your dashboard.</p>
+
+      <div class="login-error" id="login-error">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <span id="error-text">Invalid username or password.</span>
+      </div>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input class="form-input" id="username" type="text" placeholder="Enter your username" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="input-wrap">
+            <input class="form-input" id="password" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+            <button type="button" class="toggle-pw" onclick="togglePw()"><svg id="eye" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></button>
+          </div>
+        </div>
+        <div class="remember-row">
+          <label class="checkbox-wrap"><input type="checkbox" checked> Remember me</label>
+          <a class="forgot-link">Forgot password?</a>
+        </div>
+        <button class="btn btn-primary" type="submit" id="login-btn">
+          <svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg>
+          Sign In
+        </button>
+      </form>
+
+      <div class="divider">preview mode</div>
+      <p style="text-align:center;font-size:12px;color:#9ca3af;">
+        admin / admin123 &nbsp;•&nbsp; user / user123
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP SCREEN ===== -->
+<div class="app-screen" id="app-screen">
+  <div class="app-header">
+    <div class="app-header-left">
+      <div class="logo-sm"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+      <h1>LeadGen AI</h1>
+    </div>
+    <div class="user-badge">
+      <div class="user-info">
+        <div class="name" id="app-name">Admin</div>
+        <span class="role role-admin" id="app-role">Admin</span>
+      </div>
+      <div class="user-avatar" id="app-avatar">A</div>
+    </div>
+  </div>
+  <div class="welcome-box">
+    <h2 id="welcome-msg">Welcome, Admin!</h2>
+    <p>You're logged in successfully. This is a preview — the real authentication is not connected yet.</p>
+    <div class="preview-tag"> Preview mode — no backend authentication</div>
+    <br>
+    <button class="switch-btn" onclick="handleLogout()">Switch Account</button>
+  </div>
+</div>
+
+<script>
+const DEMO_USERS = {
+  admin: { password: 'admin123', role: 'admin', displayName: 'Admin' },
+  user:  { password: 'user123',  role: 'user',  displayName: 'Staff User' }
+};
+
+function handleLogin(e) {
+  e.preventDefault();
+  const username = document.getElementById('username').value.trim().toLowerCase();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.classList.remove('show');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="loading-spinner"></div> Signing in...';
+  setTimeout(() => {
+    const user = DEMO_USERS[username];
+    if (!user || user.password !== password) {
+      err.classList.add('show');
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg> Sign In';
+      return;
+    }
+    document.getElementById('app-avatar').textContent = user.displayName[0];
+    document.getElementById('app-name').textContent = user.displayName;
+    const roleEl = document.getElementById('app-role');
+    roleEl.textContent = user.role === 'admin' ? 'Admin' : 'User';
+    roleEl.className = 'role ' + (user.role === 'admin' ? 'role-admin' : 'role-user');
+    document.getElementById('welcome-msg').textContent = 'Welcome, ' + user.displayName + '!';
+    document.getElementById('login-page').classList.add('hide');
+    document.getElementById('app-screen').classList.add('show');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg> Sign In';
+  }, 800);
+}
+
+function handleLogout() {
+  document.getElementById('app-screen').classList.remove('show');
+  document.getElementById('login-page').classList.remove('hide');
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('login-error').classList.remove('show');
+}
+
+function togglePw() {
+  const pw = document.getElementById('password');
+  const icon = document.getElementById('eye');
+  if (pw.type === 'password') {
+    pw.type = 'text';
+    icon.innerHTML = '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>';
+  } else {
+    pw.type = 'password';
+    icon.innerHTML = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
+  }
+}
+</script>
+</body>
+</html>
