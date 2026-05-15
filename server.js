@@ -210,10 +210,13 @@ async function ensureDefaultUsers(store) {
 // Migrate old global bigin to admin user
 function migrateGlobalBigin(store) {
   if (store.integrations && store.integrations.bigin) {
-    const adminUser = store.users.find(u => u.username === "admin");
-    if (adminUser) {
-      adminUser.bigin = { ...store.integrations.bigin };
+    if (!Array.isArray(store.users)) store.users = [];
+    let adminUser = store.users.find(u => u.username === "admin");
+    if (!adminUser) {
+      adminUser = { username: "admin", bigin: {} };
+      store.users.push(adminUser);
     }
+    adminUser.bigin = { ...store.integrations.bigin };
     delete store.integrations.bigin;
     if (Object.keys(store.integrations).length === 0) {
       delete store.integrations;
@@ -1740,7 +1743,7 @@ function getEmailActivityLeads(leads) {
 async function handleApi(request, response, pathname, options = {}) {
   let store;
   try {
-    store = readStore();
+    store = await readStore();
   } catch (err) {
     console.error('Data file error, using fallback:', err.message);
     store = defaultStore();
@@ -2255,7 +2258,7 @@ function createAppServer(options = {}) {
           return;
         }
 
-        const store = readStore();
+        const store = await readStore();
 
         if (url.searchParams.get("state") === "bigin-connect" && url.searchParams.get("code")) {
           try {
