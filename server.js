@@ -17,6 +17,7 @@ function resolveDataPath() {
     return path.join(path.resolve(process.env.LEAD_DATA_DIR), "store.json");
   }
 
+  // Railway persistent volumes (if configured)
   const persistentCandidates = [process.env.RAILWAY_VOLUME_MOUNT_PATH, process.env.RAILWAY_PERSISTENT_DIR, "/data"];
   for (const candidate of persistentCandidates) {
     if (!candidate) {
@@ -27,6 +28,15 @@ function resolveDataPath() {
     if (fs.existsSync(resolved)) {
       return path.join(resolved, "store.json");
     }
+  }
+
+  // Railway fallback: use /tmp which is always writable
+  if (process.env.RAILWAY_STATIC_URL || process.env.RAILWAY_SERVICE_NAME) {
+    const tmpDir = path.join("/tmp", "leadgen");
+    if (!fs.existsSync(tmpDir)) {
+      fs.mkdirSync(tmpDir, { recursive: true });
+    }
+    return path.join(tmpDir, "store.json");
   }
 
   return LOCAL_DEFAULT_DATA_PATH;
