@@ -1293,13 +1293,15 @@ async function searchGoogleMapsLeads(
   const firstPage = await fetchSearchPage();
   allPlaces.push(...(Array.isArray(firstPage.places) ? firstPage.places : []));
 
-  if (firstPage.nextPageToken && allPlaces.length < 40) {
+  let pageToken = firstPage.nextPageToken;
+  while (pageToken && allPlaces.length < 60) {
     await new Promise((resolve) => setTimeout(resolve, 1800));
     try {
-      const nextPage = await fetchSearchPage(firstPage.nextPageToken);
+      const nextPage = await fetchSearchPage(pageToken);
       allPlaces.push(...(Array.isArray(nextPage.places) ? nextPage.places : []));
+      pageToken = nextPage.nextPageToken;
     } catch (error) {
-      // Keep the first page results even if follow-up pagination fails.
+      break;
     }
   }
 
