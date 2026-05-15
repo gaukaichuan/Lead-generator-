@@ -1799,8 +1799,16 @@ async function handleApi(request, response, pathname, options = {}) {
       websiteFetch
     );
 
+    const existingIdentities = new Set(store.leads.map(makeLeadIdentity));
+
+    const deduplicated = candidates.filter((candidate) => {
+      const identity = makeLeadIdentity(candidate);
+      return !existingIdentities.has(identity);
+    });
+
     sendJson(response, 200, {
-      leads: candidates.map(sanitizePreviewLead)
+      leads: deduplicated.map(sanitizePreviewLead),
+      filteredCount: candidates.length - deduplicated.length
     });
     return;
   }

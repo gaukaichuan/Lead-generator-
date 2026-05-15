@@ -466,7 +466,7 @@ Best,
     const PA = ['kuala lumpur','petaling jaya','subang jaya','shah alam','puchong','klang','cheras','ampang','kajang','selangor'];
 
     // Google Maps state
-    let gmapsResults = [], gmapsSelected = new Set();
+    let gmapsResults = [], gmapsSelected = new Set(), gmapsFilteredCount = 0;
     let detectedLat = null, detectedLng = null;
 
     // ===== API =====
@@ -853,6 +853,7 @@ Best,
           body: JSON.stringify({ query: q, radiusKm: parseInt(radius), latitude: detectedLat, longitude: detectedLng })
         });
         gmapsResults = result.leads || [];
+        gmapsFilteredCount = result.filteredCount || 0;
         gmapsSelected = new Set();
         renderGmapsModal();
         document.getElementById('gmaps-modal').hidden = false;
@@ -868,12 +869,20 @@ Best,
       const container = document.getElementById('gmaps-results');
       const countEl = document.getElementById('gmaps-count');
       const importBtn = document.getElementById('gmaps-import-btn');
-      countEl.textContent = `${gmapsResults.length} results`;
+      let countText = `${gmapsResults.length} results`;
+      if (gmapsFilteredCount > 0) {
+        countText += ` (${gmapsFilteredCount} already imported)`;
+      }
+      countEl.textContent = countText;
       importBtn.disabled = gmapsSelected.size === 0;
       importBtn.textContent = `Import Selected (${gmapsSelected.size})`;
 
       if (gmapsResults.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No businesses found. Try a different search or increase the radius.</p></div>';
+        if (gmapsFilteredCount > 0) {
+          container.innerHTML = '<div class="empty-state"><p>All businesses from this search have already been imported. Try a different category or increase the radius.</p></div>';
+        } else {
+          container.innerHTML = '<div class="empty-state"><p>No businesses found. Try a different search or increase the radius.</p></div>';
+        }
         return;
       }
 
