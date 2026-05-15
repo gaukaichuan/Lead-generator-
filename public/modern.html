@@ -342,7 +342,7 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
           <div class="chart-panel"><h3>Lead Sources</h3><p>Breakdown of where your leads come from</p><div class="bar-chart" id="bar-chart"></div></div>
-          <div class="panel"><div class="panel-header"><div><div class="panel-title">Pipeline Summary</div><div class="panel-desc">Current queue and opportunities</div></div></div><div class="spotlight-row" id="spotlight"></div></div>
+          <div class="panel" id="product-rank-panel"><div class="panel-header"><div><div class="panel-title">Top Products</div><div class="panel-desc">Lead distribution by recommended product</div></div></div><div id="product-rank-bars"></div></div>
         </div>
         <div class="panel"><div class="panel-header"><div><div class="panel-title">Recent Activity</div><div class="panel-desc">Your team's latest actions</div></div></div><div class="activity-list" id="activity"></div></div>
       </div>
@@ -768,10 +768,21 @@ Best,
         </div>
         <div class="donut-legend">${emailDonutData.map(d => `<div class="legend-item"><div class="legend-dot" style="background:${d.color}"></div><span>${d.label}</span><strong>${d.count}</strong></div>`).join('')}</div>`;
 
-      // Spotlight
-      document.getElementById('spotlight').innerHTML = `
-        <div class="spotlight"><div class="spotlight-label">Current Queue</div><div class="spotlight-value">${t} active leads</div><div class="spotlight-sub">${p} in priority markets</div></div>
-        <div class="spotlight"><div class="spotlight-label">Best Opportunity</div><div class="spotlight-value">${topProd ? topProd[0] : '—'}</div><div class="spotlight-sub">${topProd ? topProd[1] + ' leads' : 'No data yet'}</div></div>`;
+      // Product ranking bar chart
+      const prodCounts = {};
+      leads.forEach(l => {
+        const p = l.recommendation?.productName || 'Unknown';
+        prodCounts[p] = (prodCounts[p] || 0) + 1;
+      });
+      const sorted = Object.entries(prodCounts).sort((a, b) => b[1] - a[1]);
+      const maxProd = sorted.length ? sorted[0][1] : 1;
+      const colors = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4'];
+      document.getElementById('product-rank-bars').innerHTML = sorted.length
+        ? sorted.slice(0, 5).map(([name, count], i) => {
+            const pct = (count / maxProd * 100).toFixed(0);
+            return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;font-weight:600;color:var(--text)">${name}</span><span style="font-size:11px;color:var(--text-muted)">${count} leads</span></div><div style="height:8px;background:var(--surface-hover);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${colors[i % colors.length]};border-radius:4px;transition:width 400ms ease"></div></div></div>`;
+          }).join('')
+        : '<div class="empty-state"><p>No lead data yet.</p></div>';
 
       // Recent leads
       try {
