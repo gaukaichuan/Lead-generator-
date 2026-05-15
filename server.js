@@ -879,7 +879,7 @@ function ensureBiginClientConfig() {
   }
 }
 
-function buildBiginConnectUrl(request) {
+function buildBiginConnectUrl(request, username) {
   ensureBiginClientConfig();
   const authUrl = new URL("/oauth/v2/auth", getBiginAccountsServer());
   authUrl.searchParams.set("client_id", getBiginClientId());
@@ -888,7 +888,7 @@ function buildBiginConnectUrl(request) {
   authUrl.searchParams.set("prompt", "consent");
   authUrl.searchParams.set("scope", BIGIN_SCOPES);
   authUrl.searchParams.set("redirect_uri", getBiginRedirectUri(request));
-  authUrl.searchParams.set("state", "bigin-connect");
+  authUrl.searchParams.set("state", "bigin-connect:" + (username || ""));
   return authUrl.toString();
 }
 
@@ -1812,7 +1812,7 @@ async function handleApi(request, response, pathname, options = {}) {
   // ===== BIGIN ENDPOINTS =====
 
   if (request.method === "GET" && pathname === "/api/integrations/bigin/connect") {
-    response.writeHead(302, { Location: buildBiginConnectUrl(request) });
+    response.writeHead(302, { Location: buildBiginConnectUrl(request, session.username) });
     response.end();
     return;
   }
@@ -2185,6 +2185,21 @@ async function handleApi(request, response, pathname, options = {}) {
       autoSendQualifiedLead(store, lead);
     }
 
+    if (action === "edit" && request.method === "PATCH") {
+      const body = await readRequestBody(request);
+      const updatable = ['company','contactName','email','phone','website','role','industry','region','companyType','painPoint','source','notes','status'];
+      let changed = false;
+      for (const field of updatable) {
+        if (body[field] !== undefined && lead[field] !== body[field]) {
+          lead[field] = body[field];
+          changed = true;
+        }
+      }
+      if (changed) {
+        appendActivity(store, lead.id, "Lead updated", `${lead.company} details were edited manually.`);
+      }
+    }
+
     if (action === "sent" && request.method === "PATCH") {
       if (!lead.sent) {
         lead.sent = true;
@@ -2260,7 +2275,15 @@ function createAppServer(options = {}) {
 
         const store = await readStore();
 
-        if (url.searchParams.get("state") === "bigin-connect" && url.searchParams.get("code")) {
+        const state = url.searchParams.get("state") || "";
+        if (state.startsWith("bigin-connect:") && url.searchParams.get("code")) {
+          const username = state.replace("bigin-connect:", "");
+          // Verify the session user matches the state user
+          if (username && username !== session.username) {
+            response.writeHead(302, { Location: `${failureDestination}&message=${encodeURIComponent("Session mismatch")}` });
+            response.end();
+            return;
+          }
           try {
             await exchangeBiginAuthorizationCode(request, store, session.username, url.searchParams.get("code"));
             response.writeHead(302, { Location: `${destination}?bigin=connected` });

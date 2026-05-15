@@ -201,8 +201,29 @@ function togglePw() {
 (async function checkSession() {
   try {
     const res = await fetch('/api/auth/session');
-    if (res.ok) window.location.href = '/modern.html';
+    if (res.ok) {
+      window.location.href = '/modern.html';
+      return;
+    }
   } catch(e) {}
+  // Show BigIN connection messages from URL
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('bigin') === 'connected') {
+    const errEl = document.getElementById('login-error');
+    errEl.style.background = 'rgba(16,185,129,0.08)';
+    errEl.style.borderColor = 'rgba(16,185,129,0.2)';
+    errEl.querySelector('svg').style.fill = '#10b981';
+    document.getElementById('error-text').textContent = 'Zoho Bigin connected successfully! Sign in to continue.';
+    errEl.classList.add('show');
+    // Clean URL
+    window.history.replaceState({}, '', '/login.html');
+  } else if (params.get('error')) {
+    const errEl = document.getElementById('login-error');
+    errEl.querySelector('svg').style.fill = '#ef4444';
+    document.getElementById('error-text').textContent = params.get('message') || 'OAuth authorization failed.';
+    errEl.classList.add('show');
+    window.history.replaceState({}, '', '/login.html');
+  }
 })();
 </script>
 </body>

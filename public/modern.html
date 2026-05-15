@@ -177,8 +177,41 @@
     .modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; background: rgba(17,24,39,0.35); backdrop-filter: blur(4px); }
     .modal-backdrop[hidden] { display: none !important; }
     .modal { background: var(--surface); border-radius: var(--radius-xl); padding: 28px; width: min(600px, 100%); max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); position: relative; border: 1px solid var(--border); }
-    .modal-close { position: absolute; top: 18px; right: 18px; width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; font-size: 18px; color: var(--text-muted); transition: all 150ms ease; }
+    .lead-detail-modal { width: min(640px, 100%); padding: 0; }
+    .modal-close { position: absolute; top: 18px; right: 18px; width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; font-size: 18px; color: var(--text-muted); transition: all 150ms ease; z-index: 5; }
     .modal-close:hover { background: var(--red-50); color: var(--red); border-color: var(--red-100); }
+
+    /* Lead Detail Styles */
+    .ld-header { display: flex; align-items: center; justify-content: space-between; padding: 28px 28px 0; gap: 16px; }
+    .ld-header-left { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
+    .ld-avatar { width: 48px; height: 48px; border-radius: var(--radius); background: linear-gradient(135deg, var(--blue-50), var(--purple-50)); display: grid; place-items: center; font-weight: 800; font-size: 18px; color: var(--blue-600); border: 1px solid var(--blue-100); flex-shrink: 0; }
+    .ld-company { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ld-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .ld-badges { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+
+    .ld-section { padding: 20px 28px; }
+    .ld-section + .ld-section { border-top: 1px solid var(--border-light); }
+    .ld-section-title { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+    .ld-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; }
+    .ld-field { display: flex; flex-direction: column; gap: 4px; }
+    .ld-field-label { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+    .ld-field-value { font-size: 14px; color: var(--text); }
+
+    .ld-pitch-card { background: linear-gradient(135deg, var(--green-50), var(--blue-50)); border: 1px solid var(--green-100); border-radius: var(--radius); padding: 16px 18px; }
+    .ld-pitch-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .ld-pitch-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    .ld-notes { background: var(--surface-hover); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 14px 16px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; white-space: pre-wrap; }
+
+    /* Edit Mode */
+    .ld-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 28px; }
+    .ld-form-field { display: flex; flex-direction: column; gap: 4px; }
+    .ld-form-field label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+    .ld-form-full { grid-column: 1 / -1; }
+
+    .ld-actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 28px 24px; border-top: 1px solid var(--border-light); }
+    .ld-actions .btn { font-size: 12px; padding: 8px 14px; }
     .modal-eyebrow { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
     .modal-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; padding-right: 40px; }
     .modal-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 22px; }
@@ -374,17 +407,93 @@
 
   <!-- LEAD DETAIL MODAL -->
   <div class="modal-backdrop" id="m-lead" hidden>
-    <div class="modal">
+    <div class="modal lead-detail-modal">
       <button class="modal-close" onclick="closeM('m-lead')">&times;</button>
-      <div class="modal-eyebrow">Lead Detail</div>
-      <div class="modal-title" id="d-company">Company</div>
-      <div class="modal-subtitle" id="d-sub"></div>
-      <div class="detail-grid" id="d-fields"></div>
-      <div class="detail-actions">
-        <button class="btn btn-primary" onclick="openEmail()"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Send Email</button>
-        <button class="btn btn-green" onclick="setStatus('qualified')">Set Qualified</button>
-        <button class="btn" onclick="setStatus('new')">Set New</button>
-        <button class="btn btn-red" onclick="delLead()">Delete Lead</button>
+
+      <!-- Header -->
+      <div class="ld-header">
+        <div class="ld-header-left">
+          <div class="ld-avatar" id="ld-avatar">A</div>
+          <div>
+            <div class="ld-company" id="ld-company">Company</div>
+            <div class="ld-subtitle" id="ld-subtitle">Contact · Region</div>
+          </div>
+        </div>
+        <div class="ld-badges" id="ld-badges"></div>
+      </div>
+
+      <!-- View Mode -->
+      <div id="ld-view">
+        <div class="ld-section">
+          <div class="ld-section-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--blue-600)"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            Contact Info
+          </div>
+          <div class="ld-grid" id="ld-contact"></div>
+        </div>
+        <div class="ld-section">
+          <div class="ld-section-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--indigo)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Lead Profile
+          </div>
+          <div class="ld-grid" id="ld-profile"></div>
+        </div>
+        <div class="ld-section" id="ld-pitch-section">
+          <div class="ld-section-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--green)"><path d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"/></svg>
+            Recommended Product
+          </div>
+          <div class="ld-pitch-card" id="ld-pitch"></div>
+        </div>
+        <div class="ld-section" id="ld-notes-section">
+          <div class="ld-section-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="var(--text-muted)"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+            Notes
+          </div>
+          <div class="ld-notes" id="ld-notes"></div>
+        </div>
+      </div>
+
+      <!-- Edit Mode -->
+      <div id="ld-edit" style="display:none">
+        <form id="ld-form" onsubmit="saveLeadEdit(event)" class="ld-form-grid">
+          <div class="ld-form-field"><label>Company</label><input class="form-input" name="company" id="lf-company"></div>
+          <div class="ld-form-field"><label>Contact Name</label><input class="form-input" name="contactName" id="lf-contact"></div>
+          <div class="ld-form-field"><label>Email</label><input class="form-input" name="email" type="email" id="lf-email"></div>
+          <div class="ld-form-field"><label>Phone</label><input class="form-input" name="phone" id="lf-phone"></div>
+          <div class="ld-form-field"><label>Website</label><input class="form-input" name="website" id="lf-website"></div>
+          <div class="ld-form-field"><label>Role</label><input class="form-input" name="role" id="lf-role"></div>
+          <div class="ld-form-field"><label>Industry</label><input class="form-input" name="industry" id="lf-industry"></div>
+          <div class="ld-form-field"><label>Region</label><input class="form-input" name="region" id="lf-region"></div>
+          <div class="ld-form-field"><label>Business Type</label>
+            <select class="form-select" name="companyType" id="lf-type"><option value="retail">Retail</option><option value="fnb">F&B</option><option value="wholesale">Wholesale</option><option value="warehouse">Warehouse</option><option value="service">Service</option><option value="manufacturing">Manufacturing</option></select>
+          </div>
+          <div class="ld-form-field"><label>Pain Point</label>
+            <select class="form-select" name="painPoint" id="lf-pain"><option value="checkout-pos">Checkout / POS</option><option value="stock-visibility">Stock Visibility</option><option value="warehouse-control">Warehouse Control</option><option value="manual-accounting">Manual Accounting</option><option value="payroll-compliance">Payroll Compliance</option></select>
+          </div>
+          <div class="ld-form-field"><label>Source</label>
+            <select class="form-select" name="source" id="lf-source"><option>Manual research</option><option>Referral</option><option>Walk-in</option><option>WhatsApp</option><option>LinkedIn</option><option>Google Maps</option></select>
+          </div>
+          <div class="ld-form-field"><label>Status</label>
+            <select class="form-select" name="status" id="lf-status"><option value="new">New</option><option value="qualified">Qualified</option><option value="unqualified">Unqualified</option></select>
+          </div>
+          <div class="ld-form-field ld-form-full"><label>Notes</label><textarea class="form-textarea" name="notes" id="lf-notes" rows="3"></textarea></div>
+        </form>
+      </div>
+
+      <!-- Actions -->
+      <div class="ld-actions">
+        <div id="ld-view-actions">
+          <button class="btn btn-primary" onclick="openEmail()"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Send Email</button>
+          <button class="btn btn-green" id="ld-crm-btn" onclick="logToCrm()"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>Log to CRM</button>
+          <button class="btn" onclick="enterEditMode()"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>Edit</button>
+          <button class="btn" onclick="setStatus('qualified')">Set Qualified</button>
+          <button class="btn btn-red" onclick="delLead()"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>Delete</button>
+        </div>
+        <div id="ld-edit-actions" style="display:none;gap:10px;display:none">
+          <button class="btn btn-primary" onclick="saveLeadEdit(event)"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Save</button>
+          <button class="btn" onclick="cancelEditMode()">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -708,76 +817,157 @@ Best,
     function togSel(id, checked) { if (checked) sel.add(id); else sel.delete(id); renderQueue(); }
 
     // ===== LEAD DETAIL =====
-    async function openDetail(id) {
+    function openDetail(id) {
       selId = id;
       const l = leads.find(x => x.id === id);
       if (!l) return;
-      document.getElementById('d-company').textContent = l.company;
-      document.getElementById('d-sub').textContent = `${l.contactName || 'No contact'} · ${l.region}`;
+      // Reset to view mode
+      document.getElementById('ld-view').style.display = '';
+      document.getElementById('ld-edit').style.display = 'none';
+      document.getElementById('ld-view-actions').style.display = '';
+      document.getElementById('ld-edit-actions').style.display = 'none';
+
+      // Header
+      document.getElementById('ld-avatar').textContent = (l.company || '?')[0].toUpperCase();
+      document.getElementById('ld-company').textContent = l.company;
+      document.getElementById('ld-subtitle').textContent = `${l.contactName || 'No contact'} · ${l.region}`;
+
+      // Badges
       const sc = l.status === 'qualified' ? 'badge-qualified' : l.status === 'unqualified' ? 'badge-unqualified' : 'badge-new';
       const ac = PA.includes((l.region || '').toLowerCase()) ? 'badge-priority' : 'badge-standard';
-      document.getElementById('d-fields').innerHTML = `
-        <div>
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--blue-600)" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Status
-          </div>
-          <span class="detail-badge ${sc}">${l.status}</span>
-        </div>
-        <div>
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--amber)" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Area
-          </div>
-          <span class="detail-badge ${ac}">${PA.includes((l.region||'').toLowerCase()) ? 'Priority' : 'Standard'}</span>
-        </div>
-        <div>
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--green)" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>Source
-          </div>
-          <div class="detail-field-value">${l.source}</div>
-        </div>
-        <div>
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--purple)" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>Region
-          </div>
-          <div class="detail-field-value">${l.region}</div>
-        </div>
-        <div>
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--blue-600)" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Email
-          </div>
-          <div class="detail-field-value">${l.email || 'Not stored'}</div>
-        </div>
-        <div>
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--green)" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>Phone
-          </div>
-          <div class="detail-field-value">${l.phone || 'Not stored'}</div>
-        </div>
-        <div>
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--indigo)" viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11L12 2zm0 3.84L13.93 9h-3.87L12 5.84zM17.5 13c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM3 21.5h8v-8H3v8zm2-6h4v4H5v-4z"/></svg>Recommended Product
-          </div>
-          <div class="detail-field-value"><strong>${l.recommendation?.productName || 'N/A'}</strong></div>
-        </div>
-        <div>
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--text-muted)" viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z"/></svg>Industry
-          </div>
-          <div class="detail-field-value">${l.industry || 'N/A'}</div>
-        </div>
-        <div style="grid-column:1/-1">
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--blue-600)" viewBox="0 0 24 24"><path d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"/></svg>Pitch
-          </div>
-          <div class="detail-field-value">${l.recommendation?.pitch || 'N/A'}</div>
-        </div>
-        <div style="grid-column:1/-1">
-          <div class="detail-field-label">
-            <svg style="width:12px;height:12px;vertical-align:middle;margin-right:4px;fill:var(--text-muted)" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>Notes
-          </div>
-          <div class="detail-field-value">${l.notes || 'No notes'}</div>
-        </div>`;
+      const ec = l.emailStatus === 'sent' ? 'tag-sent' : 'badge-standard';
+      let badges = `<span class="detail-badge ${sc}">${l.status}</span>`;
+      badges += `<span class="detail-badge ${ac}">${ac === 'badge-priority' ? 'Priority' : 'Standard'}</span>`;
+      if (l.crmLogged) badges += `<span class="tag tag-crm" style="font-size:10px">CRM ✓</span>`;
+      document.getElementById('ld-badges').innerHTML = badges;
+
+      // CRM button state
+      const crmBtn = document.getElementById('ld-crm-btn');
+      if (l.crmLogged) {
+        crmBtn.disabled = true;
+        crmBtn.style.opacity = '0.5';
+        crmBtn.innerHTML = '✓ CRM Synced';
+      } else {
+        crmBtn.disabled = false;
+        crmBtn.style.opacity = '';
+        crmBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>Log to CRM';
+      }
+
+      // Contact section
+      document.getElementById('ld-contact').innerHTML = `
+        <div class="ld-field"><div class="ld-field-label">Email</div><div class="ld-field-value">${l.email || '<span style="color:var(--text-muted)">Not stored</span>'}</div></div>
+        <div class="ld-field"><div class="ld-field-label">Phone</div><div class="ld-field-value">${l.phone || '<span style="color:var(--text-muted)">Not stored</span>'}</div></div>
+        <div class="ld-field"><div class="ld-field-label">Website</div><div class="ld-field-value">${l.website ? '<a href="https://'+l.website+'" target="_blank" style="color:var(--blue-600);text-decoration:none">'+l.website+'</a>' : '<span style="color:var(--text-muted)">Not stored</span>'}</div></div>
+        <div class="ld-field"><div class="ld-field-label">Role</div><div class="ld-field-value">${l.role || '<span style="color:var(--text-muted)">N/A</span>'}</div></div>`;
+
+      // Profile section
+      document.getElementById('ld-profile').innerHTML = `
+        <div class="ld-field"><div class="ld-field-label">Source</div><div class="ld-field-value">${l.source}</div></div>
+        <div class="ld-field"><div class="ld-field-label">Region</div><div class="ld-field-value">${l.region}</div></div>
+        <div class="ld-field"><div class="ld-field-label">Industry</div><div class="ld-field-value">${l.industry || 'N/A'}</div></div>
+        <div class="ld-field"><div class="ld-field-label">Business Type</div><div class="ld-field-value">${l.companyType || 'N/A'}</div></div>`;
+
+      // Pitch section
+      const pitchEl = document.getElementById('ld-pitch');
+      if (l.recommendation?.productName) {
+        document.getElementById('ld-pitch-section').style.display = '';
+        pitchEl.innerHTML = `<div class="ld-pitch-name">${l.recommendation.productName}</div><div class="ld-pitch-text">${l.recommendation.pitch || ''}</div>`;
+      } else {
+        document.getElementById('ld-pitch-section').style.display = 'none';
+      }
+
+      // Notes
+      if (l.notes) {
+        document.getElementById('ld-notes-section').style.display = '';
+        document.getElementById('ld-notes').textContent = l.notes;
+      } else {
+        document.getElementById('ld-notes-section').style.display = 'none';
+      }
+
+      // Fill edit form
+      document.getElementById('lf-company').value = l.company;
+      document.getElementById('lf-contact').value = l.contactName || '';
+      document.getElementById('lf-email').value = l.email || '';
+      document.getElementById('lf-phone').value = l.phone || '';
+      document.getElementById('lf-website').value = l.website || '';
+      document.getElementById('lf-role').value = l.role || '';
+      document.getElementById('lf-industry').value = l.industry || '';
+      document.getElementById('lf-region').value = l.region || '';
+      document.getElementById('lf-type').value = l.companyType || 'retail';
+      document.getElementById('lf-pain').value = l.painPoint || 'checkout-pos';
+      document.getElementById('lf-source').value = l.source || 'Manual research';
+      document.getElementById('lf-status').value = l.status || 'new';
+      document.getElementById('lf-notes').value = l.notes || '';
+
       document.getElementById('m-lead').hidden = false;
+    }
+
+    function enterEditMode() {
+      document.getElementById('ld-view').style.display = 'none';
+      document.getElementById('ld-edit').style.display = '';
+      document.getElementById('ld-view-actions').style.display = 'none';
+      document.getElementById('ld-edit-actions').style.display = 'flex';
+    }
+
+    function cancelEditMode() {
+      document.getElementById('ld-view').style.display = '';
+      document.getElementById('ld-edit').style.display = 'none';
+      document.getElementById('ld-view-actions').style.display = '';
+      document.getElementById('ld-edit-actions').style.display = 'none';
+    }
+
+    async function saveLeadEdit(e) {
+      if (e) e.preventDefault();
+      const l = leads.find(x => x.id === selId);
+      if (!l) return;
+      const body = {
+        company: document.getElementById('lf-company').value,
+        contactName: document.getElementById('lf-contact').value,
+        email: document.getElementById('lf-email').value,
+        phone: document.getElementById('lf-phone').value,
+        website: document.getElementById('lf-website').value,
+        role: document.getElementById('lf-role').value,
+        industry: document.getElementById('lf-industry').value,
+        region: document.getElementById('lf-region').value,
+        companyType: document.getElementById('lf-type').value,
+        painPoint: document.getElementById('lf-pain').value,
+        source: document.getElementById('lf-source').value,
+        status: document.getElementById('lf-status').value,
+        notes: document.getElementById('lf-notes').value
+      };
+      try {
+        await api(`/api/leads/${l.id}/edit`, { method: 'PATCH', body: JSON.stringify(body) });
+        notify('Saved', `${l.company} was updated.`);
+        cancelEditMode();
+        await loadLeads();
+      } catch (err) {
+        notify('Error', err.message, 'error');
+      }
+    }
+
+    async function logToCrm() {
+      const l = leads.find(x => x.id === selId);
+      if (!l) return;
+      const btn = document.getElementById('ld-crm-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="loading-spinner"></div> Syncing...';
+      try {
+        await api(`/api/leads/${l.id}/crm`, { method: 'PATCH' });
+        l.crmLogged = true;
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.innerHTML = '✓ CRM Synced';
+        // Add CRM badge
+        let badges = document.getElementById('ld-badges').innerHTML;
+        if (!badges.includes('CRM')) badges += '<span class="tag tag-crm" style="font-size:10px">CRM ✓</span>';
+        document.getElementById('ld-badges').innerHTML = badges;
+        notify('CRM', `${l.company} was logged to Bigin.`);
+      } catch (err) {
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>Log to CRM';
+        notify('Error', err.message, 'error');
+      }
     }
 
     async function setStatus(s) {
