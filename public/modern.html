@@ -490,9 +490,8 @@ Best,
         console.error('Failed to load leads:', err);
         if (retries > 0) {
           setTimeout(() => loadLeads(retries - 1), 1000);
-        } else {
-          notify('Error', 'Could not load leads from server.', 'error');
         }
+        // Silently fail — dashboard will show empty state (0 leads)
       }
     }
 
