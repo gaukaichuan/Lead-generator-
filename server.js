@@ -2309,8 +2309,8 @@ function createAppServer(options = {}) {
       if (pathname === "/oauth/callback") {
         const sessionId = parseSessionCookie(request);
         const session = getSession(sessionId);
-        const destination = "/login.html";
-        const failureDestination = `/login.html?error=${encodeURIComponent("OAuth authorization failed")}`;
+        const destination = "/modern.html";
+        const failureDestination = `/modern.html?error=${encodeURIComponent("OAuth authorization failed")}`;
 
         if (!session) {
           response.writeHead(302, { Location: destination });
