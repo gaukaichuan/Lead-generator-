@@ -1809,6 +1809,51 @@ async function handleApi(request, response, pathname, options = {}) {
   const session = requireAuth(request, response, store);
   if (!session) return;
 
+  // ===== ADMIN-ONLY ENDPOINTS =====
+  if (pathname.startsWith("/api/admin/")) {
+    if (session.role !== "admin") {
+      sendJson(response, 403, { error: "Admin access required." });
+      return;
+    }
+
+    // GET /api/admin/bigin-connections - list all users' BigIN status
+    if (request.method === "GET" && pathname === "/api/admin/bigin-connections") {
+      const connections = store.users.map(u => ({
+        username: u.username,
+        displayName: u.displayName || u.username,
+        role: u.role,
+        connected: Boolean(u.bigin && u.bigin.refreshToken),
+        connectedAt: (u.bigin && u.bigin.connectedAt) || null,
+        apiDomain: (u.bigin && u.bigin.apiDomain) || null
+      }));
+      sendJson(response, 200, { users: connections });
+      return;
+    }
+
+    // POST /api/admin/bigin-connections/:username/disconnect
+    const disconnectMatch = pathname.match(/^\/api\/admin\/bigin-connections\/([^/]+)\/disconnect$/);
+    if (disconnectMatch && request.method === "POST") {
+      const [, targetUsername] = disconnectMatch;
+      const targetUser = store.users.find(u => u.username === targetUsername);
+      if (!targetUser) {
+        sendJson(response, 404, { error: "User not found." });
+        return;
+      }
+      targetUser.bigin = {};
+      writeStore(store);
+      sendJson(response, 200, { message: `Bigin disconnected for ${targetUser.displayName || targetUser.username}.` });
+      return;
+    }
+
+    // GET /api/admin/bigin-status - summary stats
+    if (request.method === "GET" && pathname === "/api/admin/bigin-status") {
+      const total = store.users.length;
+      const connected = store.users.filter(u => u.bigin && u.bigin.refreshToken).length;
+      sendJson(response, 200, { total, connected, disconnected: total - connected });
+      return;
+    }
+  }
+
   // ===== BIGIN ENDPOINTS =====
 
   if (request.method === "GET" && pathname === "/api/integrations/bigin/connect") {

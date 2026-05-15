@@ -213,6 +213,20 @@
 
     .ld-actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 28px 24px; border-top: 1px solid var(--border-light); }
     .ld-actions .btn { font-size: 12px; padding: 8px 14px; }
+
+    /* Admin BigIN Section */
+    .bigin-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-hover); gap: 12px; }
+    .bigin-row-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .bigin-avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .bigin-avatar.admin { background: var(--purple-50); color: var(--purple); }
+    .bigin-avatar.user { background: var(--green-50); color: var(--green); }
+    .bigin-info .bigin-name { font-size: 13px; font-weight: 600; }
+    .bigin-info .bigin-role { font-size: 10px; color: var(--text-muted); }
+    .bigin-status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    .bigin-status.connected { background: var(--green-50); color: var(--green); }
+    .bigin-status.disconnected { background: var(--red-50); color: var(--red); }
+    .bigin-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .bigin-row-actions .btn { font-size: 10px; padding: 4px 8px; }
     .modal-eyebrow { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
     .modal-title { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; padding-right: 40px; }
     .modal-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 22px; }
@@ -319,6 +333,22 @@
             <button class="btn" onclick="openSettings()"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg> Settings</button>
           </div>
         </div>
+
+        <!-- BigIN First-Time Prompt -->
+        <div class="bigin-prompt-banner" id="bigin-prompt-banner" hidden style="background:linear-gradient(135deg,var(--amber-50),var(--amber-100));border:1px solid var(--amber-100);border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:40px;height:40px;border-radius:var(--radius-sm);background:white;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow-sm)">🔗</div>
+            <div>
+              <div style="font-size:14px;font-weight:700;color:var(--text)">Connect Zoho Bigin to Enable CRM Sync</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Your Bigin account is not connected yet. Connect once and your credentials will be remembered.</div>
+            </div>
+          </div>
+          <button class="btn btn-green" onclick="window.open('/api/integrations/bigin/connect','_blank')" style="flex-shrink:0">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:white"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+            Connect Bigin
+          </button>
+        </div>
+
         <div class="metrics" id="metrics"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 300px;gap:16px;margin-bottom:16px">
           <div class="chart-panel"><h3>Pipeline Status</h3><p>Lead distribution by status</p><div class="donut-container" id="donut-chart"></div></div>
@@ -546,10 +576,20 @@ Best,
   <div class="drawer-backdrop" id="s-backdrop" hidden onclick="closeSettings()"></div>
   <div class="settings-drawer" id="s-drawer" hidden>
     <div class="settings-header"><div><div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px">Settings</div><h3>Configuration</h3></div><button class="modal-close" style="position:static" onclick="closeSettings()">&times;</button></div>
-    <div class="settings-body">
+    <div class="settings-body" style="overflow-y:auto">
       <div class="settings-section"><h4>Quick Access</h4><button class="settings-item" onclick="toggleSender()"><div class="settings-item-icon blue"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><div class="settings-item-text"><strong>Email Configuration</strong><span>Sender details and email templates</span></div></button></div>
       <div class="settings-section sender-panel" id="sender-panel"><h4>Sender Details</h4><div style="display:flex;flex-direction:column;gap:10px"><div><label class="form-label">Sender Name</label><input class="form-input" id="s-name" value="Your Name"></div><div><label class="form-label">Sender Email</label><input class="form-input" id="s-email" type="email" value="sales@example.com"></div><div><label class="form-label">Subject Template</label><input class="form-input" id="s-subj" value="{{productName}} idea for {{company}}"></div><div><label class="form-label">Body Template</label><textarea class="form-textarea" id="s-body" rows="4">Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\n{{pitch}}\n\nBest,\n{{senderName}}</textarea></div><button class="btn btn-primary" onclick="saveSettings()" style="width:100%">Save Settings</button></div></div>
-      <div class="settings-section"><h4>Integration</h4><button class="settings-item" onclick="window.open('/api/integrations/bigin/connect','_blank')"><div class="settings-item-icon green"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div><div class="settings-item-text"><strong>Connect Zoho Bigin</strong><span>Authorize CRM integration</span></div></button></div>
+
+      <div class="settings-section" id="admin-bigin-section" hidden>
+        <h4>Admin — BigIN Connections</h4>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <span class="toolbar-summary" id="bigin-count">Loading...</span>
+          <button class="btn" style="font-size:11px;padding:4px 10px" onclick="loadBiginConnections()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:var(--text-muted)"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>Refresh</button>
+        </div>
+        <div id="bigin-table" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <div class="settings-section"><h4>Integration</h4><button class="settings-item" onclick="window.open('/api/integrations/bigin/connect','_blank')"><div class="settings-item-icon green"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div><div class="settings-item-text"><strong>Connect Zoho Bigin</strong><span>Authorize CRM integration for your account</span></div></button></div>
     </div>
   </div>
 
@@ -1355,6 +1395,87 @@ Best,
       closeSettings();
     }
 
+    // ===== ADMIN BIGIN MANAGEMENT =====
+    let currentUserRole = '';
+
+    async function loadBiginConnections() {
+      try {
+        const res = await fetch('/api/admin/bigin-connections');
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+        renderBiginTable(data.users);
+      } catch (e) {
+        document.getElementById('bigin-table').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Failed to load connections</div>';
+      }
+    }
+
+    function renderBiginTable(users) {
+      const connectedCount = users.filter(u => u.connected).length;
+      document.getElementById('bigin-count').textContent = connectedCount + ' of ' + users.length + ' connected';
+
+      const avClass = u => u.role === 'admin' ? 'admin' : 'user';
+      document.getElementById('bigin-table').innerHTML = users.map(u => `
+        <div class="bigin-row">
+          <div class="bigin-row-left">
+            <div class="bigin-avatar ${avClass(u)}">${u.displayName[0]}</div>
+            <div class="bigin-info">
+              <div class="bigin-name">${u.displayName}</div>
+              <div class="bigin-role">${u.role} · @${u.username}</div>
+            </div>
+          </div>
+          <span class="bigin-status ${u.connected ? 'connected' : 'disconnected'}">${u.connected ? '● Connected' : '● Disconnected'}</span>
+          <div class="bigin-row-actions">
+            ${u.connected
+              ? `<button class="btn btn-red" onclick="disconnectBigin('${u.username}')">Disconnect</button>`
+              : `<button class="btn btn-primary" onclick="connectBigin('${u.username}')">Connect</button>`
+            }
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function disconnectBigin(username) {
+      if (!confirm('Disconnect Bigin for ' + username + '?')) return;
+      try {
+        const res = await fetch('/api/admin/bigin-connections/' + username + '/disconnect', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        notify('Disconnected', data.message);
+        loadBiginConnections();
+      } catch (e) {
+        notify('Error', e.message, 'error');
+      }
+    }
+
+    function connectBigin(username) {
+      // Open Bigin OAuth for this user - they need to be logged in as that user
+      // For admin managing others, we show a note
+      alert('To connect Bigin for ' + username + ', log in as that user and go to Settings > Connect Zoho Bigin.');
+    }
+
+    // Check if current user is admin and show admin section
+    async function initAdminPanel() {
+      try {
+        const res = await fetch('/api/auth/session');
+        if (res.ok) {
+          const data = await res.json();
+          currentUserRole = data.role;
+          if (data.role === 'admin') {
+            document.getElementById('admin-bigin-section').hidden = false;
+            loadBiginConnections();
+          }
+        }
+        // Check current user's BigIN connection status
+        const biginRes = await fetch('/api/integrations/bigin/status');
+        if (biginRes.ok) {
+          const biginData = await biginRes.json();
+          if (!biginData.connected) {
+            document.getElementById('bigin-prompt-banner').hidden = false;
+          }
+        }
+      } catch (e) {}
+    }
+
     function loadSettings() {
       try {
         const raw = localStorage.getItem('leadgen-sender');
@@ -1394,6 +1515,7 @@ Best,
     // ===== INIT =====
     loadSettings();
     loadLeads();
+    initAdminPanel();
   </script>
 </body>
 </html>
