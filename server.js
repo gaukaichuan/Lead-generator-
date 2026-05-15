@@ -2043,8 +2043,19 @@ function startServer(port = PORT, options = {}) {
 }
 
 if (require.main === module) {
-  startServer().then(() => {
+  // Ensure data directory and file exist before starting
+  try {
+    ensureDataFile();
+    const store = readStore();
     process.stdout.write(`Lead automation app running on http://localhost:${PORT}\n`);
+    process.stdout.write(`Data file: ${DATA_PATH}\n`);
+  } catch (err) {
+    process.stderr.write(`Warning: Could not initialize data file: ${err.message}\n`);
+    process.stderr.write(`Falling back to in-memory store.\n`);
+  }
+  startServer().catch((err) => {
+    process.stderr.write(`Server failed to start: ${err.message}\n`);
+    process.exit(1);
   });
 }
 
