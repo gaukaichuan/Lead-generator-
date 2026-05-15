@@ -28,8 +28,8 @@
     .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; position: relative; z-index: 1; }
     .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; }
     .brand { display: flex; align-items: center; gap: 12px; padding: 4px 12px; margin-bottom: 28px; }
-    .brand-icon { width: 40px; height: 40px; border-radius: var(--radius); background: linear-gradient(135deg, var(--blue-500), var(--indigo)); display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(59,130,246,0.25); }
-    .brand-icon svg { width: 22px; height: 22px; }
+    .brand-icon { width: 40px; height: 40px; border-radius: var(--radius); background: linear-gradient(135deg, #3b82f6, #6366f1); background: linear-gradient(135deg, var(--blue-500, #3b82f6), var(--indigo, #6366f1)); display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(59,130,246,0.25); }
+    .brand-icon svg { width: 22px; height: 22px; fill: #ffffff; }
     .brand h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(135deg, var(--text), var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .brand p { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
     .nav-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; padding: 16px 12px 6px; }
@@ -251,7 +251,7 @@
   <div class="app">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-icon"><svg viewBox="0 0 24 24" fill="white"><path d="M12 2.5s-5 6-5 10.5C7 16.5 9.2 19 12 19s5-2.5 5-6C17 8.5 12 2.5 12 2.5zm0 12.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></div>
+        <div class="brand-icon"><svg viewBox="0 0 24 24"><path fill="white" d="M12 2.5s-5 6-5 10.5C7 16.5 9.2 19 12 19s5-2.5 5-6C17 8.5 12 2.5 12 2.5zm0 12.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></div>
         <div><p>Lead Generator</p><h1>LeadGen AI</h1></div>
       </div>
       <div class="nav-label">Workspace</div>

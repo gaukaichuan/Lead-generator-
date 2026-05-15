@@ -1500,7 +1500,10 @@ function filterLeadsByQuery(leads, query) {
 }
 
 function sendJson(response, statusCode, payload) {
-  response.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
+  response.writeHead(statusCode, {
+    "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-cache, no-store, must-revalidate"
+  });
   response.end(JSON.stringify(payload));
 }
 
@@ -1515,9 +1518,14 @@ function sendFile(response, filePath) {
 
   try {
     const file = fs.readFileSync(filePath);
-    response.writeHead(200, {
+    const headers = {
       "Content-Type": contentTypes[extension] || "application/octet-stream"
-    });
+    };
+    // Add cache-busting for HTML files to ensure fresh UI loads
+    if (extension === ".html") {
+      headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    }
+    response.writeHead(200, headers);
     response.end(file);
   } catch (error) {
     response.writeHead(404);
@@ -1573,7 +1581,14 @@ function getEmailActivityLeads(leads) {
 }
 
 async function handleApi(request, response, pathname, options = {}) {
-  const store = readStore();
+  let store;
+  try {
+    store = readStore();
+  } catch (err) {
+    // If data file fails, use in-memory fallback
+    console.error('Data file error, using fallback:', err.message);
+    store = defaultStore();
+  }
   const googlePlacesFetch = options.googlePlacesFetch || fetch;
   const websiteFetch = options.websiteFetch || googlePlacesFetch;
   const sendEmail = options.sendEmail || sendEmailMessage;
