@@ -2027,7 +2027,7 @@ function createAppServer(options = {}) {
         return;
       }
 
-      const target = pathname === "/" ? path.join(PUBLIC_DIR, "index.html") : path.join(PUBLIC_DIR, pathname);
+      const target = pathname === "/" ? path.join(PUBLIC_DIR, "modern.html") : path.join(PUBLIC_DIR, pathname);
       sendFile(response, target);
     } catch (error) {
       sendJson(response, 500, { error: error.message || "Server error" });
