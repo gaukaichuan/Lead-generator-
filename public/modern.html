@@ -335,16 +335,17 @@
         </div>
 
         <div class="metrics" id="metrics"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 300px;gap:16px;margin-bottom:16px">
+        <!-- Top row: 3 columns -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
           <div class="chart-panel"><h3>Pipeline Status</h3><p>Lead distribution by status</p><div class="donut-container" id="donut-chart"></div></div>
           <div class="chart-panel"><h3>Email Outreach</h3><p>Sent vs pending emails</p><div class="donut-container" id="email-donut-chart"></div></div>
-          <div class="panel" style="display:flex;flex-direction:column;min-height:0"><div class="panel-header" style="margin-bottom:8px;flex-shrink:0"><div><div class="panel-title" style="font-size:13px">Recent Leads</div></div><button class="btn" style="font-size:11px;padding:3px 8px" onclick="go('crm',document.querySelectorAll('.nav-item')[2])">View All →</button></div><div class="lead-list" id="recent-leads" style="flex:1;overflow-y:auto;max-height:180px"></div></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-          <div class="chart-panel"><h3>Lead Sources</h3><p>Breakdown of where your leads come from</p><div class="bar-chart" id="bar-chart"></div></div>
           <div class="panel" id="product-rank-panel"><div class="panel-header"><div><div class="panel-title">Top Products</div><div class="panel-desc">Lead distribution by recommended product</div></div></div><div id="product-rank-bars"></div></div>
         </div>
-        <div class="panel"><div class="panel-header"><div><div class="panel-title">Recent Activity</div><div class="panel-desc">Your team's latest actions</div></div></div><div class="activity-list" id="activity"></div></div>
+        <!-- Bottom row: 2 columns -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div class="chart-panel"><h3>Lead Sources</h3><p>Breakdown of where your leads come from</p><div class="bar-chart" id="bar-chart"></div></div>
+          <div class="panel"><div class="panel-header"><div><div class="panel-title">Recent Activity</div><div class="panel-desc">Your team's latest actions</div></div></div><div class="activity-list" id="activity"></div></div>
+        </div>
       </div>
 
       <!-- ===== INBOUND SCANNER ===== -->
