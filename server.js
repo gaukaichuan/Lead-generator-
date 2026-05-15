@@ -885,7 +885,7 @@ function buildBiginConnectUrl(request, username) {
   authUrl.searchParams.set("client_id", getBiginClientId());
   authUrl.searchParams.set("response_type", "code");
   authUrl.searchParams.set("access_type", "offline");
-  authUrl.searchParams.set("prompt", "consent");
+  authUrl.searchParams.set("prompt", "login");
   authUrl.searchParams.set("scope", BIGIN_SCOPES);
   authUrl.searchParams.set("redirect_uri", getBiginRedirectUri(request));
   authUrl.searchParams.set("state", "bigin-connect:" + (username || ""));
