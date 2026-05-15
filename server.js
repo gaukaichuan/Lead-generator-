@@ -1858,7 +1858,9 @@ async function handleApi(request, response, pathname, options = {}) {
   // ===== BIGIN ENDPOINTS =====
 
   if (request.method === "GET" && pathname === "/api/integrations/bigin/connect") {
-    response.writeHead(302, { Location: buildBiginConnectUrl(request, session.username) });
+    const url = new URL(request.url, `http://${request.headers.host}`);
+    const forUser = url.searchParams.get("for") || session.username;
+    response.writeHead(302, { Location: buildBiginConnectUrl(request, forUser) });
     response.end();
     return;
   }
@@ -2324,15 +2326,15 @@ function createAppServer(options = {}) {
 
         const state = url.searchParams.get("state") || "";
         if (state.startsWith("bigin-connect:") && url.searchParams.get("code")) {
-          const username = state.replace("bigin-connect:", "");
-          // Verify the session user matches the state user
-          if (username && username !== session.username) {
+          const targetUser = state.replace("bigin-connect:", "");
+          // Allow admin to connect Bigin for any user; others must match their own session
+          if (session.role !== "admin" && targetUser && targetUser !== session.username) {
             response.writeHead(302, { Location: `${failureDestination}&message=${encodeURIComponent("Session mismatch")}` });
             response.end();
             return;
           }
           try {
-            await exchangeBiginAuthorizationCode(request, store, session.username, url.searchParams.get("code"));
+            await exchangeBiginAuthorizationCode(request, store, targetUser || session.username, url.searchParams.get("code"));
             response.writeHead(302, { Location: `${destination}?bigin=connected` });
             response.end();
             return;

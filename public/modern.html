@@ -334,21 +334,6 @@
           </div>
         </div>
 
-        <!-- BigIN First-Time Prompt -->
-        <div class="bigin-prompt-banner" id="bigin-prompt-banner" hidden style="background:linear-gradient(135deg,var(--amber-50),var(--amber-100));border:1px solid var(--amber-100);border-radius:var(--radius-lg);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:40px;height:40px;border-radius:var(--radius-sm);background:white;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow-sm)">🔗</div>
-            <div>
-              <div style="font-size:14px;font-weight:700;color:var(--text)">Connect Zoho Bigin to Enable CRM Sync</div>
-              <div style="font-size:12px;color:var(--text-secondary)">Your Bigin account is not connected yet. Connect once and your credentials will be remembered.</div>
-            </div>
-          </div>
-          <button class="btn btn-green" onclick="window.open('/api/integrations/bigin/connect','_blank')" style="flex-shrink:0">
-            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:white"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
-            Connect Bigin
-          </button>
-        </div>
-
         <div class="metrics" id="metrics"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 300px;gap:16px;margin-bottom:16px">
           <div class="chart-panel"><h3>Pipeline Status</h3><p>Lead distribution by status</p><div class="donut-container" id="donut-chart"></div></div>
@@ -588,8 +573,6 @@ Best,
         </div>
         <div id="bigin-table" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
-
-      <div class="settings-section"><h4>Integration</h4><button class="settings-item" onclick="window.open('/api/integrations/bigin/connect','_blank')"><div class="settings-item-icon green"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div><div class="settings-item-text"><strong>Connect Zoho Bigin</strong><span>Authorize CRM integration for your account</span></div></button></div>
     </div>
   </div>
 
@@ -1450,20 +1433,12 @@ Best,
     }
 
     function connectBigin(username) {
-      // Open Bigin OAuth for this user - they need to be logged in as that user
-      // For admin managing others, we show a note
-      alert('To connect Bigin for ' + username + ', log in as that user and go to Settings > Connect Zoho Bigin.');
+      // Redirect to Bigin OAuth for the specified user
+      window.location.href = '/api/integrations/bigin/connect?for=' + encodeURIComponent(username);
     }
 
     // Check if current user is admin and show admin section
     async function initAdminPanel() {
-      // Handle Bigin connection result from URL
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('bigin') === 'connected') {
-        document.getElementById('bigin-prompt-banner').hidden = true;
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-
       try {
         const res = await fetch('/api/auth/session');
         if (res.ok) {
@@ -1473,13 +1448,6 @@ Best,
             document.getElementById('admin-bigin-section').hidden = false;
             loadBiginConnections();
           }
-        }
-        // Check current user's BigIN connection status
-        await new Promise(r => setTimeout(r, 500)); // Wait for token to save
-        const biginRes = await fetch('/api/integrations/bigin/status');
-        if (biginRes.ok) {
-          const biginData = await biginRes.json();
-          document.getElementById('bigin-prompt-banner').hidden = biginData.connected;
         }
       } catch (e) {}
     }
