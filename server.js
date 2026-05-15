@@ -2143,6 +2143,43 @@ async function handleApi(request, response, pathname, options = {}) {
     return;
   }
 
+  // Reassign lead (admin only)
+  const reassignMatch = pathname.match(/^\/api\/leads\/([^/]+)\/reassign$/);
+  if (reassignMatch && request.method === "POST") {
+    if (session.role !== "admin") {
+      sendJson(response, 403, { error: "Only admins can reassign leads." });
+      return;
+    }
+    const [, leadId] = reassignMatch;
+    const lead = store.leads.find((item) => item.id === leadId);
+    if (!lead) {
+      sendJson(response, 404, { error: "Lead not found." });
+      return;
+    }
+    const body = await readRequestBody(request);
+    const newOwner = String(body.assignedTo || "").trim().toLowerCase();
+    if (!newOwner) {
+      sendJson(response, 400, { error: "No target user specified." });
+      return;
+    }
+    const targetUser = store.users.find(u => u.username === newOwner);
+    if (!targetUser) {
+      sendJson(response, 404, { error: `User '${newOwner}' not found.` });
+      return;
+    }
+    const oldOwner = lead.assignedTo;
+    lead.assignedTo = newOwner;
+    writeStore(store);
+    appendActivity(
+      store,
+      lead.id,
+      "Lead reassigned",
+      `${lead.company} was reassigned from '${oldOwner}' to '${newOwner}'.`
+    );
+    sendJson(response, 200, { message: `Lead reassigned to ${newOwner}.`, lead: enrichLead(lead) });
+    return;
+  }
+
   const sendEmailMatch = pathname.match(/^\/api\/leads\/([^/]+)\/send-email$/);
   if (sendEmailMatch && request.method === "POST") {
     const [, leadId] = sendEmailMatch;
