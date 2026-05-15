@@ -860,12 +860,8 @@ Best,
       document.getElementById('ld-company').textContent = l.company;
       document.getElementById('ld-subtitle').textContent = `${l.contactName || 'No contact'} · ${l.region}`;
 
-      // Badges
-      const sc = l.status === 'qualified' ? 'badge-qualified' : l.status === 'unqualified' ? 'badge-unqualified' : 'badge-new';
-      const ac = PA.includes((l.region || '').toLowerCase()) ? 'badge-priority' : 'badge-standard';
-      const ec = l.emailStatus === 'sent' ? 'tag-sent' : 'badge-standard';
-      let badges = `<span class="detail-badge ${sc}">${l.status}</span>`;
-      badges += `<span class="detail-badge ${ac}">${ac === 'badge-priority' ? 'Priority' : 'Standard'}</span>`;
+      // Badges (removed status & priority badges from header)
+      let badges = '';
       if (l.crmLogged) badges += `<span class="tag tag-crm" style="font-size:10px">CRM ✓</span>`;
       document.getElementById('ld-badges').innerHTML = badges;
 
