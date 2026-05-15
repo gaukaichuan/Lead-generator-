@@ -1623,6 +1623,14 @@ async function handleApi(request, response, pathname, options = {}) {
     return;
   }
 
+  if (request.method === "DELETE" && pathname === "/api/leads") {
+    const count = store.leads.length;
+    store.leads = [];
+    writeStore(store);
+    sendJson(response, 200, { message: `Cleared ${count} leads.`, cleared: count });
+    return;
+  }
+
   if (request.method === "GET" && pathname === "/api/export/leads.csv") {
     const query = new URL(request.url, `http://${request.headers.host}`).searchParams.get("query");
     const leads = filterLeadsByQuery(sortLeads(store.leads), query);

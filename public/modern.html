@@ -343,7 +343,7 @@
         <div class="panel">
           <div class="toolbar">
             <div class="toolbar-left"><span class="toolbar-summary" id="q-summary">0 selected</span><div class="search-input"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input placeholder="Search leads..." id="q-search" oninput="queuePage=1;renderQueue()"></div><select class="select-input" id="q-prod" onchange="queuePage=1;renderQueue()"><option value="all">All Products</option></select></div>
-            <div class="toolbar-right"><button class="btn" style="font-size:12px;padding:5px 12px" onclick="selectAll()">Select All</button><button class="btn" style="font-size:12px;padding:5px 12px" onclick="sel.clear();renderQueue()">Clear</button><button class="btn btn-primary" style="font-size:12px;padding:5px 12px" onclick="bulkEmail()"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Bulk Email</button></div>
+            <div class="toolbar-right"><button class="btn" style="font-size:12px;padding:5px 12px" onclick="selectAll()">Select All</button><button class="btn" style="font-size:12px;padding:5px 12px" onclick="sel.clear();renderQueue()">Clear</button><button class="btn btn-primary" style="font-size:12px;padding:5px 12px" onclick="bulkEmail()"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Bulk Email</button><button class="btn btn-red" style="font-size:12px;padding:5px 12px" onclick="clearAllLeads()">Clear All</button></div>
           </div>
           <div class="lead-list" id="q-list"></div>
           <div class="pagination"><button class="btn" style="font-size:12px;padding:5px 12px" onclick="queuePage--;renderQueue()" id="q-prev">← Previous</button><span class="pagination-info" id="q-page">Page 1 of 1</span><button class="btn" style="font-size:12px;padding:5px 12px" onclick="queuePage++;renderQueue()" id="q-next">Next →</button></div>
@@ -766,6 +766,17 @@ Best,
         sel.delete(selId);
         notify('Removed', `${l.company} was deleted.`);
         closeM('m-lead');
+        await loadLeads();
+      } catch (err) {
+        notify('Error', err.message, 'error');
+      }
+    }
+
+    async function clearAllLeads() {
+      if (!confirm('Delete ALL leads? This cannot be undone.')) return;
+      try {
+        const result = await api('/api/leads', { method: 'DELETE' });
+        notify('Cleared', result.message || 'All leads removed.');
         await loadLeads();
       } catch (err) {
         notify('Error', err.message, 'error');
