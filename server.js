@@ -2168,7 +2168,7 @@ async function handleApi(request, response, pathname, options = {}) {
     }
   }
 
-  const leadMatch = pathname.match(/^\/api\/leads\/([^/]+)\/(status|sent|crm)$/);
+  const leadMatch = pathname.match(/^\/api\/leads\/([^/]+)\/(status|sent|crm|edit)$/);
   if (leadMatch) {
     const [, leadId, action] = leadMatch;
     const lead = store.leads.find((item) => item.id === leadId);

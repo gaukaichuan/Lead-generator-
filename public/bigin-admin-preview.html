@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadGen AI — BigIN Connections</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8f9fc; --surface: #ffffff; --surface-hover: #f8f9fc;
+  --border: #e8eaef; --border-light: #f1f3f8;
+  --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+  --blue: #3b82f6; --blue-50: #eff6ff; --blue-100: #dbeafe; --blue-600: #2563eb; --blue-700: #1d4ed8;
+  --green: #10b981; --green-50: #ecfdf5; --green-100: #d1fae5;
+  --amber: #f59e0b; --amber-50: #fffbeb; --amber-100: #fef3c7;
+  --red: #ef4444; --red-50: #fef2f2; --red-100: #fee2e2;
+  --purple: #8b5cf6; --purple-50: #f5f3ff; --purple-100: #ede9fe;
+  --indigo: #6366f1; --cyan: #06b6d4;
+  --radius-sm: 8px; --radius: 12px; --radius-lg: 16px; --radius-xl: 20px;
+  --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.03); --shadow: 0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px -1px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(59,130,246,0.04) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,92,246,0.03) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+
+.app { position: relative; z-index: 1; }
+
+/* Header */
+.app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
+.app-header-left { display: flex; align-items: center; gap: 12px; }
+.app-logo { width: 32px; height: 32px; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--blue-600), var(--purple)); display: grid; place-items: center; }
+.app-logo svg { width: 18px; height: 18px; fill: white; }
+.app-header h1 { font-size: 16px; font-weight: 700; }
+.app-header-right { display: flex; align-items: center; gap: 12px; }
+.user-badge { display: flex; align-items: center; gap: 8px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--purple-50); display: grid; place-items: center; font-size: 13px; font-weight: 700; color: var(--purple); }
+.user-info .name { font-size: 13px; font-weight: 600; }
+.user-info .role { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 1px 8px; border-radius: 99px; }
+.role-admin { background: var(--purple-50); color: var(--purple); border: 1px solid var(--purple-100); }
+.role-user { background: var(--green-50); color: var(--green); border: 1px solid var(--green-100); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 600; font-size: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: all 150ms ease; font-family: inherit; white-space: nowrap; }
+.btn:hover { background: var(--surface-hover); box-shadow: var(--shadow); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-primary { background: var(--blue-600); border-color: var(--blue-600); color: white; }
+.btn-primary:hover { background: var(--blue-700); }
+.btn-red { background: var(--red); border-color: var(--red); color: white; }
+.btn-red:hover { background: #dc2626; }
+.btn-green { background: var(--green); border-color: var(--green); color: white; }
+.btn-green:hover { background: #059669; }
+.btn svg { width: 14px; height: 14px; fill: currentColor; }
+.btn-primary svg, .btn-red svg, .btn-green svg { fill: white; }
+
+/* Main content */
+.main { padding: 24px; max-width: 1000px; margin: 0 auto; }
+
+/* First-time prompt banner */
+.bigin-prompt { background: linear-gradient(135deg, var(--amber-50), var(--amber-100)); border: 1px solid var(--amber-100); border-radius: var(--radius-lg); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.bigin-prompt-text h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.bigin-prompt-text p { font-size: 13px; color: var(--text-secondary); }
+.bigin-prompt .btn { flex-shrink: 0; }
+
+/* Admin panel */
+.admin-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.admin-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.admin-header h2 { font-size: 18px; font-weight: 700; }
+.admin-header .subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.admin-header .count { background: var(--blue-50); color: var(--blue-600); font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 99px; }
+
+.admin-table { width: 100%; }
+.admin-table thead th { padding: 12px 24px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); background: var(--surface-hover); }
+.admin-table tbody tr { border-bottom: 1px solid var(--border-light); transition: background 150ms ease; }
+.admin-table tbody tr:hover { background: var(--surface-hover); }
+.admin-table tbody tr:last-child { border-bottom: none; }
+.admin-table td { padding: 16px 24px; font-size: 13px; vertical-align: middle; }
+.admin-table .user-cell { display: flex; align-items: center; gap: 12px; }
+.admin-table .user-cell .avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.admin-table .user-cell .avatar.admin-av { background: var(--purple-50); color: var(--purple); }
+.admin-table .user-cell .avatar.user-av { background: var(--green-50); color: var(--green); }
+.admin-table .user-cell .avatar.staff-av { background: var(--blue-50); color: var(--blue-600); }
+.admin-table .user-cell .info .uname { font-weight: 600; }
+.admin-table .user-cell .info .urole { font-size: 11px; color: var(--text-muted); }
+
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+.status-connected { background: var(--green-50); color: var(--green); border: 1px solid var(--green-100); }
+.status-connected::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.status-disconnected { background: var(--red-50); color: var(--red); border: 1px solid var(--red-100); }
+.status-disconnected::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--red); }
+
+.connect-info { font-size: 11px; color: var(--text-muted); }
+.connect-info strong { color: var(--text-secondary); }
+
+.action-cell { display: flex; gap: 8px; }
+.action-cell .btn { font-size: 11px; padding: 6px 12px; }
+
+/* Toast notification */
+.toast { position: fixed; top: 24px; right: 24px; z-index: 999; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 20px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; transform: translateX(120%); transition: transform 300ms ease; }
+.toast.show { transform: translateX(0); }
+.toast.success { border-color: var(--green-100); }
+.toast.success svg { fill: var(--green); }
+.toast.error { border-color: var(--red-100); }
+.toast.error svg { fill: var(--red); }
+.toast svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Modal */
+.modal-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; background: rgba(17,24,39,0.35); backdrop-filter: blur(4px); }
+.modal-backdrop[hidden] { display: none !important; }
+.modal { background: var(--surface); border-radius: var(--radius-xl); padding: 28px; width: min(480px, 100%); box-shadow: var(--shadow-xl); position: relative; border: 1px solid var(--border); }
+.modal-close { position: absolute; top: 16px; right: 16px; width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; font-size: 16px; color: var(--text-muted); }
+.modal-close:hover { background: var(--red-50); color: var(--red); }
+.modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.modal p { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+.modal .info-box { background: var(--blue-50); border: 1px solid var(--blue-100); border-radius: var(--radius-sm); padding: 14px 16px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+.modal .info-box strong { color: var(--text); }
+.modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="app-header">
+    <div class="app-header-left">
+      <div class="app-logo"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+      <h1>LeadGen AI</h1>
+    </div>
+    <div class="app-header-right">
+      <div class="user-badge">
+        <div class="user-info">
+          <div class="name">Admin</div>
+          <span class="role role-admin">Admin</span>
+        </div>
+        <div class="user-avatar">A</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <!-- First-time BigIN prompt (shown if current user not connected) -->
+    <div class="bigin-prompt" id="bigin-prompt">
+      <div class="bigin-prompt-text">
+        <h3>🔗 Connect Zoho Bigin to Enable CRM Sync</h3>
+        <p>Your Bigin account is not connected yet. Connect once and your credentials will be remembered — no need to log in again.</p>
+      </div>
+      <button class="btn btn-green" onclick="openConnectModal()">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        Connect Bigin
+      </button>
+    </div>
+
+    <!-- Admin BigIN Management Panel (visible only to admin) -->
+    <div class="admin-panel">
+      <div class="admin-header">
+        <div>
+          <h2>BigIN Connections</h2>
+          <div class="subtitle">Manage Bigin OAuth connections for all users</div>
+        </div>
+        <div class="count" id="connected-count">2 connected</div>
+      </div>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Status</th>
+            <th>Connected At</th>
+            <th>API Domain</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bigin-users-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span id="toast-text">Done</span></div>
+
+<!-- Connect Modal -->
+<div class="modal-backdrop" id="connect-modal" hidden>
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('connect-modal')">&times;</button>
+    <h3>Connect Zoho Bigin</h3>
+    <p>You will be redirected to Zoho to authorize access. Your refresh token will be stored securely.</p>
+    <div class="info-box">
+      <strong>How it works:</strong><br>
+      1. Click <strong>"Authorize Bigin"</strong> below<br>
+      2. You'll be redirected to Zoho login<br>
+      3. After authorization, you'll be redirected back<br>
+      4. Your connection is saved — no need to repeat this step
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeM('connect-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="simulateConnect()">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        Authorize Bigin
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Disconnect Modal -->
+<div class="modal-backdrop" id="disconnect-modal" hidden>
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('disconnect-modal')">&times;</button>
+    <h3>Disconnect Bigin</h3>
+    <p>This will remove the Bigin OAuth connection for <strong id="dc-user">admin</strong>. Leads already synced to Bigin will remain unaffected, but new leads won't sync until reconnected.</p>
+    <div class="info-box">
+      <strong>⚠️ This action affects:</strong><br>
+      • CRM sync will stop for this user<br>
+      • Existing Bigin deals are <strong>not</strong> deleted<br>
+      • The user can reconnect at any time
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeM('disconnect-modal')">Cancel</button>
+      <button class="btn btn-red" id="dc-confirm-btn" onclick="confirmDisconnect()">
+        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        Disconnect
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== MOCK DATA =====
+let users = [
+  { username: 'admin', displayName: 'Admin', role: 'admin', bigin: { refreshToken: 'abc123', apiDomain: 'https://www.zohoapis.com', connectedAt: '2026-05-14T10:30:00Z' } },
+  { username: 'user', displayName: 'Staff User', role: 'user', bigin: { refreshToken: 'def456', apiDomain: 'https://www.zohoapis.com', connectedAt: '2026-05-15T08:15:00Z' } },
+  { username: 'sales1', displayName: 'Sales Person 1', role: 'user', bigin: {} },
+  { username: 'sales2', displayName: 'Sales Person 2', role: 'user', bigin: {} },
+  { username: 'manager', displayName: 'Sales Manager', role: 'user', bigin: {} }
+];
+
+let currentUsername = 'admin';
+let disconnectTarget = null;
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function isConnected(user) {
+  return !!(user.bigin && user.bigin.refreshToken);
+}
+
+function renderTable() {
+  const tbody = document.getElementById('bigin-users-body');
+  const connectedCount = users.filter(isConnected).length;
+  document.getElementById('connected-count').textContent = connectedCount + ' connected';
+
+  // Update prompt visibility
+  const me = users.find(u => u.username === currentUsername);
+  const prompt = document.getElementById('bigin-prompt');
+  if (me && isConnected(me)) {
+    prompt.style.display = 'none';
+  } else {
+    prompt.style.display = 'flex';
+  }
+
+  const avClasses = { admin: 'admin-av', user: 'user-av' };
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td>
+        <div class="user-cell">
+          <div class="avatar ${avClasses[u.role] || 'staff-av'}">${u.displayName[0]}</div>
+          <div class="info">
+            <div class="uname">${u.displayName}</div>
+            <div class="urole">${u.role} · @${u.username}</div>
+          </div>
+        </div>
+      </td>
+      <td>${isConnected(u)
+        ? '<span class="status-badge status-connected">Connected</span>'
+        : '<span class="status-badge status-disconnected">Disconnected</span>'
+      }</td>
+      <td><div class="connect-info">${isConnected(u) ? '<strong>' + formatDate(u.bigin.connectedAt) + '</strong>' : '—'}</div></td>
+      <td><div class="connect-info">${isConnected(u) ? '<strong>' + (u.bigin.apiDomain || '—') + '</strong>' : '—'}</div></td>
+      <td>
+        <div class="action-cell">
+          ${isConnected(u)
+            ? `<button class="btn" onclick="openDisconnectModal('${u.username}')">Disconnect</button>
+               <button class="btn" onclick="simulateConnectUser('${u.username}')">Reconnect</button>`
+            : `<button class="btn btn-primary" onclick="simulateConnectUser('${u.username}')">Connect</button>`
+          }
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openConnectModal() {
+  document.getElementById('connect-modal').hidden = false;
+}
+
+function openDisconnectModal(username) {
+  disconnectTarget = username;
+  document.getElementById('dc-user').textContent = username;
+  document.getElementById('disconnect-modal').hidden = false;
+}
+
+function simulateConnect() {
+  closeM('connect-modal');
+  const user = users.find(u => u.username === currentUsername);
+  if (!user) return;
+  user.bigin = {
+    refreshToken: 'mock_token_' + Date.now(),
+    apiDomain: 'https://www.zohoapis.com',
+    connectedAt: new Date().toISOString()
+  };
+  showToast('success', 'Bigin connected successfully for ' + user.displayName);
+  renderTable();
+}
+
+function simulateConnectUser(username) {
+  const user = users.find(u => u.username === username);
+  if (!user) return;
+  user.bigin = {
+    refreshToken: 'mock_token_' + Date.now(),
+    apiDomain: 'https://www.zohoapis.com',
+    connectedAt: new Date().toISOString()
+  };
+  showToast('success', 'Bigin connected for ' + user.displayName);
+  renderTable();
+}
+
+function confirmDisconnect() {
+  if (!disconnectTarget) return;
+  const user = users.find(u => u.username === disconnectTarget);
+  if (user) {
+    user.bigin = {};
+    showToast('success', 'Bigin disconnected for ' + user.displayName);
+  }
+  disconnectTarget = null;
+  closeM('disconnect-modal');
+  renderTable();
+}
+
+function closeM(id) { document.getElementById(id).hidden = true; }
+
+function showToast(type, msg) {
+  const toast = document.getElementById('toast');
+  const icon = toast.querySelector('svg');
+  document.getElementById('toast-text').textContent = msg;
+  toast.className = 'toast ' + type;
+  if (type === 'success') {
+    icon.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+  } else {
+    icon.innerHTML = '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>';
+  }
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+renderTable();
+</script>
+</body>
+</html>
