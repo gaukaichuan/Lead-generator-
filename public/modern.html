@@ -493,6 +493,9 @@
           <div class="ld-form-field"><label>Status</label>
             <select class="form-select" name="status" id="lf-status"><option value="new">New</option><option value="qualified">Qualified</option><option value="unqualified">Unqualified</option></select>
           </div>
+          <div class="ld-form-field admin-only" id="lf-assign-wrap" hidden><label>Assigned To</label>
+            <select class="form-select" name="assignedTo" id="lf-assignedTo"><option value="">Unassigned</option></select>
+          </div>
           <div class="ld-form-field ld-form-full"><label>Notes</label><textarea class="form-textarea" name="notes" id="lf-notes" rows="3"></textarea></div>
         </form>
       </div>
@@ -886,14 +889,8 @@ Best,
         <div class="ld-field"><div class="ld-field-label">Role</div><div class="ld-field-value">${l.role || '<span style="color:var(--text-muted)">N/A</span>'}</div></div>`;
 
       // Profile section
-      let assignedHtml = `<div class="ld-field"><div class="ld-field-label">Assigned To</div><div class="ld-field-value"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;background:var(--blue-600);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${(l.assignedTo || '?')[0].toUpperCase()}</span>${l.assignedTo || 'Unassigned'}</span></div></div>`;
-      // Admin reassign dropdown
-      if (currentUserRole === 'admin') {
-        const users = (currentUserList || []).map(u => `<option value="${u.username}"${u.username === (l.assignedTo || '') ? ' selected' : ''}>${u.username}${u.displayName ? ' (' + u.displayName + ')' : ''}</option>`).join('');
-        assignedHtml += `<div class="ld-field"><div class="ld-field-label">Reassign</div><div class="ld-field-value"><select class="form-select" style="font-size:12px;padding:4px 8px" onchange="reassignLead('${l.id}',this.value)"><option value="">-- Select user --</option>${users}</select></div></div>`;
-      }
       document.getElementById('ld-profile').innerHTML = `
-        ${assignedHtml}
+        <div class="ld-field"><div class="ld-field-label">Assigned To</div><div class="ld-field-value"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:50%;background:var(--blue-600);color:white;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">${(l.assignedTo || '?')[0].toUpperCase()}</span>${l.assignedTo || 'Unassigned'}</span></div></div>
         <div class="ld-field"><div class="ld-field-label">Source</div><div class="ld-field-value">${l.source}</div></div>
         <div class="ld-field"><div class="ld-field-label">Region</div><div class="ld-field-value">${l.region}</div></div>
         <div class="ld-field"><div class="ld-field-label">Industry</div><div class="ld-field-value">${l.industry || 'N/A'}</div></div>
@@ -930,6 +927,15 @@ Best,
       document.getElementById('lf-source').value = l.source || 'Manual research';
       document.getElementById('lf-status').value = l.status || 'new';
       document.getElementById('lf-notes').value = l.notes || '';
+      document.getElementById('lf-assignedTo').value = l.assignedTo || '';
+      // Populate assignedTo dropdown with user list
+      const assignSelect = document.getElementById('lf-assignedTo');
+      assignSelect.innerHTML = '<option value="">Unassigned</option>' + (currentUserList || []).map(u =>
+        `<option value="${u.username}">${u.username}${u.displayName ? ' (' + u.displayName + ')' : ''}</option>`
+      ).join('');
+      assignSelect.value = l.assignedTo || '';
+      // Show/hide assignedTo field for admin only
+      document.getElementById('lf-assign-wrap').hidden = currentUserRole !== 'admin';
 
       document.getElementById('m-lead').hidden = false;
     }
@@ -965,6 +971,7 @@ Best,
         painPoint: document.getElementById('lf-pain').value,
         source: document.getElementById('lf-source').value,
         status: document.getElementById('lf-status').value,
+        assignedTo: document.getElementById('lf-assignedTo').value || '',
         notes: document.getElementById('lf-notes').value
       };
       try {
@@ -1399,28 +1406,6 @@ Best,
         renderBiginTable(data.users);
       } catch (e) {
         document.getElementById('bigin-table').innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Failed to load connections</div>';
-      }
-    }
-
-    async function reassignLead(leadId, newOwner) {
-      if (!newOwner) return;
-      try {
-        const res = await fetch(`/api/leads/${leadId}/reassign`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ assignedTo: newOwner })
-        });
-        if (!res.ok) throw new Error('Failed to reassign');
-        const data = await res.json();
-        // Update local lead data
-        const lead = leads.find(l => l.id === leadId);
-        if (lead) { lead.assignedTo = newOwner; }
-        // Refresh lead detail
-        openDetail(leadId);
-        renderQueue();
-        notify('Lead Reassigned', `${leadId} reassigned to ${newOwner}`);
-      } catch (e) {
-        notify('Error', e.message, 'error');
       }
     }
 
