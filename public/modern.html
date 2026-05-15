@@ -1455,6 +1455,13 @@ Best,
 
     // Check if current user is admin and show admin section
     async function initAdminPanel() {
+      // Handle Bigin connection result from URL
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('bigin') === 'connected') {
+        document.getElementById('bigin-prompt-banner').hidden = true;
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+
       try {
         const res = await fetch('/api/auth/session');
         if (res.ok) {
@@ -1466,12 +1473,11 @@ Best,
           }
         }
         // Check current user's BigIN connection status
+        await new Promise(r => setTimeout(r, 500)); // Wait for token to save
         const biginRes = await fetch('/api/integrations/bigin/status');
         if (biginRes.ok) {
           const biginData = await biginRes.json();
-          if (!biginData.connected) {
-            document.getElementById('bigin-prompt-banner').hidden = false;
-          }
+          document.getElementById('bigin-prompt-banner').hidden = biginData.connected;
         }
       } catch (e) {}
     }
