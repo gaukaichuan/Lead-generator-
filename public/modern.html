@@ -487,7 +487,6 @@ Best,
         acts = data.activities || [];
         renderAll();
       } catch (err) {
-        console.error('Failed to load leads:', err);
         if (retries > 0) {
           setTimeout(() => loadLeads(retries - 1), 1000);
         }

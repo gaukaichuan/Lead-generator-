@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(copy *)",
+      "Bash(netstat *)",
+      "Bash(findstr *)",
+      "Bash(powershell *)",
+      "Bash(taskkill *)",
+      "Bash(set *)",
+      "Bash(node *)",
+      "Bash(timeout *)"
+    ]
+  },
+  "$version": 4
+}
