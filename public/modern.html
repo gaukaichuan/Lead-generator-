@@ -1995,10 +1995,11 @@
           if (data.role === 'admin') {
             document.getElementById('admin-bigin-section').hidden = false;
             loadBiginConnections();
+          } else {
+            // Non-admin users see their own BigIN section
+            document.getElementById('my-bigin-section').hidden = false;
+            loadMyBigin();
           }
-          // All users (admin + non-admin) see their own BigIN section
-          document.getElementById('my-bigin-section').hidden = false;
-          loadMyBigin();
         }
       } catch (e) {}
     }
