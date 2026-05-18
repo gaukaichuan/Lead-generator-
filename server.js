@@ -1624,6 +1624,115 @@ async function searchGoogleMapsLeads(
     return place.distanceKm !== null && place.distanceKm <= normalizedRadiusKm;
   });
 }
+
+async function searchGoogleMapsViaApify(
+  { query, region, companyType, painPoint, latitude, longitude, radiusKm },
+  maxResults = 500,
+  fetchImpl = fetch
+) {
+  const apifyToken = process.env.APIFY_TOKEN || "";
+  if (!apifyToken) {
+    throw new Error("Apify API token is not configured. Set APIFY_TOKEN in environment variables.");
+  }
+
+  const actorId = process.env.APIFY_GOOGLE_MAPS_ACTOR_ID || "apify/google-maps-scraper";
+  const limit = Number(process.env.APIFY_MAX_RESULTS) || maxResults || 500;
+
+  // Build search query
+  const searchQuery = String(query || "").trim() || "businesses";
+  const locationQuery = latitude && longitude
+    ? `${searchQuery} near ${latitude},${longitude}`
+    : searchQuery;
+
+  // Start the Apify actor run
+  const runResponse = await fetchImpl(`https://api.apify.com/v2/acts/${actorId}/runs?token=${apifyToken}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      searchStringsArray: [locationQuery],
+      maxCrawledPlacesPerSearch: limit,
+      language: "en",
+      country: "MY",
+      includeHistogram: false
+    })
+  });
+
+  if (!runResponse.ok) {
+    const errText = await runResponse.text();
+    throw new Error(`Apify run failed: ${errText}`);
+  }
+
+  const runData = await runResponse.json();
+  const runId = runData.data.id;
+
+  // Poll for completion (max 5 minutes)
+  const maxWait = 300000;
+  const pollInterval = 3000;
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxWait) {
+    await new Promise(r => setTimeout(r, pollInterval));
+
+    const statusResponse = await fetchImpl(`https://api.apify.com/v2/actor-runs/${runId}?token=${apifyToken}`);
+    const statusData = await statusResponse.json();
+    const status = statusData.data.status;
+
+    if (status === "SUCCEEDED") break;
+    if (status === "FAILED" || status === "ABORTED") {
+      throw new Error(`Apify scraper failed: ${statusData.data.statusMessage || status}`);
+    }
+    // TIMING-RUNNING or STARTING — keep polling
+  }
+
+  // Fetch results from dataset
+  const datasetResponse = await fetchImpl(
+    `https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${apifyToken}&format=json&clean=true&desc=true&limit=${limit}`,
+    { method: "GET" }
+  );
+
+  if (!datasetResponse.ok) {
+    const errText = await datasetResponse.text();
+    throw new Error(`Apify dataset fetch failed: ${errText}`);
+  }
+
+  const items = await datasetResponse.json();
+
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  // Map Apify results to internal lead format
+  return items.map((item) => {
+    const website = String(item.website || "").trim();
+    const email = String(item.email || "").trim() || guessEmailFromWebsite(website);
+    const address = String(item.address || "").trim();
+    const placeId = String(item.placeId || item.place_id || "");
+
+    return {
+      company: item.name || "Unknown business",
+      contactName: "Business Contact",
+      email,
+      phone: String(item.phone || "").trim(),
+      website,
+      role: "",
+      industry: item.category || "Business",
+      region: region || "Other",
+      companyType: companyType || "",
+      painPoint: painPoint || "",
+      source: "Google Maps (Apify)",
+      status: "new",
+      notes: [
+        "Imported from Google Maps via Apify.",
+        address ? `Address: ${address}` : "",
+        item.rating ? `Rating: ${item.rating} (${item.reviews || 0} reviews)` : ""
+      ].filter(Boolean).join(" "),
+      externalRef: placeId || `apify_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      distanceKm: null,
+      location: null
+    };
+  });
+}
+
 function sanitizePreviewLead(lead) {
   const enrichedLead = enrichLead(store, lead);
   return {
@@ -2325,6 +2434,56 @@ async function handleApi(request, response, pathname, options = {}) {
       googlePlacesFetch,
       "",
       websiteFetch
+    );
+
+    const existingIdentities = new Set(store.leads.map(makeLeadIdentity));
+
+    const deduplicated = candidates.filter((candidate) => {
+      const identity = makeLeadIdentity(candidate);
+      return !existingIdentities.has(identity);
+    });
+
+    sendJson(response, 200, {
+      leads: deduplicated.map(sanitizePreviewLead),
+      filteredCount: candidates.length - deduplicated.length
+    });
+    return;
+  }
+
+  if (request.method === "POST" && pathname === "/api/google-maps/apify-search") {
+    const body = await readRequestBody(request);
+    const latitude = Number(body.latitude);
+    const longitude = Number(body.longitude);
+    const radiusKm = Number(body.radiusKm);
+    const maxResults = Number(body.maxResults) || 500;
+
+    if (!process.env.APIFY_TOKEN) {
+      sendJson(response, 400, { error: "Apify API token is not configured on the server." });
+      return;
+    }
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      sendJson(response, 400, { error: "Your live location is required before searching Google Maps." });
+      return;
+    }
+
+    if (!Number.isFinite(radiusKm) || radiusKm <= 0) {
+      sendJson(response, 400, { error: "Please enter a valid radius in kilometers." });
+      return;
+    }
+
+    const candidates = await searchGoogleMapsViaApify(
+      {
+        query: body.query,
+        region: body.region,
+        companyType: body.companyType,
+        painPoint: body.painPoint,
+        latitude,
+        longitude,
+        radiusKm
+      },
+      maxResults,
+      fetch
     );
 
     const existingIdentities = new Set(store.leads.map(makeLeadIdentity));
