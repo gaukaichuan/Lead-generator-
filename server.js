@@ -1645,7 +1645,8 @@ async function searchGoogleMapsViaApify(
     : searchQuery;
 
   // Start the Apify actor run
-  const runResponse = await fetchImpl(`https://api.apify.com/v2/acts/${actorId}/runs?token=${apifyToken}`, {
+  const encodedActorId = encodeURIComponent(actorId);
+  const runResponse = await fetchImpl(`https://api.apify.com/v2/acts/${encodedActorId}/runs?token=${apifyToken}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
