@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Manager Preview</title>
+<style>
+  :root {
+    --bg: #f1f5f9; --surface: #ffffff; --border: #e2e8f0; --text: #0f172a;
+    --muted: #64748b; --muted-light: #94a3b8; --blue: #3b82f6; --blue-soft: #eff6ff;
+    --green: #10b981; --green-soft: #ecfdf5; --amber: #f59e0b; --amber-soft: #fef3c7;
+    --red: #ef4444; --red-soft: #fef2f2; --purple: #8b5cf6; --purple-soft: #f5f3ff;
+    --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 24px; }
+  .container { max-width: 700px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+
+  /* Header bar */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .toolbar .count { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+  .toolbar .btn { padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .toolbar .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .toolbar .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  /* Product list */
+  .product-list { display: flex; flex-direction: column; gap: 8px; }
+  .product-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; display: flex; align-items: flex-start; gap: 14px;
+    transition: all 0.15s; position: relative; overflow: hidden;
+  }
+  .product-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+  .product-card.disabled { opacity: 0.5; }
+  .product-card .p-icon {
+    width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .product-card .p-info { flex: 1; min-width: 0; }
+  .product-card .p-name { font-size: 0.92rem; font-weight: 700; margin-bottom: 3px; }
+  .product-card .p-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.45; }
+  .product-card .p-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .product-card .p-action {
+    width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); cursor: pointer; display: grid; place-items: center;
+    font-size: 14px; color: var(--muted); transition: all 0.15s;
+  }
+  .product-card .p-action:hover { border-color: var(--blue); color: var(--blue); }
+  .product-card .p-action.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-soft); }
+  .product-card .p-action.toggle-on { border-color: var(--green); color: var(--green); background: var(--green-soft); }
+  .product-card .p-action.toggle-off { border-color: var(--muted-light); color: var(--muted-light); }
+
+  .product-card .p-status {
+    position: absolute; top: 10px; right: 14px;
+    padding: 2px 8px; border-radius: 999px; font-size: 0.6rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .p-status.active { background: var(--green-soft); color: var(--green); }
+  .p-status.inactive { background: var(--red-soft); color: var(--red); }
+
+  /* Add form */
+  .add-form {
+    background: var(--surface); border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 20px; margin-top: 16px; display: none;
+  }
+  .add-form.show { display: block; }
+  .add-form h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 14px; }
+  .add-form .form-row { margin-bottom: 10px; }
+  .add-form label { display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .add-form input, .add-form textarea, .add-form select {
+    width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);
+    font-size: 0.85rem; font-family: inherit; color: var(--text); background: #f8fafc;
+    transition: border-color 0.15s;
+  }
+  .add-form input:focus, .add-form textarea:focus, .add-form select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .add-form textarea { resize: vertical; min-height: 60px; }
+  .add-form .form-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+  .add-form .form-actions .btn { padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .add-form .form-actions .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .add-form .form-actions .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  /* Edit modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.35); backdrop-filter: blur(3px); z-index: 100; display: grid; place-items: center; padding: 24px; }
+  .modal-overlay[hidden] { display: none !important; }
+  .edit-modal { background: var(--surface); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); width: 100%; max-width: 480px; padding: 24px; animation: slideUp 0.2s ease; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  .edit-modal h3 { font-size: 1rem; font-weight: 800; margin-bottom: 16px; }
+  .edit-modal .form-row { margin-bottom: 12px; }
+  .edit-modal label { display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .edit-modal input, .edit-modal textarea { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.85rem; font-family: inherit; color: var(--text); background: #f8fafc; }
+  .edit-modal input:focus, .edit-modal textarea:focus { outline: none; border-color: var(--blue); }
+  .edit-modal textarea { resize: vertical; min-height: 60px; }
+  .edit-modal .form-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+  .edit-modal .form-actions .btn { padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+  .edit-modal .form-actions .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  /* Color picker row */
+  .color-options { display: flex; gap: 6px; flex-wrap: wrap; }
+  .color-opt { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+  .color-opt:hover { transform: scale(1.15); }
+  .color-opt.selected { border-color: var(--text); box-shadow: 0 0 0 2px rgba(15,23,42,0.15); }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted-light); }
+  .empty .empty-icon { font-size: 2rem; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Product Manager</h1>
+  <p class="subtitle">Add, edit, enable/disable products used in bulk email campaigns.</p>
+
+  <div class="toolbar">
+    <span class="count" id="prodCount">5 products (5 active)</span>
+    <button class="btn primary" onclick="showAddForm()">+ Add Product</button>
+  </div>
+
+  <div class="product-list" id="productList"></div>
+
+  <!-- Inline add form -->
+  <div class="add-form" id="addForm">
+    <h3>Add New Product</h3>
+    <div class="form-row">
+      <label>Product Name</label>
+      <input id="addName" placeholder="e.g. AutoCount Inventory">
+    </div>
+    <div class="form-row">
+      <label>Description / Pitch</label>
+      <textarea id="addDesc" placeholder="e.g. Track stock levels, manage warehouses, and automate reordering."></textarea>
+    </div>
+    <div class="form-row">
+      <label>Icon</label>
+      <select id="addIcon">
+        <option value="">📦</option>
+        <option value="">🏪</option>
+        <option value="">📊</option>
+        <option value="">💰</option>
+        <option value="">📱</option>
+        <option value="">🚚</option>
+        <option value="">🔧</option>
+        <option value="">📋</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Color</label>
+      <div class="color-options" id="addColors"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="hideAddForm()">Cancel</button>
+      <button class="btn primary" onclick="addProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal-overlay" id="editModal" hidden>
+  <div class="edit-modal">
+    <h3 id="editTitle">Edit Product</h3>
+    <div class="form-row">
+      <label>Product Name</label>
+      <input id="editName">
+    </div>
+    <div class="form-row">
+      <label>Description / Pitch</label>
+      <textarea id="editDesc"></textarea>
+    </div>
+    <div class="form-row">
+      <label>Icon</label>
+      <select id="editIcon">
+        <option value="">📦</option>
+        <option value="">🏪</option>
+        <option value="">📊</option>
+        <option value="">💰</option>
+        <option value="">📱</option>
+        <option value="">🚚</option>
+        <option value="">🔧</option>
+        <option value="">📋</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Color</label>
+      <div class="color-options" id="editColors"></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeEdit()">Cancel</button>
+      <button class="btn primary" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS = [
+  { key: 'blue', val: '#3b82f6', soft: '#eff6ff' },
+  { key: 'green', val: '#10b981', soft: '#ecfdf5' },
+  { key: 'amber', val: '#f59e0b', soft: '#fef3c7' },
+  { key: 'purple', val: '#8b5cf6', soft: '#f5f3ff' },
+  { key: 'red', val: '#ef4444', soft: '#fef2f2' },
+  { key: 'pink', val: '#ec4899', soft: '#fdf2f8' },
+  { key: 'teal', val: '#14b8a6', soft: '#f0fdfa' },
+  { key: 'indigo', val: '#6366f1', soft: '#eef2ff' },
+];
+
+let products = [
+  { id: 1, name: 'AutoCount Accounting', desc: 'Improve accounting control, reporting speed, and day-to-day finance visibility.', icon: '📊', color: 'blue', active: true },
+  { id: 2, name: 'AutoCount POS', desc: 'Upgrade in-store sales handling, stock sync, and branch reporting.', icon: '🏪', color: 'green', active: true },
+  { id: 3, name: 'Presoft Mobile Stock', desc: 'Give sales teams live stock visibility and reduce order mistakes on the road.', icon: '📱', color: 'amber', active: true },
+  { id: 4, name: 'Cubehous WMS System', desc: 'Tighten warehouse control, trace stock movement, and improve picking accuracy.', icon: '🚚', color: 'purple', active: true },
+  { id: 5, name: 'AutoCount Cloud Payroll', desc: 'Simplify payroll processing, staff records, and monthly compliance work.', icon: '💰', color: 'red', active: true },
+];
+
+let editingId = null;
+let addColor = 'blue';
+let editColor = 'blue';
+let nextId = 6;
+
+function renderProducts() {
+  const list = document.getElementById('productList');
+  const activeCount = products.filter(p => p.active).length;
+  document.getElementById('prodCount').textContent = `${products.length} product${products.length !== 1 ? 's' : ''} (${activeCount} active)`;
+
+  if (products.length === 0) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><p>No products yet. Add your first product above.</p></div>';
+    return;
+  }
+
+  list.innerHTML = products.map(p => {
+    const c = COLORS.find(x => x.key === p.color) || COLORS[0];
+    return `
+      <div class="product-card ${p.active ? '' : 'disabled'}">
+        <span class="p-status ${p.active ? 'active' : 'inactive'}">${p.active ? 'Active' : 'Disabled'}</span>
+        <div class="p-icon" style="background:${c.soft};color:${c.val}">${p.icon}</div>
+        <div class="p-info">
+          <div class="p-name">${p.name}</div>
+          <div class="p-desc">${p.desc}</div>
+        </div>
+        <div class="p-actions">
+          <button class="p-action ${p.active ? 'toggle-on' : 'toggle-off'}" title="${p.active ? 'Disable' : 'Enable'}" onclick="toggleProduct(${p.id})">${p.active ? '✓' : '○'}</button>
+          <button class="p-action" title="Edit" onclick="openEdit(${p.id})">✎</button>
+          <button class="p-action danger" title="Delete" onclick="deleteProduct(${p.id})">🗑</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (p) p.active = !p.active;
+  renderProducts();
+}
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  products = products.filter(x => x.id !== id);
+  renderProducts();
+}
+
+function showAddForm() {
+  document.getElementById('addForm').classList.add('show');
+  document.getElementById('addName').value = '';
+  document.getElementById('addDesc').value = '';
+  addColor = 'blue';
+  renderColorPicker('addColors', addColor, (c) => { addColor = c; });
+  document.getElementById('addName').focus();
+}
+
+function hideAddForm() {
+  document.getElementById('addForm').classList.remove('show');
+}
+
+function addProduct() {
+  const name = document.getElementById('addName').value.trim();
+  const desc = document.getElementById('addDesc').value.trim();
+  const icon = document.getElementById('addIcon').value || '';
+  if (!name) { alert('Product name is required'); return; }
+  products.push({ id: nextId++, name, desc: desc || 'No description', icon, color: addColor, active: true });
+  hideAddForm();
+  renderProducts();
+}
+
+function openEdit(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  document.getElementById('editTitle').textContent = 'Edit Product';
+  document.getElementById('editName').value = p.name;
+  document.getElementById('editDesc').value = p.desc;
+  document.getElementById('editIcon').value = p.icon;
+  editColor = p.color;
+  renderColorPicker('editColors', editColor, (c) => { editColor = c; });
+  document.getElementById('editModal').hidden = false;
+}
+
+function closeEdit() {
+  document.getElementById('editModal').hidden = true;
+  editingId = null;
+}
+
+function saveEdit() {
+  const p = products.find(x => x.id === editingId);
+  if (!p) return;
+  const name = document.getElementById('editName').value.trim();
+  const desc = document.getElementById('editDesc').value.trim();
+  const icon = document.getElementById('editIcon').value || '';
+  if (!name) { alert('Product name is required'); return; }
+  p.name = name;
+  p.desc = desc || 'No description';
+  p.icon = icon;
+  p.color = editColor;
+  closeEdit();
+  renderProducts();
+}
+
+function renderColorPicker(containerId, selected, onChange) {
+  document.getElementById(containerId).innerHTML = COLORS.map(c =>
+    `<div class="color-opt ${c.key === selected ? 'selected' : ''}" style="background:${c.val}" onclick="this.parentElement.querySelectorAll('.color-opt').forEach(x=>x.classList.remove('selected'));this.classList.add('selected');(${onChange.toString()})('${c.key}')"></div>`
+  ).join('');
+}
+
+// Close edit on backdrop click
+document.getElementById('editModal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeEdit();
+});
+
+renderProducts();
+</script>
+</body>
+</html>

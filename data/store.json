@@ -1370,7 +1370,72 @@
       "createdAt": "2026-05-14T06:51:30.595Z"
     }
   ],
-  "integrations": {
-    "bigin": {}
-  }
+  "users": [
+    {
+      "username": "admin",
+      "passwordHash": "$2a$10$qsAnCnVT1Lm.D3Ii31SRfuOkJnVu2fziPaO4wUImrG57GQbZWitQ6",
+      "role": "admin",
+      "displayName": "Admin",
+      "bigin": {}
+    },
+    {
+      "username": "user",
+      "passwordHash": "$2a$10$Bz5OOD21czmTo1.oPo6zGuv.e8wwLun73nkyCKwUBHwMbQph2CcBC",
+      "role": "user",
+      "displayName": "Staff User",
+      "bigin": {}
+    }
+  ],
+  "products": [
+    {
+      "id": "prod_default_0",
+      "key": "autocount-accounting",
+      "name": "AutoCount Accounting",
+      "pitch": "Improve accounting control, reporting speed, and day-to-day finance visibility.",
+      "icon": "accounting",
+      "color": "blue",
+      "active": true,
+      "createdAt": "2026-05-18T07:27:14.640Z"
+    },
+    {
+      "id": "prod_default_1",
+      "key": "autocount-pos",
+      "name": "AutoCount POS",
+      "pitch": "Upgrade in-store sales handling, stock sync, and branch reporting.",
+      "icon": "pos",
+      "color": "green",
+      "active": true,
+      "createdAt": "2026-05-18T07:27:14.642Z"
+    },
+    {
+      "id": "prod_default_2",
+      "key": "presoft-mobile-stock",
+      "name": "Presoft Mobile Stock",
+      "pitch": "Give sales teams live stock visibility and reduce order mistakes on the road.",
+      "icon": "stock",
+      "color": "amber",
+      "active": true,
+      "createdAt": "2026-05-18T07:27:14.642Z"
+    },
+    {
+      "id": "prod_default_3",
+      "key": "cubehous-wms-system",
+      "name": "Cubehous WMS System",
+      "pitch": "Tighten warehouse control, trace stock movement, and improve picking accuracy.",
+      "icon": "wms",
+      "color": "purple",
+      "active": true,
+      "createdAt": "2026-05-18T07:27:14.642Z"
+    },
+    {
+      "id": "prod_default_4",
+      "key": "autocount-cloud-payroll",
+      "name": "AutoCount Cloud Payroll",
+      "pitch": "Simplify payroll processing, staff records, and monthly compliance work.",
+      "icon": "payroll",
+      "color": "pink",
+      "active": true,
+      "createdAt": "2026-05-18T07:27:14.642Z"
+    }
+  ]
 }

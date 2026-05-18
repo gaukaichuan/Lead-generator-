@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Manager — With Product Manager</title>
+<style>
+  :root {
+    --bg: #f1f5f9; --surface: #ffffff; --border: #e2e8f0; --text: #0f172a;
+    --muted: #64748b; --muted-light: #94a3b8; --blue: #3b82f6; --blue-soft: #eff6ff;
+    --blue-600: #2563eb; --blue-700: #1d4ed8; --green: #10b981; --green-soft: #ecfdf5;
+    --amber: #f59e0b; --amber-soft: #fef3c7; --red: #ef4444; --red-soft: #fef2f2;
+    --purple: #8b5cf6; --purple-soft: #f5f3ff; --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+  /* Sidebar */
+  .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+  .sidebar-brand { padding: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .sidebar-brand .logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--blue), var(--purple)); display: grid; place-items: center; color: #fff; font-size: 16px; font-weight: 800; }
+  .sidebar-brand .brand-text { font-size: 0.75rem; color: var(--muted); line-height: 1.3; }
+  .sidebar-brand .brand-text strong { display: block; font-size: 0.88rem; color: var(--text); }
+  .sidebar-nav { padding: 16px 12px; flex: 1; }
+  .nav-label { font-size: 0.65rem; font-weight: 700; color: var(--muted-light); text-transform: uppercase; letter-spacing: 0.1em; padding: 0 8px; margin-bottom: 8px; margin-top: 16px; }
+  .nav-label:first-child { margin-top: 0; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+  .nav-item:hover { background: #f8fafc; color: var(--text); }
+  .nav-item.active { background: var(--blue-soft); color: var(--blue-600); }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .nav-item.active svg { fill: var(--blue-600); }
+
+  /* Main content */
+  .main { flex: 1; overflow-y: auto; padding: 24px 28px; }
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .page-header h1 { font-size: 1.5rem; font-weight: 800; }
+  .page-header .subtitle { font-size: 0.85rem; color: var(--muted); }
+  .page-actions { display: flex; gap: 8px; }
+  .page-actions .btn { padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .page-actions .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .page-actions .btn svg { width: 16px; height: 16px; }
+
+  /* Toolbar */
+  .toolbar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .toolbar .sel-info { font-size: 0.78rem; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  .toolbar input[type=search] { flex: 1; min-width: 140px; padding: 8px 12px 8px 32px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.82rem; background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='%2394a3b8' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") 10px center no-repeat; }
+  .toolbar input:focus { outline: none; border-color: var(--blue); }
+  .toolbar select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.82rem; background: var(--surface); cursor: pointer; }
+  .toolbar .btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+  .toolbar .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .toolbar .btn.primary { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+  .toolbar .btn.primary:hover { background: var(--blue-700); }
+  .toolbar .btn.danger { background: var(--red); color: #fff; border-color: var(--red); }
+
+  /* Lead list */
+  .lead-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .lead-row { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #f1f5f9; transition: background 0.12s; cursor: pointer; }
+  .lead-row:last-child { border-bottom: none; }
+  .lead-row:hover { background: #f8fafc; }
+  .lead-row.selected { background: var(--blue-soft); border-color: var(--blue-100); }
+  .lead-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--blue-600); cursor: pointer; }
+  .lead-row .avatar { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, var(--blue-soft), var(--purple-soft)); display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--blue-600); flex-shrink: 0; }
+  .lead-row .name { font-size: 0.85rem; font-weight: 700; }
+  .lead-row .sub { font-size: 0.72rem; color: var(--muted); }
+  .lead-row .tags { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+  .lead-row .tag { padding: 3px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; background: var(--blue-soft); color: var(--blue-600); }
+  .lead-row .assign { width: 26px; height: 26px; border-radius: 50%; background: var(--blue-600); color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px; font-size: 0.82rem; color: var(--muted); }
+  .pagination .btn { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; cursor: pointer; }
+
+  /* Settings gear */
+  .settings-gear { width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; }
+  .settings-gear:hover { border-color: var(--blue); background: var(--blue-soft); }
+  .settings-gear:hover svg { fill: var(--blue-600); }
+  .settings-gear svg { width: 20px; height: 20px; fill: var(--muted); transition: fill 0.15s; }
+
+  /* Settings drawer */
+  .drawer-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.3); backdrop-filter: blur(2px); z-index: 90; }
+  .drawer-backdrop[hidden] { display: none !important; }
+  .settings-drawer { position: fixed; top: 16px; right: 16px; bottom: 16px; width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); z-index: 95; display: flex; flex-direction: column; overflow: hidden; animation: slideLeft 0.2s ease; }
+  .settings-drawer[hidden] { display: none !important; }
+  @keyframes slideLeft { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  .drawer-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .drawer-header h3 { font-size: 1.1rem; font-weight: 800; }
+  .drawer-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 16px; color: var(--muted); display: grid; place-items: center; }
+  .drawer-close:hover { background: var(--red-soft); color: var(--red); }
+  .drawer-section { margin-bottom: 20px; }
+  .drawer-section h4 { font-size: 0.7rem; font-weight: 700; color: var(--muted-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .drawer-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: #f8fafc; cursor: pointer; transition: all 0.15s; width: 100%; text-align: left; font: inherit; }
+  .drawer-item:hover { background: var(--blue-soft); border-color: var(--blue-100); }
+  .drawer-item .di-icon { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; font-size: 16px; }
+  .drawer-item .di-icon.blue { background: var(--blue-soft); }
+  .drawer-item .di-icon.green { background: var(--green-soft); }
+  .drawer-item .di-icon.purple { background: var(--purple-soft); }
+  .drawer-item .di-icon.amber { background: var(--amber-soft); }
+  .drawer-item .di-text strong { display: block; font-size: 0.82rem; font-weight: 700; }
+  .drawer-item .di-text span { font-size: 0.72rem; color: var(--muted); }
+
+  /* Product Manager Panel */
+  .pm-overlay { position: fixed; inset: 0; z-index: 100; display: grid; place-items: start center; padding: 40px 24px; background: rgba(15,23,42,0.35); backdrop-filter: blur(4px); }
+  .pm-overlay[hidden] { display: none !important; }
+  .pm-panel { background: var(--surface); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); width: 100%; max-width: 560px; max-height: 80vh; overflow: hidden; animation: slideUp 0.2s ease; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .pm-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+  .pm-header h3 { font-size: 1rem; font-weight: 800; }
+  .pm-close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 16px; color: var(--muted); display: grid; place-items: center; }
+  .pm-close:hover { background: var(--red-soft); color: var(--red); }
+  .pm-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid var(--border); }
+  .pm-toolbar .count { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+  .pm-toolbar .btn { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+  .pm-toolbar .btn.primary { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+  .pm-body { padding: 12px; max-height: calc(80vh - 120px); overflow-y: auto; }
+  .pm-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 6px; transition: all 0.15s; }
+  .pm-card:hover { box-shadow: var(--shadow); }
+  .pm-card.disabled { opacity: 0.5; }
+  .pm-card .pm-icon { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+  .pm-card .pm-info { flex: 1; }
+  .pm-card .pm-name { font-size: 0.82rem; font-weight: 700; }
+  .pm-card .pm-desc { font-size: 0.72rem; color: var(--muted); }
+  .pm-card .pm-actions { display: flex; gap: 4px; }
+  .pm-card .pm-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; font-size: 13px; color: var(--muted); transition: all 0.15s; }
+  .pm-card .pm-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .pm-card .pm-btn.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-soft); }
+  .pm-card .pm-btn.on { border-color: var(--green); color: var(--green); background: var(--green-soft); }
+  .pm-status { position: absolute; top: 8px; right: 12px; padding: 1px 6px; border-radius: 4px; font-size: 0.55rem; font-weight: 700; text-transform: uppercase; }
+  .pm-status.active { background: var(--green-soft); color: var(--green); }
+  .pm-status.inactive { background: var(--red-soft); color: var(--red); }
+  .pm-card { position: relative; }
+
+  /* Add form in PM */
+  .pm-add { padding: 14px 20px; border-top: 1px solid var(--border); background: #f8fafc; display: none; }
+  .pm-add.show { display: block; }
+  .pm-add h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; }
+  .pm-add .row { margin-bottom: 8px; }
+  .pm-add label { display: block; font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; }
+  .pm-add input, .pm-add textarea { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 0.82rem; font-family: inherit; background: var(--surface); }
+  .pm-add input:focus, .pm-add textarea:focus { outline: none; border-color: var(--blue); }
+  .pm-add textarea { resize: vertical; min-height: 50px; }
+  .pm-add .actions { display: flex; gap: 6px; margin-top: 10px; justify-content: flex-end; }
+  .pm-add .actions .btn { padding: 6px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+  .pm-add .actions .btn.primary { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+
+  /* Color picker */
+  .color-opts { display: flex; gap: 5px; }
+  .color-opt { width: 24px; height: 24px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+  .color-opt:hover { transform: scale(1.15); }
+  .color-opt.selected { border-color: var(--text); }
+
+  /* Highlight indicator */
+  .highlight-ring { animation: pulseRing 1.5s ease 3; }
+  @keyframes pulseRing { 0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,0.4); } 50% { box-shadow: 0 0 0 8px rgba(59,130,246,0); } }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="logo">⬡</div>
+    <div class="brand-text"><strong>LeadGen AI</strong>LEAD GENERATOR</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      Inbound Scanner
+    </div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+      CRM Manager
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      Outbound Tools
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="page-header">
+    <div>
+      <h1>CRM Manager</h1>
+      <p class="subtitle">Review your pipeline, qualify leads, and manage CRM actions.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn" style="padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        Load Demo
+      </button>
+      <button class="btn" style="padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--surface);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        Refresh
+      </button>
+      <!-- SETTINGS GEAR -->
+      <button class="settings-gear" id="settingsBtn" onclick="openSettings()" title="Settings">
+        <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <span class="sel-info">5 selected (3 with email)</span>
+    <input type="search" placeholder="Search leads...">
+    <select><option>All Products</option></select>
+    <button class="btn">Select All</button>
+    <button class="btn">Clear</button>
+    <button class="btn primary">📧 Bulk Email</button>
+    <button class="btn danger">Clear All</button>
+  </div>
+
+  <!-- LEAD LIST -->
+  <div class="lead-list">
+    <div class="lead-row selected">
+      <input type="checkbox" checked onclick="event.stopPropagation()">
+      <div class="avatar">NF</div>
+      <div><div class="name">New Factory</div><div class="sub">Contact Person · Shah Alam</div></div>
+      <div class="tags"><span class="tag" style="background:var(--amber-soft);color:#92400e">Priority</span><span class="tag">AutoCount Accounting</span></div>
+      <div class="assign">?</div>
+    </div>
+    <div class="lead-row selected">
+      <input type="checkbox" checked onclick="event.stopPropagation()">
+      <div class="avatar">SS</div>
+      <div><div class="name">Seri Setia Construction</div><div class="sub">Business Contact · Other</div></div>
+      <div class="tags"><span class="tag">AutoCount Accounting</span></div>
+      <div class="assign">?</div>
+    </div>
+    <div class="lead-row selected">
+      <input type="checkbox" checked onclick="event.stopPropagation()">
+      <div class="avatar">CC</div>
+      <div><div class="name">Construction Company in Malaysia</div><div class="sub">Business Contact · Other</div></div>
+      <div class="tags"><span class="tag">AutoCount POS</span></div>
+      <div class="assign">?</div>
+    </div>
+    <div class="lead-row selected">
+      <input type="checkbox" checked onclick="event.stopPropagation()">
+      <div class="avatar">DC</div>
+      <div><div class="name">Dakwah Corner Bookstore</div><div class="sub">Business Contact · Other</div></div>
+      <div class="tags"><span class="tag">AutoCount POS</span></div>
+      <div class="assign">?</div>
+    </div>
+    <div class="lead-row selected">
+      <input type="checkbox" checked onclick="event.stopPropagation()">
+      <div class="avatar">BA</div>
+      <div><div class="name">BookXcess Amcorp Mall</div><div class="sub">Business Contact · Other</div></div>
+      <div class="tags"><span class="tag">Presoft Mobile Stock</span></div>
+      <div class="assign">?</div>
+    </div>
+    <div class="pagination">
+      <button class="btn">← Previous</button>
+      <span>Page 1 of 9</span>
+      <button class="btn">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS DRAWER -->
+<div class="drawer-backdrop" id="drawerBackdrop" hidden onclick="closeSettings()"></div>
+<div class="settings-drawer" id="settingsDrawer" hidden>
+  <div class="drawer-header">
+    <div>
+      <div style="font-size:10px;font-weight:700;color:var(--muted-light);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px">Settings</div>
+      <h3>Configuration</h3>
+    </div>
+    <button class="drawer-close" onclick="closeSettings()">&times;</button>
+  </div>
+  <div style="flex:1;overflow-y:auto">
+    <div class="drawer-section">
+      <h4>Quick Access</h4>
+      <button class="drawer-item" onclick="alert('Email config (existing)')">
+        <div class="di-icon blue">📧</div>
+        <div class="di-text"><strong>Email Configuration</strong><span>Sender details and templates</span></div>
+      </button>
+      <button class="drawer-item" style="margin-top:8px" onclick="alert('Bigin connection (existing)')">
+        <div class="di-icon green">🔗</div>
+        <div class="di-text"><strong>Bigin Connection</strong><span>Zoho CRM integration</span></div>
+      </button>
+      <!-- NEW: Product Manager -->
+      <button class="drawer-item highlight-ring" style="margin-top:8px" onclick="openProductManager()">
+        <div class="di-icon amber">📦</div>
+        <div class="di-text"><strong>Product Manager</strong><span>Add, edit & manage products</span></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MANAGER PANEL -->
+<div class="pm-overlay" id="pmOverlay" hidden>
+  <div class="pm-panel">
+    <div class="pm-header">
+      <div>
+        <h3>📦 Product Manager</h3>
+        <span style="font-size:0.72rem;color:var(--muted)">Manage products for bulk email campaigns</span>
+      </div>
+      <button class="pm-close" onclick="closePM()">&times;</button>
+    </div>
+    <div class="pm-toolbar">
+      <span class="count" id="pmCount">5 products (5 active)</span>
+      <button class="btn primary" onclick="showPMAdd()">+ Add Product</button>
+    </div>
+    <div class="pm-body" id="pmBody"></div>
+    <div class="pm-add" id="pmAdd">
+      <h4>Add New Product</h4>
+      <div class="row"><label>Product Name</label><input id="pmName" placeholder="e.g. AutoCount Inventory"></div>
+      <div class="row"><label>Description</label><textarea id="pmDesc" placeholder="e.g. Track stock levels and automate reordering."></textarea></div>
+      <div class="row"><label>Color</label><div class="color-opts" id="pmAddColors"></div></div>
+      <div class="actions">
+        <button class="btn" onclick="hidePMAdd()">Cancel</button>
+        <button class="btn primary" onclick="pmAddProduct()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS = [
+  { key: 'blue', val: '#3b82f6', soft: '#eff6ff' },
+  { key: 'green', val: '#10b981', soft: '#ecfdf5' },
+  { key: 'amber', val: '#f59e0b', soft: '#fef3c7' },
+  { key: 'purple', val: '#8b5cf6', soft: '#f5f3ff' },
+  { key: 'red', val: '#ef4444', soft: '#fef2f2' },
+  { key: 'pink', val: '#ec4899', soft: '#fdf2f8' },
+  { key: 'teal', val: '#14b8a6', soft: '#f0fdfa' },
+];
+
+let pmProducts = [
+  { id: 1, name: 'AutoCount Accounting', desc: 'Improve accounting control, reporting speed, and day-to-day finance visibility.', color: 'blue', active: true },
+  { id: 2, name: 'AutoCount POS', desc: 'Upgrade in-store sales handling, stock sync, and branch reporting.', color: 'green', active: true },
+  { id: 3, name: 'Presoft Mobile Stock', desc: 'Give sales teams live stock visibility and reduce order mistakes on the road.', color: 'amber', active: true },
+  { id: 4, name: 'Cubehous WMS System', desc: 'Tighten warehouse control, trace stock movement, and improve picking accuracy.', color: 'purple', active: true },
+  { id: 5, name: 'AutoCount Cloud Payroll', desc: 'Simplify payroll processing, staff records, and monthly compliance work.', color: 'red', active: true },
+];
+let pmAddColor = 'blue';
+let pmNextId = 6;
+
+function openSettings() {
+  document.getElementById('settingsDrawer').hidden = false;
+  document.getElementById('drawerBackdrop').hidden = false;
+}
+function closeSettings() {
+  document.getElementById('settingsDrawer').hidden = true;
+  document.getElementById('drawerBackdrop').hidden = true;
+}
+
+function openProductManager() {
+  closeSettings();
+  renderPM();
+  document.getElementById('pmOverlay').hidden = false;
+}
+function closePM() {
+  document.getElementById('pmOverlay').hidden = true;
+  hidePMAdd();
+}
+
+function renderPM() {
+  const body = document.getElementById('pmBody');
+  const active = pmProducts.filter(p => p.active).length;
+  document.getElementById('pmCount').textContent = `${pmProducts.length} product${pmProducts.length !== 1 ? 's' : ''} (${active} active)`;
+  body.innerHTML = pmProducts.map(p => {
+    const c = COLORS.find(x => x.key === p.color) || COLORS[0];
+    return `<div class="pm-card ${p.active ? '' : 'disabled'}">
+      <span class="pm-status ${p.active ? 'active' : 'inactive'}">${p.active ? 'Active' : 'Off'}</span>
+      <div class="pm-icon" style="background:${c.soft}"><span style="font-size:16px">${p.active ? '📦' : '📦'}</span></div>
+      <div class="pm-info">
+        <div class="pm-name">${p.name}</div>
+        <div class="pm-desc">${p.desc}</div>
+      </div>
+      <div class="pm-actions">
+        <button class="pm-btn ${p.active ? 'on' : ''}" onclick="pmToggle(${p.id})">${p.active ? '✓' : '○'}</button>
+        <button class="pm-btn danger" onclick="pmDelete(${p.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function pmToggle(id) {
+  const p = pmProducts.find(x => x.id === id);
+  if (p) p.active = !p.active;
+  renderPM();
+}
+function pmDelete(id) {
+  if (!confirm('Delete this product?')) return;
+  pmProducts = pmProducts.filter(x => x.id !== id);
+  renderPM();
+}
+
+function showPMAdd() {
+  document.getElementById('pmAdd').classList.add('show');
+  document.getElementById('pmName').value = '';
+  document.getElementById('pmDesc').value = '';
+  pmAddColor = 'blue';
+  renderPMColors('pmAddColors', pmAddColor, c => { pmAddColor = c; });
+}
+function hidePMAdd() {
+  document.getElementById('pmAdd').classList.remove('show');
+}
+function pmAddProduct() {
+  const name = document.getElementById('pmName').value.trim();
+  const desc = document.getElementById('pmDesc').value.trim();
+  if (!name) { alert('Name required'); return; }
+  pmProducts.push({ id: pmNextId++, name, desc: desc || 'No description', color: pmAddColor, active: true });
+  hidePMAdd();
+  renderPM();
+}
+
+function renderPMColors(containerId, selected, onChange) {
+  document.getElementById(containerId).innerHTML = COLORS.map(c =>
+    `<div class="color-opt ${c.key === selected ? 'selected' : ''}" style="background:${c.val}" onclick="this.parentElement.querySelectorAll('.color-opt').forEach(x=>x.classList.remove('selected'));this.classList.add('selected');(${onChange.toString()})('${c.key}')"></div>`
+  ).join('');
+}
+
+document.getElementById('pmOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closePM(); });
+</script>
+</body>
+</html>

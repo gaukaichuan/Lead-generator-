@@ -243,6 +243,73 @@
     .badge-standard { background: var(--surface-hover); color: var(--text-muted); border: 1px solid var(--border); }
     .detail-actions { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--border-light); }
 
+    /* ===== PRODUCT MANAGER ===== */
+    .pm-overlay { position: fixed; inset: 0; z-index: 200; display: grid; place-items: start center; padding: 40px 24px; background: rgba(15,23,42,0.35); backdrop-filter: blur(4px); }
+    .pm-overlay[hidden] { display: none !important; }
+    .pm-panel { background: var(--surface); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); width: 100%; max-width: 560px; max-height: 80vh; overflow: hidden; animation: slideUp 0.2s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .pm-header { padding: 24px 24px 20px; border-bottom: 1px solid var(--border); }
+    .pm-header h3 { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+    .pm-header .pm-box-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #d4a574, #c4956a); display: grid; place-items: center; }
+    .pm-header .pm-box-icon svg { width: 18px; height: 18px; fill: #fff; }
+    .pm-header-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .pm-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 16px; color: var(--text-muted); display: grid; place-items: center; }
+    .pm-close:hover { background: var(--red-50); color: var(--red); }
+    .pm-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); }
+    .pm-toolbar .pm-count { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+    .pm-add-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; border-radius: 12px; border: 2px dashed var(--border); background: transparent; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; }
+    .pm-add-btn:hover { border-color: var(--blue-600); color: var(--blue-600); background: var(--blue-50); }
+    .pm-add-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .pm-list-wrap { max-height: 360px; overflow-y: auto; padding: 8px 24px 16px; }
+    .pm-list-wrap::-webkit-scrollbar { width: 6px; }
+    .pm-list-wrap::-webkit-scrollbar-track { background: transparent; }
+    .pm-list-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .pm-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 8px; transition: all 0.15s; }
+    .pm-card:hover { box-shadow: var(--shadow); border-color: #cbd5e1; }
+    .pm-card.disabled .pm-name, .pm-card.disabled .pm-desc { color: var(--text-muted); }
+    .pm-card .pm-icon-wrap { width: 42px; height: 42px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; }
+    .pm-card .pm-info { flex: 1; min-width: 0; }
+    .pm-card .pm-name { font-size: 0.88rem; font-weight: 700; margin-bottom: 2px; }
+    .pm-card .pm-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.45; }
+    .pm-card .pm-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .pm-toggle { position: relative; width: 80px; height: 30px; border-radius: 15px; background: #e2e8f0; cursor: pointer; transition: background 0.25s ease; flex-shrink: 0; user-select: none; }
+    .pm-toggle.active { background: var(--green); }
+    .pm-toggle.inactive { background: var(--red); }
+    .pm-toggle .pm-thumb { position: absolute; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.15); transition: left 0.25s ease; z-index: 2; }
+    .pm-toggle.active .pm-thumb { left: 53px; }
+    .pm-toggle.inactive .pm-thumb { left: 3px; }
+    .pm-toggle .pm-label { position: absolute; top: 50%; transform: translateY(-50%); font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #fff; pointer-events: none; white-space: nowrap; z-index: 1; transition: opacity 0.2s ease; line-height: 1; }
+    .pm-toggle .pm-label-active { left: 6px; opacity: 0; }
+    .pm-toggle.active .pm-label-active { opacity: 1; }
+    .pm-toggle .pm-label-inactive { right: 6px; opacity: 0; }
+    .pm-toggle.inactive .pm-label-inactive { opacity: 1; }
+    .pm-btn-edit { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; }
+    .pm-btn-edit svg { fill: var(--text-muted); width: 15px; height: 15px; }
+    .pm-btn-edit:hover { border-color: var(--blue-600); background: var(--blue-50); }
+    .pm-btn-edit:hover svg { fill: var(--blue-600); }
+    .pm-btn-delete { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; }
+    .pm-btn-delete svg { fill: var(--text-muted); width: 15px; height: 15px; }
+    .pm-btn-delete:hover { border-color: var(--red); background: var(--red-50); }
+    .pm-btn-delete:hover svg { fill: var(--red); }
+    .pm-form-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.3); backdrop-filter: blur(3px); z-index: 300; display: grid; place-items: center; padding: 24px; }
+    .pm-form-overlay[hidden] { display: none !important; }
+    .pm-form-card { background: var(--surface); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); width: 100%; max-width: 440px; padding: 24px; animation: slideUp 0.2s ease; }
+    .pm-form-card h4 { font-size: 1rem; font-weight: 800; margin-bottom: 16px; }
+    .pm-form-card .pmf-row { margin-bottom: 12px; }
+    .pm-form-card label { display: block; font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .pm-form-card input, .pm-form-card textarea, .pm-form-card select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.85rem; font-family: inherit; background: var(--surface-hover); color: var(--text); }
+    .pm-form-card input:focus, .pm-form-card textarea:focus, .pm-form-card select:focus { outline: none; border-color: var(--blue-600); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+    .pm-form-card textarea { resize: vertical; min-height: 60px; }
+    .pm-form-card .pmf-colors { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pm-form-card .pmf-color { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+    .pm-form-card .pmf-color:hover { transform: scale(1.15); }
+    .pm-form-card .pmf-color.selected { border-color: var(--text); box-shadow: 0 0 0 2px rgba(15,23,42,0.15); }
+    .pm-form-card .pmf-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+    .pm-form-card .pmf-actions .btn { padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+    .pm-form-card .pmf-actions .btn-primary { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+    .pm-empty { text-align: center; padding: 30px; color: var(--text-muted); }
+    .pm-empty-icon { font-size: 2rem; margin-bottom: 6px; }
+
     /* ===== BULK EMAIL 3-STEP FLOW ===== */
     .step-indicator { display: flex; align-items: center; gap: 8px; padding: 0 24px 16px; }
     .step-dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; border: 2px solid var(--border); color: var(--text-muted); transition: all 200ms ease; }
@@ -391,6 +458,39 @@
     @media (max-width: 768px) { .app { grid-template-columns: 1fr; } .sidebar { display: none; } .main { padding: 16px; } .metrics, .grid-2, .mini-stats { grid-template-columns: 1fr; } }
     .loading-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 0.6s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== PRODUCT MANAGER ===== */
+    .pm-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 6px; transition: all 0.15s; }
+    .pm-card:hover { box-shadow: var(--shadow); border-color: #cbd5e1; }
+    .pm-card.disabled .pm-name, .pm-card.disabled .pm-pitch { color: var(--text-muted); }
+    .pm-card .pm-icon-wrap { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; }
+    .pm-card .pm-icon-wrap svg { width: 20px; height: 20px; }
+    .pm-card .pm-info { flex: 1; min-width: 0; }
+    .pm-card .pm-name { font-size: 13px; font-weight: 700; margin-bottom: 1px; }
+    .pm-card .pm-pitch { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+    .pm-card .pm-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .pm-toggle { position: relative; width: 72px; height: 28px; border-radius: 14px; background: #e2e8f0; cursor: pointer; transition: background 0.25s; flex-shrink: 0; user-select: none; }
+    .pm-toggle.active { background: var(--green); }
+    .pm-toggle.inactive { background: var(--red); }
+    .pm-toggle .pm-toggle-thumb { position: absolute; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.15); transition: left 0.25s; z-index: 2; }
+    .pm-toggle.active .pm-toggle-thumb { left: 47px; }
+    .pm-toggle.inactive .pm-toggle-thumb { left: 3px; }
+    .pm-toggle .pm-toggle-label { position: absolute; top: 50%; transform: translateY(-50%); font-size: 9px; font-weight: 800; text-transform: uppercase; color: #fff; pointer-events: none; white-space: nowrap; z-index: 1; }
+    .pm-toggle .pm-label-on { left: 6px; opacity: 0; }
+    .pm-toggle.active .pm-label-on { opacity: 1; }
+    .pm-toggle .pm-label-off { right: 6px; opacity: 0; }
+    .pm-toggle.inactive .pm-label-off { opacity: 1; }
+    .pm-btn-sm { width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; }
+    .pm-btn-sm svg { fill: var(--text-muted); width: 14px; height: 14px; }
+    .pm-btn-sm.edit:hover { border-color: var(--blue); background: var(--blue-50); }
+    .pm-btn-sm.edit:hover svg { fill: var(--blue-600); }
+    .pm-btn-sm.del:hover { border-color: var(--red); background: var(--red-50); }
+    .pm-btn-sm.del:hover svg { fill: var(--red); }
+    .pm-color-dot { width: 26px; height: 26px; border-radius: 7px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+    .pm-color-dot:hover { transform: scale(1.15); }
+    .pm-color-dot.selected { border-color: var(--text); box-shadow: 0 0 0 2px rgba(15,23,42,0.12); }
+    .pm-empty { text-align: center; padding: 28px; color: var(--text-muted); }
+    .pm-empty .pm-empty-icon { font-size: 1.8rem; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -719,6 +819,7 @@
     <div class="settings-header"><div><div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:3px">Settings</div><h3>Configuration</h3></div><button class="modal-close" style="position:static" onclick="closeSettings()">&times;</button></div>
     <div class="settings-body" style="overflow-y:auto">
       <div class="settings-section"><h4>Quick Access</h4><button class="settings-item" onclick="toggleSender()"><div class="settings-item-icon blue"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><div class="settings-item-text"><strong>Email Configuration</strong><span>Sender details and email templates</span></div></button></div>
+      <div class="settings-section"><button class="settings-item" onclick="openProductManager()"><div class="settings-item-icon green"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM12 18l-4-4h3V8h2v6h3l-4 4z"/></svg></div><div class="settings-item-text"><strong>Product Manager</strong></div></button></div>
       <div class="settings-section sender-panel" id="sender-panel"><h4>Sender Details</h4><div style="display:flex;flex-direction:column;gap:10px"><div><label class="form-label">Sender Name</label><input class="form-input" id="s-name" value="Your Name"></div><div><label class="form-label">Sender Email</label><input class="form-input" id="s-email" type="email" value="sales@example.com"></div><div><label class="form-label">Subject Template</label><input class="form-input" id="s-subj" value="{{productName}} idea for {{company}}"></div><div><label class="form-label">Body Template</label><textarea class="form-textarea" id="s-body" rows="4">Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\n{{pitch}}\n\nBest,\n{{senderName}}</textarea></div><button class="btn btn-primary" onclick="saveSettings()" style="width:100%">Save Settings</button></div></div>
 
       <div class="settings-section" id="admin-bigin-section" hidden>
@@ -728,6 +829,59 @@
           <button class="btn" style="font-size:11px;padding:4px 10px" onclick="loadBiginConnections()"><svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:var(--text-muted)"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>Refresh</button>
         </div>
         <div id="bigin-table" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT MANAGER MODAL -->
+  <div class="modal-backdrop" id="m-product-manager" hidden>
+    <div class="modal" style="max-width:560px;padding:0;overflow:hidden">
+      <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:flex-start;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#d4a574,#c4956a);display:grid;place-items:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM12 18l-4-4h3V8h2v6h3l-4 4z"/></svg>
+          </div>
+          <h3 style="font-size:1.1rem;font-weight:800;margin:0">Product Manager</h3>
+        </div>
+        <button class="modal-close" style="position:static" onclick="closeProductManager()">&times;</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border-light)">
+        <span class="toolbar-summary" id="pm-count">0 products</span>
+        <button class="btn" style="font-size:12px;padding:6px 14px;border:2px dashed var(--border);background:transparent;font-weight:700" onclick="openPmAddForm()">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;vertical-align:-2px;margin-right:4px"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Add Product
+        </button>
+      </div>
+      <div style="max-height:400px;overflow-y:auto;padding:8px 24px 16px" id="pm-list"></div>
+    </div>
+  </div>
+
+  <!-- PRODUCT MANAGER ADD/EDIT FORM MODAL -->
+  <div class="modal-backdrop" id="m-pm-form" hidden>
+    <div class="modal" style="max-width:440px">
+      <button class="modal-close" onclick="closePmForm()">&times;</button>
+      <div class="modal-eyebrow" id="pm-form-eyebrow">Add Product</div>
+      <div class="modal-title" id="pm-form-title" style="font-size:1.1rem;padding-right:0">Add New Product</div>
+      <input type="hidden" id="pm-edit-id">
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+        <div><label class="form-label">Product Name</label><input class="form-input" id="pm-name" placeholder="e.g. Insight Analytics Hub"></div>
+        <div><label class="form-label">Description / Pitch</label><textarea class="form-textarea" id="pm-pitch" rows="2" placeholder="Short description for email campaigns..."></textarea></div>
+        <div><label class="form-label">Icon</label>
+          <select class="form-select" id="pm-icon" style="width:100%">
+            <option value="">📦 Default (auto)</option>
+            <option value="accounting">📊 Accounting</option>
+            <option value="pos">🏪 POS System</option>
+            <option value="stock">📱 Mobile Stock</option>
+            <option value="wms">🚚 Warehouse</option>
+            <option value="payroll">💰 Payroll</option>
+            <option value="maxima">🚀 Campaign</option>
+            <option value="analytics">📈 Analytics</option>
+          </select>
+        </div>
+        <div><label class="form-label">Color</label><div class="pm-color-opts" id="pm-form-colors" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+        <button class="btn" onclick="closePmForm()">Cancel</button>
+        <button class="btn btn-primary" onclick="savePmProduct()">Save Product</button>
       </div>
     </div>
   </div>
@@ -1454,13 +1608,19 @@
     }
 
     // ===== BULK EMAIL 3-STEP FLOW =====
-    const ALL_PRODUCTS = [
-      { key: 'autocount-accounting', name: 'AutoCount Accounting', pitch: 'Improve accounting control, reporting speed, and day-to-day finance visibility.' },
-      { key: 'autocount-pos', name: 'AutoCount POS', pitch: 'Upgrade in-store sales handling, stock sync, and branch reporting.' },
-      { key: 'presoft-mobile-stock', name: 'Presoft Mobile Stock', pitch: 'Give sales teams live stock visibility and reduce order mistakes on the road.' },
-      { key: 'cubehous-wms', name: 'Cubehous WMS System', pitch: 'Tighten warehouse control, trace stock movement, and improve picking accuracy.' },
-      { key: 'autocount-payroll', name: 'AutoCount Cloud Payroll', pitch: 'Simplify payroll processing, staff records, and monthly compliance work.' }
-    ];
+    function getActiveProducts() {
+      // Use Product Manager products (active only), fall back to hardcoded defaults
+      if (pmProducts && pmProducts.filter(p => p.active).length > 0) {
+        return pmProducts.filter(p => p.active).map(p => ({ key: p.key, name: p.name, pitch: p.pitch || 'No description' }));
+      }
+      return [
+        { key: 'autocount-accounting', name: 'AutoCount Accounting', pitch: 'Improve accounting control, reporting speed, and day-to-day finance visibility.' },
+        { key: 'autocount-pos', name: 'AutoCount POS', pitch: 'Upgrade in-store sales handling, stock sync, and branch reporting.' },
+        { key: 'presoft-mobile-stock', name: 'Presoft Mobile Stock', pitch: 'Give sales teams live stock visibility and reduce order mistakes on the road.' },
+        { key: 'cubehous-wms-system', name: 'Cubehous WMS System', pitch: 'Tighten warehouse control, trace stock movement, and improve picking accuracy.' },
+        { key: 'autocount-cloud-payroll', name: 'AutoCount Cloud Payroll', pitch: 'Simplify payroll processing, staff records, and monthly compliance work.' }
+      ];
+    }
 
     const BULK_TONES = {
       professional: { emoji: '', name: 'Professional', desc: 'Straightforward, business-focused' },
@@ -1509,12 +1669,13 @@
     }
 
     function renderBulkProducts() {
-      document.getElementById('b-prod-checks').innerHTML = ALL_PRODUCTS.map(p => `
+      const prods = getActiveProducts();
+      document.getElementById('b-prod-checks').innerHTML = prods.map(p => `
         <div class="bulk-product-check ${bulkSelProducts.includes(p.key) ? 'selected' : ''}" onclick="toggleBulkProd('${p.key}')">
           <input type="checkbox" ${bulkSelProducts.includes(p.key) ? 'checked' : ''} onclick="event.stopPropagation();toggleBulkProd('${p.key}')">
           <div>
-            <div class="bp-name">${p.name}</div>
-            <div class="bp-pitch">${p.pitch}</div>
+            <div class="bp-name">${esc(p.name)}</div>
+            <div class="bp-pitch">${esc(p.pitch)}</div>
           </div>
         </div>
       `).join('');
@@ -1551,7 +1712,8 @@
     function bulkStep2() {
       document.getElementById('m-bulk-step1').hidden = true;
       const selLeads = leads.filter(l => sel.has(l.id) && l.email);
-      const selProds = bulkSelProducts.map(key => ALL_PRODUCTS.find(p => p.key === key));
+      const allProds = getActiveProducts();
+      const selProds = bulkSelProducts.map(key => allProds.find(p => p.key === key)).filter(Boolean);
       const tone = TONE_TEMPLATES[bulkSelTone];
 
       // Build product blocks string for template
@@ -1590,7 +1752,8 @@
     function bulkStep3() {
       document.getElementById('m-bulk-step2').hidden = true;
       const selLeads = leads.filter(l => sel.has(l.id) && l.email);
-      const selProds = bulkSelProducts.map(key => ALL_PRODUCTS.find(p => p.key === key));
+      const allProds = getActiveProducts();
+      const selProds = bulkSelProducts.map(key => allProds.find(p => p.key === key)).filter(Boolean);
 
       bulkPreviewIdx = 0;
       document.getElementById('b-preview-count').textContent = selLeads.length;
@@ -1611,7 +1774,8 @@
 
     function previewBulkLead(idx, btn) {
       const selLeads = leads.filter(l => sel.has(l.id) && l.email);
-      const selProds = bulkSelProducts.map(key => ALL_PRODUCTS.find(p => p.key === key));
+      const allProds = getActiveProducts();
+      const selProds = bulkSelProducts.map(key => allProds.find(p => p.key === key)).filter(Boolean);
       const lead = selLeads[idx];
       bulkPreviewIdx = idx;
 
@@ -1648,7 +1812,8 @@
 
     async function sendBulkFromStep3() {
       const selLeads = leads.filter(l => sel.has(l.id) && l.email);
-      const selProds = bulkSelProducts.map(key => ALL_PRODUCTS.find(p => p.key === key));
+      const allProds = getActiveProducts();
+      const selProds = bulkSelProducts.map(key => allProds.find(p => p.key === key)).filter(Boolean);
       const subjectTpl = document.getElementById('b-subject2').value.trim();
       const bodyTpl = document.getElementById('b-body2').value.trim();
       const btn = document.getElementById('b-send-final-btn');
@@ -1858,10 +2023,169 @@
       return Math.floor(s / 86400) + 'd ago';
     }
 
+    // ===== PRODUCT MANAGER =====
+    const PM_COLORS = [
+      { key: 'blue', val: '#3b82f6' }, { key: 'green', val: '#10b981' }, { key: 'amber', val: '#f59e0b' },
+      { key: 'purple', val: '#8b5cf6' }, { key: 'red', val: '#ef4444' }, { key: 'pink', val: '#ec4899' },
+      { key: 'teal', val: '#14b8a6' }, { key: 'orange', val: '#f97316' }, { key: 'cyan', val: '#06b6d4' },
+      { key: 'rose', val: '#f43f5e' }, { key: 'violet', val: '#7c3aed' }, { key: 'slate', val: '#475569' },
+      { key: 'lime', val: '#84cc16' }, { key: 'sky', val: '#0ea5e9' }
+    ];
+    const PM_ICONS = {
+      accounting: `<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>`,
+      pos: `<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>`,
+      stock: `<svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>`,
+      wms: `<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg>`,
+      payroll: `<svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>`,
+      maxima: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`,
+      analytics: `<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>`
+    };
+    const ICON_COLORS_MAP = {
+      accounting: '#2563eb', pos: '#059669', stock: '#d97706', wms: '#7c3aed',
+      payroll: '#db2777', maxima: '#0d9488', analytics: '#4f46e5'
+    };
+    const SOFT_COLORS = {
+      blue: '#eff6ff', green: '#ecfdf5', amber: '#fef3c7', purple: '#f5f3ff',
+      red: '#fef2f2', pink: '#fdf2f8', teal: '#f0fdfa', orange: '#fff7ed',
+      cyan: '#ecfeff', rose: '#fff1f2', violet: '#f5f3ff', slate: '#f1f5f9',
+      lime: '#f7fee7', sky: '#f0f9ff'
+    };
+
+    let pmProducts = [];
+    let pmFormColor = 'blue';
+
+    async function loadProducts() {
+      try {
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          pmProducts = data.products || [];
+        }
+      } catch(e) { /* silent fail */ }
+      renderPmCards();
+      // Also refresh bulk email products if the modal is open
+      if (!document.getElementById('m-bulk-step1').hidden) {
+        renderBulkProducts();
+      }
+    }
+
+    function renderPmCards() {
+      const list = document.getElementById('pm-list');
+      document.getElementById('pm-count').textContent = `${pmProducts.length} product${pmProducts.length !== 1 ? 's' : ''}`;
+      if (pmProducts.length === 0) {
+        list.innerHTML = '<div class="pm-empty"><div class="pm-empty-icon">📦</div><p>No products yet. Add one to get started.</p></div>';
+        return;
+      }
+      list.innerHTML = pmProducts.map(p => {
+        const c = PM_COLORS.find(x => x.key === p.color) || PM_COLORS[0];
+        const iconSvg = p.icon && PM_ICONS[p.icon] ? PM_ICONS[p.icon] : `<svg viewBox="0 0 24 24" fill="${p.icon ? (ICON_COLORS_MAP[p.icon] || '#64748b') : '#64748b'}"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM12 18l-4-4h3V8h2v6h3l-4 4z"/></svg>`;
+        const iconBg = SOFT_COLORS[p.color] || '#f1f5f9';
+        return `<div class="pm-card ${p.active ? '' : 'disabled'}">
+          <div class="pm-icon-wrap" style="background:${iconBg}">${iconSvg}</div>
+          <div class="pm-info"><div class="pm-name">${esc(p.name)}</div><div class="pm-pitch">${esc(p.pitch || 'No description')}</div></div>
+          <div class="pm-actions">
+            <div class="pm-toggle ${p.active ? 'active' : 'inactive'}" onclick="pmToggle('${esc(p.id)}')">
+              <div class="pm-toggle-thumb"></div>
+              <span class="pm-toggle-label pm-label-on">Active</span>
+              <span class="pm-toggle-label pm-label-off">Off</span>
+            </div>
+            <button class="pm-btn-sm edit" onclick="pmEdit('${esc(p.id)}')" title="Edit"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg></button>
+            <button class="pm-btn-sm del" onclick="pmDelete('${esc(p.id)}')" title="Delete"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function openProductManager() {
+      closeSettings();
+      document.getElementById('m-product-manager').hidden = false;
+      loadProducts();
+    }
+    function closeProductManager() {
+      document.getElementById('m-product-manager').hidden = true;
+    }
+
+    function renderPmFormColors(selected, onChange) {
+      document.getElementById('pm-form-colors').innerHTML = PM_COLORS.map(c =>
+        `<div class="pm-color-dot ${c.key === selected ? 'selected' : ''}" style="background:${c.val}" onclick="event.stopPropagation();document.getElementById('pm-form-colors').querySelectorAll('.pm-color-dot').forEach(x=>x.classList.remove('selected'));this.classList.add('selected');(${onChange.toString()})('${c.key}')"></div>`
+      ).join('');
+    }
+
+    function openPmAddForm() {
+      document.getElementById('pm-form-eyebrow').textContent = 'Add Product';
+      document.getElementById('pm-form-title').textContent = 'Add New Product';
+      document.getElementById('pm-edit-id').value = '';
+      document.getElementById('pm-name').value = '';
+      document.getElementById('pm-pitch').value = '';
+      document.getElementById('pm-icon').value = '';
+      pmFormColor = 'blue';
+      renderPmFormColors(pmFormColor, c => { pmFormColor = c; });
+      document.getElementById('m-pm-form').hidden = false;
+      document.getElementById('pm-name').focus();
+    }
+
+    function pmEdit(id) {
+      const p = pmProducts.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('pm-form-eyebrow').textContent = 'Edit Product';
+      document.getElementById('pm-form-title').textContent = 'Edit Product';
+      document.getElementById('pm-edit-id').value = id;
+      document.getElementById('pm-name').value = p.name;
+      document.getElementById('pm-pitch').value = p.pitch || '';
+      document.getElementById('pm-icon').value = p.icon || '';
+      pmFormColor = p.color || 'blue';
+      renderPmFormColors(pmFormColor, c => { pmFormColor = c; });
+      document.getElementById('m-pm-form').hidden = false;
+    }
+
+    function closePmForm() {
+      document.getElementById('m-pm-form').hidden = true;
+    }
+
+    async function savePmProduct() {
+      const id = document.getElementById('pm-edit-id').value;
+      const name = document.getElementById('pm-name').value.trim();
+      const pitch = document.getElementById('pm-pitch').value.trim();
+      const icon = document.getElementById('pm-icon').value;
+      if (!name) { notify('Missing Name', 'Product name is required.', 'error'); return; }
+      try {
+        if (id) {
+          await api(`/api/products/${id}`, { method: 'PATCH', body: JSON.stringify({ name, pitch, icon, color: pmFormColor }) });
+        } else {
+          const key = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `custom-${Date.now()}`;
+          await api('/api/products', { method: 'POST', body: JSON.stringify({ key, name, pitch, icon, color: pmFormColor }) });
+        }
+        closePmForm();
+        await loadProducts();
+        notify(id ? 'Updated' : 'Created', `Product "${name}" saved.`);
+      } catch(e) { notify('Error', e.message, 'error'); }
+    }
+
+    async function pmToggle(id) {
+      const p = pmProducts.find(x => x.id === id);
+      if (!p) return;
+      try {
+        await api(`/api/products/${id}`, { method: 'PATCH', body: JSON.stringify({ active: !p.active }) });
+        await loadProducts();
+      } catch(e) { notify('Error', e.message, 'error'); }
+    }
+
+    async function pmDelete(id) {
+      const p = pmProducts.find(x => x.id === id);
+      if (!p) return;
+      if (!confirm(`Delete "${p.name}"?`)) return;
+      try {
+        await api(`/api/products/${id}`, { method: 'DELETE' });
+        await loadProducts();
+        notify('Deleted', `Product "${p.name}" removed.`);
+      } catch(e) { notify('Error', e.message, 'error'); }
+    }
+
     // ===== INIT =====
     loadSettings();
     loadLeads();
     initAdminPanel();
+    loadProducts();
   </script>
 </body>
 </html>

@@ -173,7 +173,8 @@ function defaultStore() {
   return {
     leads: [],
     activities: [],
-    users: []
+    users: [],
+    products: []
   };
 }
 
@@ -205,6 +206,34 @@ async function ensureDefaultUsers(store) {
       bigin: {}
     });
   }
+}
+
+function seedDefaultProducts(store) {
+  if (!Array.isArray(store.products)) {
+    store.products = [];
+  }
+  if (store.products.length > 0) return; // Already seeded
+
+  const defaults = [
+    { key: "autocount-accounting", name: "AutoCount Accounting", pitch: "Improve accounting control, reporting speed, and day-to-day finance visibility.", icon: "accounting", color: "blue" },
+    { key: "autocount-pos", name: "AutoCount POS", pitch: "Upgrade in-store sales handling, stock sync, and branch reporting.", icon: "pos", color: "green" },
+    { key: "presoft-mobile-stock", name: "Presoft Mobile Stock", pitch: "Give sales teams live stock visibility and reduce order mistakes on the road.", icon: "stock", color: "amber" },
+    { key: "cubehous-wms-system", name: "Cubehous WMS System", pitch: "Tighten warehouse control, trace stock movement, and improve picking accuracy.", icon: "wms", color: "purple" },
+    { key: "autocount-cloud-payroll", name: "AutoCount Cloud Payroll", pitch: "Simplify payroll processing, staff records, and monthly compliance work.", icon: "payroll", color: "pink" }
+  ];
+
+  store.products = defaults.map((d, i) => ({
+    id: `prod_default_${i}`,
+    key: d.key,
+    name: d.name,
+    pitch: d.pitch,
+    icon: d.icon,
+    color: d.color,
+    active: true,
+    createdAt: new Date().toISOString()
+  }));
+
+  writeStore(store);
 }
 
 // Migrate old global bigin to admin user
@@ -259,6 +288,9 @@ async function readStore() {
     writeStore(store);
   }
 
+  // Seed default products if none exist
+  seedDefaultProducts(store);
+
   return store;
 }
 
@@ -269,7 +301,7 @@ function writeStore(store) {
 
 function ensureStoreShape(store) {
   if (!store || typeof store !== "object") {
-    return { leads: [], activities: [], users: [] };
+    return { leads: [], activities: [], users: [], products: [] };
   }
 
   if (!Array.isArray(store.leads)) {
@@ -282,6 +314,10 @@ function ensureStoreShape(store) {
 
   if (!Array.isArray(store.users)) {
     store.users = [];
+  }
+
+  if (!Array.isArray(store.products)) {
+    store.products = [];
   }
 
   // Ensure each user has a bigin object
@@ -711,8 +747,19 @@ function recommendProduct(lead) {
   };
 }
 
-function enrichLead(lead) {
+function resolveProductInfo(store, productKey) {
+  // Try store.products first (Product Manager)
+  if (Array.isArray(store.products)) {
+    const pm = store.products.find(p => p.key === productKey && p.active !== false);
+    if (pm) return { name: pm.name, pitch: pm.pitch };
+  }
+  // Fallback to hardcoded products
+  return products[productKey] || { name: productKey, pitch: "" };
+}
+
+function enrichLead(store, lead) {
   const recommendation = recommendProduct(lead);
+  const info = resolveProductInfo(store, recommendation.productKey);
   const website = normalizeLeadWebsite(lead);
   return {
     ...lead,
@@ -723,15 +770,15 @@ function enrichLead(lead) {
     painPointLabel: humanizePainPoint(lead.painPoint),
     recommendation: {
       ...recommendation,
-      productName: products[recommendation.productKey].name,
-      pitch: products[recommendation.productKey].pitch
+      productName: info.name,
+      pitch: info.pitch
     }
   };
 }
 
-function sortLeads(leads) {
+function sortLeads(store, leads) {
   return leads
-    .map(enrichLead)
+    .map((lead) => enrichLead(store, lead))
     .sort((left, right) => {
       if (left.priorityArea !== right.priorityArea) {
         return left.priorityArea ? -1 : 1;
@@ -807,8 +854,8 @@ function logEmailSendFailure(logger, context, error) {
   console.error("EMAIL_SEND_DEBUG", logEntry);
 }
 
-function buildSummary(leads) {
-  const enriched = sortLeads(leads);
+function buildSummary(store, leads) {
+  const enriched = sortLeads(store, leads);
   return {
     totalLeads: enriched.length,
     qualifiedLeads: enriched.filter((lead) => lead.status === "qualified").length,
@@ -1169,7 +1216,7 @@ function buildBiginContactPayload(lead, companyId) {
 }
 
 function buildBiginDealPayload(lead, companyId, contactId, pipelineDefaults) {
-  const enrichedLead = enrichLead(lead);
+  const enrichedLead = enrichLead(store, lead);
   const closeDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const payload = {
     Deal_Name: `${lead.company || "Lead"} - ${enrichedLead.recommendation.productName}`,
@@ -1535,7 +1582,7 @@ async function searchGoogleMapsLeads(
   });
 }
 function sanitizePreviewLead(lead) {
-  const enrichedLead = enrichLead(lead);
+  const enrichedLead = enrichLead(store, lead);
   return {
     externalRef: lead.externalRef || "",
     company: lead.company || "",
@@ -1738,8 +1785,8 @@ function autoSendQualifiedLead(store, lead) {
   }
 }
 
-function getEmailActivityLeads(leads) {
-  return sortLeads(leads).filter((lead) => lead.emailStatus === "sent" || lead.emailStatus === "failed");
+function getEmailActivityLeads(store, leads) {
+  return sortLeads(store, leads).filter((lead) => lead.emailStatus === "sent" || lead.emailStatus === "failed");
 }
 
 async function handleApi(request, response, pathname, options = {}) {
@@ -1811,6 +1858,67 @@ async function handleApi(request, response, pathname, options = {}) {
   const session = requireAuth(request, response, store);
   if (!session) return;
 
+  // ===== PRODUCT MANAGER ENDPOINTS =====
+
+  if (request.method === "GET" && pathname === "/api/products") {
+    sendJson(response, 200, { products: store.products });
+    return;
+  }
+
+  if (request.method === "POST" && pathname === "/api/products") {
+    const body = await readRequestBody(request);
+    const product = {
+      id: `prod_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      key: String(body.key || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || `custom-${Date.now()}`,
+      name: String(body.name || "").trim(),
+      pitch: String(body.pitch || "").trim(),
+      icon: String(body.icon || "").trim(),
+      color: String(body.color || "blue").trim(),
+      active: body.active !== false,
+      createdAt: new Date().toISOString()
+    };
+    if (!product.name) {
+      sendJson(response, 400, { error: "Product name is required." });
+      return;
+    }
+    store.products.push(product);
+    writeStore(store);
+    sendJson(response, 201, { product });
+    return;
+  }
+
+  if (request.method === "PATCH" && pathname.startsWith("/api/products/")) {
+    const id = pathname.split("/api/products/")[1];
+    const body = await readRequestBody(request);
+    const idx = store.products.findIndex(p => p.id === id);
+    if (idx === -1) {
+      sendJson(response, 404, { error: "Product not found." });
+      return;
+    }
+    if (body.name !== undefined) store.products[idx].name = String(body.name).trim();
+    if (body.pitch !== undefined) store.products[idx].pitch = String(body.pitch).trim();
+    if (body.icon !== undefined) store.products[idx].icon = String(body.icon).trim();
+    if (body.color !== undefined) store.products[idx].color = String(body.color).trim();
+    if (body.active !== undefined) store.products[idx].active = Boolean(body.active);
+    if (body.key !== undefined) store.products[idx].key = String(body.key).trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    writeStore(store);
+    sendJson(response, 200, { product: store.products[idx] });
+    return;
+  }
+
+  if (request.method === "DELETE" && pathname.startsWith("/api/products/")) {
+    const id = pathname.split("/api/products/")[1];
+    const idx = store.products.findIndex(p => p.id === id);
+    if (idx === -1) {
+      sendJson(response, 404, { error: "Product not found." });
+      return;
+    }
+    store.products.splice(idx, 1);
+    writeStore(store);
+    sendJson(response, 200, { message: "Product deleted." });
+    return;
+  }
+
   // ===== ADMIN-ONLY ENDPOINTS =====
   if (pathname.startsWith("/api/admin/")) {
     if (session.role !== "admin") {
@@ -1879,8 +1987,8 @@ async function handleApi(request, response, pathname, options = {}) {
 
   if (request.method === "GET" && pathname === "/api/leads") {
     sendJson(response, 200, {
-      leads: sortLeads(store.leads),
-      summary: buildSummary(store.leads),
+      leads: sortLeads(store, store.leads),
+      summary: buildSummary(store, store.leads),
       activities: store.activities.slice(0, 20)
     });
     return;
@@ -1896,7 +2004,7 @@ async function handleApi(request, response, pathname, options = {}) {
 
   if (request.method === "GET" && pathname === "/api/export/leads.csv") {
     const query = new URL(request.url, `http://${request.headers.host}`).searchParams.get("query");
-    const leads = filterLeadsByQuery(sortLeads(store.leads), query);
+    const leads = filterLeadsByQuery(sortLeads(store, store.leads), query);
     sendExcel(
       response,
       "lead-queue-export.csv",
@@ -1917,7 +2025,7 @@ async function handleApi(request, response, pathname, options = {}) {
   }
 
   if (request.method === "GET" && pathname === "/api/export/sent.csv") {
-    const leads = getEmailActivityLeads(store.leads);
+    const leads = getEmailActivityLeads(store, store.leads);
     sendExcel(
       response,
       "sent-email-export.csv",
@@ -1941,7 +2049,7 @@ async function handleApi(request, response, pathname, options = {}) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
     if (body.type === "leads") {
-      const leads = filterLeadsByQuery(sortLeads(store.leads), body.query);
+      const leads = filterLeadsByQuery(sortLeads(store, store.leads), body.query);
       const filePath = saveExcelFile(
         `lead-queue-export-${timestamp}.csv`,
         ["Company", "Contact", "Email", "Phone", "Region", "Source", "Priority", "Recommended Product", "Status"],
@@ -1962,7 +2070,7 @@ async function handleApi(request, response, pathname, options = {}) {
     }
 
     if (body.type === "sent") {
-      const leads = getEmailActivityLeads(store.leads);
+      const leads = getEmailActivityLeads(store, store.leads);
       const filePath = saveExcelFile(
         `sent-email-export-${timestamp}.csv`,
         ["Company", "Contact", "Email", "Region", "Source", "Status", "Attempted Time", "Error"],
@@ -2140,7 +2248,7 @@ async function handleApi(request, response, pathname, options = {}) {
       `${lead.company} was added from ${lead.source} and automatically checked for KL / Selangor priority.`
     );
     writeStore(store);
-    sendJson(response, 201, { lead: enrichLead(lead) });
+    sendJson(response, 201, { lead: enrichLead(store, lead) });
     return;
   }
 
@@ -2271,7 +2379,7 @@ async function handleApi(request, response, pathname, options = {}) {
     }
 
     writeStore(store);
-    sendJson(response, 200, { lead: enrichLead(lead) });
+    sendJson(response, 200, { lead: enrichLead(store, lead) });
     return;
   }
 
