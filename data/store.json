@@ -1419,8 +1419,8 @@
     },
     {
       "id": "prod_default_3",
-      "key": "cubehous-wms-system",
-      "name": "Cubehous WMS System",
+      "key": "cubehous-wms",
+      "name": "Cubehous WMS",
       "pitch": "Tighten warehouse control, trace stock movement, and improve picking accuracy.",
       "icon": "wms",
       "color": "purple",
@@ -1429,8 +1429,8 @@
     },
     {
       "id": "prod_default_4",
-      "key": "autocount-cloud-payroll",
-      "name": "AutoCount Cloud Payroll",
+      "key": "autocount-payroll",
+      "name": "AutoCount Payroll",
       "pitch": "Simplify payroll processing, staff records, and monthly compliance work.",
       "icon": "payroll",
       "color": "pink",

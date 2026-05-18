@@ -830,6 +830,19 @@
         </div>
         <div id="bigin-table" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
+
+      <div class="settings-section" id="my-bigin-section" hidden>
+        <h4>My BigIN Connection</h4>
+        <div id="my-bigin-card" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface-hover)">
+          <div class="bigin-avatar" id="my-bigin-avatar" style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;flex-shrink:0">?</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600" id="my-bigin-name">Loading...</div>
+            <div style="font-size:11px;color:var(--text-muted)" id="my-bigin-status-text">Checking status...</div>
+          </div>
+          <span class="bigin-status disconnected" id="my-bigin-badge">● Disconnected</span>
+          <div id="my-bigin-actions"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1617,8 +1630,8 @@
         { key: 'autocount-accounting', name: 'AutoCount Accounting', pitch: 'Improve accounting control, reporting speed, and day-to-day finance visibility.' },
         { key: 'autocount-pos', name: 'AutoCount POS', pitch: 'Upgrade in-store sales handling, stock sync, and branch reporting.' },
         { key: 'presoft-mobile-stock', name: 'Presoft Mobile Stock', pitch: 'Give sales teams live stock visibility and reduce order mistakes on the road.' },
-        { key: 'cubehous-wms-system', name: 'Cubehous WMS System', pitch: 'Tighten warehouse control, trace stock movement, and improve picking accuracy.' },
-        { key: 'autocount-cloud-payroll', name: 'AutoCount Cloud Payroll', pitch: 'Simplify payroll processing, staff records, and monthly compliance work.' }
+        { key: 'cubehous-wms', name: 'Cubehous WMS', pitch: 'Tighten warehouse control, trace stock movement, and improve picking accuracy.' },
+        { key: 'autocount-payroll', name: 'AutoCount Payroll', pitch: 'Simplify payroll processing, staff records, and monthly compliance work.' }
       ];
     }
 
@@ -1972,7 +1985,7 @@
       window.location.href = '/api/integrations/bigin/connect?for=' + encodeURIComponent(username);
     }
 
-    // Check if current user is admin and show admin section
+    // Check if current user is admin and show appropriate BigIN sections
     async function initAdminPanel() {
       try {
         const res = await fetch('/api/auth/session');
@@ -1983,8 +1996,60 @@
             document.getElementById('admin-bigin-section').hidden = false;
             loadBiginConnections();
           }
+          // All users (admin + non-admin) see their own BigIN section
+          document.getElementById('my-bigin-section').hidden = false;
+          loadMyBigin();
         }
       } catch (e) {}
+    }
+
+    async function loadMyBigin() {
+      try {
+        const res = await fetch('/api/bigin/my-status');
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+        const avatar = document.getElementById('my-bigin-avatar');
+        const name = document.getElementById('my-bigin-name');
+        const statusText = document.getElementById('my-bigin-status-text');
+        const badge = document.getElementById('my-bigin-badge');
+        const actions = document.getElementById('my-bigin-actions');
+        avatar.textContent = (data.displayName || '?')[0].toUpperCase();
+        avatar.style.background = data.role === 'admin' ? 'var(--purple-50)' : 'var(--green-50)';
+        avatar.style.color = data.role === 'admin' ? 'var(--purple)' : 'var(--green)';
+        name.textContent = data.displayName;
+        if (data.connected) {
+          badge.className = 'bigin-status connected';
+          badge.textContent = '● Connected';
+          statusText.textContent = 'Connected since ' + new Date(data.connectedAt).toLocaleDateString();
+          actions.innerHTML = `<button class="btn btn-red" style="font-size:11px;padding:4px 10px" onclick="disconnectMyBigin()">Disconnect</button>`;
+        } else {
+          badge.className = 'bigin-status disconnected';
+          badge.textContent = '● Disconnected';
+          statusText.textContent = 'Connect your BigIN account to sync leads';
+          actions.innerHTML = `<button class="btn btn-primary" style="font-size:11px;padding:4px 10px" onclick="connectMyBigin()">Connect</button>`;
+        }
+      } catch (e) {
+        document.getElementById('my-bigin-status-text').textContent = 'Failed to load status';
+      }
+    }
+
+    async function disconnectMyBigin() {
+      if (!confirm('Disconnect your BigIN account?')) return;
+      try {
+        const res = await fetch('/api/bigin/disconnect', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+        notify('Disconnected', 'Bigin disconnected.');
+        loadMyBigin();
+        // If admin, refresh the admin panel too
+        if (currentUserRole === 'admin') loadBiginConnections();
+      } catch (e) {
+        notify('Error', e.message, 'error');
+      }
+    }
+
+    function connectMyBigin() {
+      window.location.href = '/api/integrations/bigin/connect';
     }
 
     function loadSettings() {

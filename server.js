@@ -149,16 +149,16 @@ const products = {
     name: "Presoft Mobile Stock",
     pitch: "Give sales teams live stock visibility and reduce order mistakes on the road."
   },
-  "cubehous-wms-system": {
-    name: "Cubehous WMS System",
+  "cubehous-wms": {
+    name: "Cubehous WMS",
     pitch: "Tighten warehouse control, trace stock movement, and improve picking accuracy."
   },
   "autocount-pos": {
     name: "AutoCount POS",
     pitch: "Upgrade in-store sales handling, stock sync, and branch reporting."
   },
-  "autocount-cloud-payroll": {
-    name: "AutoCount Cloud Payroll",
+  "autocount-payroll": {
+    name: "AutoCount Payroll",
     pitch: "Simplify payroll processing, staff records, and monthly compliance work."
   }
 };
@@ -218,8 +218,8 @@ function seedDefaultProducts(store) {
     { key: "autocount-accounting", name: "AutoCount Accounting", pitch: "Improve accounting control, reporting speed, and day-to-day finance visibility.", icon: "accounting", color: "blue" },
     { key: "autocount-pos", name: "AutoCount POS", pitch: "Upgrade in-store sales handling, stock sync, and branch reporting.", icon: "pos", color: "green" },
     { key: "presoft-mobile-stock", name: "Presoft Mobile Stock", pitch: "Give sales teams live stock visibility and reduce order mistakes on the road.", icon: "stock", color: "amber" },
-    { key: "cubehous-wms-system", name: "Cubehous WMS System", pitch: "Tighten warehouse control, trace stock movement, and improve picking accuracy.", icon: "wms", color: "purple" },
-    { key: "autocount-cloud-payroll", name: "AutoCount Cloud Payroll", pitch: "Simplify payroll processing, staff records, and monthly compliance work.", icon: "payroll", color: "pink" }
+    { key: "cubehous-wms", name: "Cubehous WMS", pitch: "Tighten warehouse control, trace stock movement, and improve picking accuracy.", icon: "wms", color: "purple" },
+    { key: "autocount-payroll", name: "AutoCount Payroll", pitch: "Simplify payroll processing, staff records, and monthly compliance work.", icon: "payroll", color: "pink" }
   ];
 
   store.products = defaults.map((d, i) => ({
@@ -1857,6 +1857,33 @@ async function handleApi(request, response, pathname, options = {}) {
   // ===== ALL OTHER API ROUTES REQUIRE AUTH =====
   const session = requireAuth(request, response, store);
   if (!session) return;
+
+  // ===== SELF-SERVICE BIGIN (all users can see/manage their own) =====
+
+  if (request.method === "GET" && pathname === "/api/bigin/my-status") {
+    const connection = getUserBigin(store, session.username);
+    sendJson(response, 200, {
+      username: session.username,
+      displayName: session.username,
+      role: session.role,
+      connected: Boolean(getUserBiginRefreshToken(store, session.username)),
+      connectedAt: connection.connectedAt || null,
+      apiDomain: getUserBiginApiDomain(store, session.username)
+    });
+    return;
+  }
+
+  if (request.method === "POST" && pathname === "/api/bigin/disconnect") {
+    const user = store.users.find(u => u.username === session.username);
+    if (!user) {
+      sendJson(response, 404, { error: "User not found." });
+      return;
+    }
+    user.bigin = {};
+    writeStore(store);
+    sendJson(response, 200, { message: "Bigin disconnected." });
+    return;
+  }
 
   // ===== PRODUCT MANAGER ENDPOINTS =====
 
