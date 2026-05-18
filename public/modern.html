@@ -2089,6 +2089,10 @@
       return Math.floor(s / 86400) + 'd ago';
     }
 
+    function esc(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+    }
+
     // ===== PRODUCT MANAGER =====
     const PM_COLORS = [
       { key: 'blue', val: '#3b82f6' }, { key: 'green', val: '#10b981' }, { key: 'amber', val: '#f59e0b' },
