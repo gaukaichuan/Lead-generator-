@@ -460,37 +460,37 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ===== PRODUCT MANAGER ===== */
-    .pm-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 6px; transition: all 0.15s; }
+    .pm-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 8px; transition: all 0.15s; background: var(--surface); }
     .pm-card:hover { box-shadow: var(--shadow); border-color: #cbd5e1; }
     .pm-card.disabled .pm-name, .pm-card.disabled .pm-pitch { color: var(--text-muted); }
-    .pm-card .pm-icon-wrap { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; }
-    .pm-card .pm-icon-wrap svg { width: 20px; height: 20px; }
+    .pm-card .pm-icon-wrap { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0; }
+    .pm-card .pm-icon-wrap svg { width: 22px; height: 22px; }
     .pm-card .pm-info { flex: 1; min-width: 0; }
-    .pm-card .pm-name { font-size: 13px; font-weight: 700; margin-bottom: 1px; }
-    .pm-card .pm-pitch { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
+    .pm-card .pm-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .pm-card .pm-pitch { font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
     .pm-card .pm-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-    .pm-toggle { position: relative; width: 72px; height: 28px; border-radius: 14px; background: #e2e8f0; cursor: pointer; transition: background 0.25s; flex-shrink: 0; user-select: none; }
+    .pm-toggle { position: relative; width: 80px; height: 32px; border-radius: 16px; background: var(--red); cursor: pointer; transition: background 0.25s; flex-shrink: 0; user-select: none; overflow: hidden; }
     .pm-toggle.active { background: var(--green); }
-    .pm-toggle.inactive { background: var(--red); }
-    .pm-toggle .pm-toggle-thumb { position: absolute; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.15); transition: left 0.25s; z-index: 2; }
-    .pm-toggle.active .pm-toggle-thumb { left: 47px; }
+    .pm-toggle .pm-toggle-thumb { position: absolute; top: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.15); transition: left 0.25s; z-index: 2; }
+    .pm-toggle.active .pm-toggle-thumb { left: 51px; }
     .pm-toggle.inactive .pm-toggle-thumb { left: 3px; }
-    .pm-toggle .pm-toggle-label { position: absolute; top: 50%; transform: translateY(-50%); font-size: 9px; font-weight: 800; text-transform: uppercase; color: #fff; pointer-events: none; white-space: nowrap; z-index: 1; }
-    .pm-toggle .pm-label-on { left: 6px; opacity: 0; }
+    .pm-toggle .pm-toggle-label { position: absolute; top: 50%; transform: translateY(-50%); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; color: #fff; pointer-events: none; white-space: nowrap; z-index: 1; }
+    .pm-toggle .pm-label-on { left: 10px; opacity: 0; }
     .pm-toggle.active .pm-label-on { opacity: 1; }
-    .pm-toggle .pm-label-off { right: 6px; opacity: 0; }
+    .pm-toggle .pm-label-off { right: 10px; opacity: 0; }
     .pm-toggle.inactive .pm-label-off { opacity: 1; }
-    .pm-btn-sm { width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; }
-    .pm-btn-sm svg { fill: var(--text-muted); width: 14px; height: 14px; }
-    .pm-btn-sm.edit:hover { border-color: var(--blue); background: var(--blue-50); }
-    .pm-btn-sm.edit:hover svg { fill: var(--blue-600); }
-    .pm-btn-sm.del:hover { border-color: var(--red); background: var(--red-50); }
-    .pm-btn-sm.del:hover svg { fill: var(--red); }
-    .pm-color-dot { width: 26px; height: 26px; border-radius: 7px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
+    .pm-btn-icon { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; cursor: pointer; display: grid; place-items: center; transition: all 0.15s; padding: 0; }
+    .pm-btn-icon svg { fill: #94a3b8; width: 16px; height: 16px; }
+    .pm-btn-icon.edit:hover { background: var(--blue-50); }
+    .pm-btn-icon.edit:hover svg { fill: var(--blue-600); }
+    .pm-btn-icon.del:hover { background: var(--red-50); }
+    .pm-btn-icon.del:hover svg { fill: var(--red); }
+    .pm-color-dot { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; }
     .pm-color-dot:hover { transform: scale(1.15); }
     .pm-color-dot.selected { border-color: var(--text); box-shadow: 0 0 0 2px rgba(15,23,42,0.12); }
     .pm-empty { text-align: center; padding: 28px; color: var(--text-muted); }
     .pm-empty .pm-empty-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .pm-count-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--text-secondary); background: var(--surface-hover); }
   </style>
 </head>
 <body>
@@ -2099,12 +2099,12 @@
     ];
     const PM_ICONS = {
       accounting: `<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>`,
-      pos: `<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>`,
+      pos: `<svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.07-.14.1-.29.1-.44 0-.56-.44-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`,
       stock: `<svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>`,
-      wms: `<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg>`,
+      wms: `<svg viewBox="0 0 24 24"><path d="M3 3v18h18V3H3zm8 16H5v-6h6v6zm0-8H5V5h6v6zm8 8h-6v-6h6v6zm0-8h-6V5h6v6z"/></svg>`,
       payroll: `<svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>`,
       maxima: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`,
-      analytics: `<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>`
+      analytics: `<svg viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>`
     };
     const ICON_COLORS_MAP = {
       accounting: '#2563eb', pos: '#059669', stock: '#d97706', wms: '#7c3aed',
@@ -2137,7 +2137,7 @@
 
     function renderPmCards() {
       const list = document.getElementById('pm-list');
-      document.getElementById('pm-count').textContent = `${pmProducts.length} product${pmProducts.length !== 1 ? 's' : ''}`;
+      document.getElementById('pm-count').innerHTML = `<span class="pm-count-badge">${pmProducts.length} product${pmProducts.length !== 1 ? 's' : ''}</span>`;
       if (pmProducts.length === 0) {
         list.innerHTML = '<div class="pm-empty"><div class="pm-empty-icon">📦</div><p>No products yet. Add one to get started.</p></div>';
         return;
@@ -2152,11 +2152,11 @@
           <div class="pm-actions">
             <div class="pm-toggle ${p.active ? 'active' : 'inactive'}" onclick="pmToggle('${esc(p.id)}')">
               <div class="pm-toggle-thumb"></div>
-              <span class="pm-toggle-label pm-label-on">Active</span>
-              <span class="pm-toggle-label pm-label-off">Off</span>
+              <span class="pm-toggle-label pm-label-on">ACTIVE</span>
+              <span class="pm-toggle-label pm-label-off">OFF</span>
             </div>
-            <button class="pm-btn-sm edit" onclick="pmEdit('${esc(p.id)}')" title="Edit"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg></button>
-            <button class="pm-btn-sm del" onclick="pmDelete('${esc(p.id)}')" title="Delete"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
+            <button class="pm-btn-icon edit" onclick="pmEdit('${esc(p.id)}')" title="Edit"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg></button>
+            <button class="pm-btn-icon del" onclick="pmDelete('${esc(p.id)}')" title="Delete"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>
           </div>
         </div>`;
       }).join('');
