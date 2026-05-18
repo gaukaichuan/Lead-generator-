@@ -491,6 +491,28 @@
     .pm-empty { text-align: center; padding: 28px; color: var(--text-muted); }
     .pm-empty .pm-empty-icon { font-size: 1.8rem; margin-bottom: 6px; }
     .pm-count-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--text-secondary); background: var(--surface-hover); }
+
+    /* ===== EMAIL TEMPLATES ===== */
+    .tmpl-card { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 150ms; position: relative; }
+    .tmpl-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
+    .tmpl-card.selected { border-color: var(--blue); background: var(--blue-50); }
+    .tmpl-card .tmpl-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: grid; place-items: center; flex-shrink: 0; margin-top: 1px; transition: all 150ms; }
+    .tmpl-card.selected .tmpl-check { border-color: var(--blue); background: var(--blue); }
+    .tmpl-card.selected .tmpl-check::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+    .tmpl-card .tmpl-info { flex: 1; min-width: 0; }
+    .tmpl-card .tmpl-name { font-size: 13px; font-weight: 700; margin-bottom: 1px; }
+    .tmpl-card .tmpl-subject { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tmpl-card .tmpl-actions { display: flex; gap: 2px; flex-shrink: 0; margin-top: 1px; }
+    .tmpl-card .tmpl-action-btn { width: 26px; height: 26px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: grid; place-items: center; transition: all 150ms; }
+    .tmpl-card .tmpl-action-btn svg { width: 13px; height: 13px; fill: var(--text-muted); }
+    .tmpl-card .tmpl-action-btn:hover { background: var(--blue-50); }
+    .tmpl-card .tmpl-action-btn:hover svg { fill: var(--blue-600); }
+    .tmpl-card .tmpl-action-btn.is-default { fill: var(--amber); }
+    .tmpl-card .tmpl-action-btn.is-default:hover { background: var(--amber-50); }
+    .tmpl-card .tmpl-action-btn.del:hover { background: var(--red-50); }
+    .tmpl-card .tmpl-action-btn.del:hover svg { fill: var(--red); }
+    .tmpl-add-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-50); }
+    .tmpl-empty { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
   </style>
 </head>
 <body>
@@ -820,7 +842,25 @@
     <div class="settings-body" style="overflow-y:auto">
       <div class="settings-section"><h4>Quick Access</h4><button class="settings-item" onclick="toggleSender()"><div class="settings-item-icon blue"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><div class="settings-item-text"><strong>Email Configuration</strong><span>Sender details and email templates</span></div></button></div>
       <div class="settings-section"><button class="settings-item" onclick="openProductManager()"><div class="settings-item-icon green"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM12 18l-4-4h3V8h2v6h3l-4 4z"/></svg></div><div class="settings-item-text"><strong>Product Manager</strong></div></button></div>
-      <div class="settings-section sender-panel" id="sender-panel"><h4>Sender Details</h4><div style="display:flex;flex-direction:column;gap:10px"><div><label class="form-label">Sender Name</label><input class="form-input" id="s-name" value="Your Name"></div><div><label class="form-label">Sender Email</label><input class="form-input" id="s-email" type="email" value="sales@example.com"></div><div><label class="form-label">Subject Template</label><input class="form-input" id="s-subj" value="{{productName}} idea for {{company}}"></div><div><label class="form-label">Body Template</label><textarea class="form-textarea" id="s-body" rows="4">Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\n{{pitch}}\n\nBest,\n{{senderName}}</textarea></div><button class="btn btn-primary" onclick="saveSettings()" style="width:100%">Save Settings</button></div></div>
+
+      <div class="settings-section sender-panel" id="sender-panel">
+        <h4>Sender Details</h4>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+          <div><label class="form-label">Sender Name</label><input class="form-input" id="s-name" value="Your Name"></div>
+          <div><label class="form-label">Sender Email</label><input class="form-input" id="s-email" type="email" value="sales@example.com"></div>
+          <button class="btn btn-primary" onclick="saveSenderDetails()" style="width:100%">Save</button>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <h4 style="margin:0">Email Templates</h4>
+          <span class="toolbar-summary" id="tmpl-count">0 templates</span>
+        </div>
+        <div class="tmpl-list" id="tmpl-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        <button class="tmpl-add-btn" onclick="openTmplForm()" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:var(--radius-sm);border:2px dashed var(--border);background:transparent;color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;width:100%;transition:all 150ms">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          Add Template
+        </button>
+      </div>
 
       <div class="settings-section" id="admin-bigin-section" hidden>
         <h4>Admin — BigIN Connections</h4>
@@ -895,6 +935,28 @@
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
         <button class="btn" onclick="closePmForm()">Cancel</button>
         <button class="btn btn-primary" onclick="savePmProduct()">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL TEMPLATE ADD/EDIT FORM MODAL -->
+  <div class="modal-backdrop" id="m-tmpl-form" hidden>
+    <div class="modal" style="max-width:440px">
+      <button class="modal-close" onclick="closeTmplForm()">&times;</button>
+      <div class="modal-eyebrow" id="tmpl-form-eyebrow">Add Template</div>
+      <div class="modal-title" id="tmpl-form-title" style="font-size:1.1rem;padding-right:0">Add New Template</div>
+      <input type="hidden" id="tmpl-edit-id">
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+        <div><label class="form-label">Template Name</label><input class="form-input" id="tmpl-name" placeholder="e.g. Follow-up Reminder"></div>
+        <div><label class="form-label">Subject</label><input class="form-input" id="tmpl-subject" placeholder="{{productName}} idea for {{company}}"></div>
+        <div><label class="form-label">Body</label><textarea class="form-textarea" id="tmpl-body" rows="6" placeholder="Hi {{contactName}}, ..."></textarea></div>
+        <div class="placeholder-hint" style="font-size:10px;color:var(--text-muted);line-height:1.5">
+          Available: <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{company}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{contactName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{region}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{source}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{senderName}}</code>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+        <button class="btn" onclick="closeTmplForm()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTmpl()">Save Template</button>
       </div>
     </div>
   </div>
@@ -1578,8 +1640,9 @@
       closeM('m-lead');
       document.getElementById('e-company').textContent = l.company;
       document.getElementById('e-recipient').textContent = l.email || 'No email stored';
-      document.getElementById('e-subject').value = tpl(eSubj, l);
-      document.getElementById('e-body').value = tpl(eBody, l);
+      const tmpl = getDefaultTemplate();
+      document.getElementById('e-subject').value = tmpl ? tpl(tmpl.subject, l) : tpl(eSubj, l);
+      document.getElementById('e-body').value = tmpl ? tpl(tmpl.body, l) : tpl(eBody, l);
       document.getElementById('m-email').dataset.lid = l.id;
       document.getElementById('m-email').hidden = false;
     }
@@ -1587,9 +1650,10 @@
     function resetEmail() {
       const l = leads.find(x => x.id === document.getElementById('m-email').dataset.lid);
       if (!l) return;
-      document.getElementById('e-subject').value = tpl(eSubj, l);
-      document.getElementById('e-body').value = tpl(eBody, l);
-      notify('Reset', 'Draft reset to template.');
+      const tmpl = getDefaultTemplate();
+      document.getElementById('e-subject').value = tmpl ? tpl(tmpl.subject, l) : tpl(eSubj, l);
+      document.getElementById('e-body').value = tmpl ? tpl(tmpl.body, l) : tpl(eBody, l);
+      notify('Reset', 'Draft reset to default template.');
     }
 
     async function sendEmail() {
@@ -1915,15 +1979,11 @@
     function openSettings() { document.getElementById('s-backdrop').hidden = false; document.getElementById('s-drawer').hidden = false; }
     function closeSettings() { document.getElementById('s-backdrop').hidden = true; document.getElementById('s-drawer').hidden = true; }
     function toggleSender() { document.getElementById('sender-panel').classList.toggle('show'); }
-    function saveSettings() {
+    function saveSenderDetails() {
       sName = document.getElementById('s-name').value;
       sEmail = document.getElementById('s-email').value;
-      eSubj = document.getElementById('s-subj').value;
-      eBody = document.getElementById('s-body').value;
-      // Persist to localStorage
-      localStorage.setItem('leadgen-sender', JSON.stringify({ sName, sEmail, eSubj, eBody }));
-      notify('Saved', 'Settings updated.');
-      closeSettings();
+      localStorage.setItem('leadgen-sender', JSON.stringify({ sName, sEmail }));
+      notify('Saved', 'Sender details updated.');
     }
 
     // ===== ADMIN BIGIN MANAGEMENT =====
@@ -2059,11 +2119,8 @@
         if (raw) {
           const p = JSON.parse(raw);
           sName = p.sName || sName; sEmail = p.sEmail || sEmail;
-          eSubj = p.eSubj || eSubj; eBody = p.eBody || eBody;
           document.getElementById('s-name').value = sName;
           document.getElementById('s-email').value = sEmail;
-          document.getElementById('s-subj').value = eSubj;
-          document.getElementById('s-body').value = eBody;
         }
       } catch (e) {}
     }
@@ -2251,11 +2308,133 @@
       } catch(e) { notify('Error', e.message, 'error'); }
     }
 
+    // ===== EMAIL TEMPLATES =====
+    let emailTemplates = [];
+    let defaultTemplateId = '';
+    let selectedTemplateId = '';
+
+    async function loadTemplates() {
+      try {
+        const res = await fetch('/api/templates');
+        if (res.ok) {
+          const data = await res.json();
+          emailTemplates = data.templates || [];
+          defaultTemplateId = data.defaultTemplateId || '';
+          selectedTemplateId = defaultTemplateId;
+        }
+      } catch(e) { /* silent */ }
+      renderTemplates();
+    }
+
+    function renderTemplates() {
+      const list = document.getElementById('tmpl-list');
+      document.getElementById('tmpl-count').textContent = `${emailTemplates.length} template${emailTemplates.length !== 1 ? 's' : ''}`;
+      if (emailTemplates.length === 0) {
+        list.innerHTML = '<div class="tmpl-empty">No templates yet. Add one to get started.</div>';
+        return;
+      }
+      list.innerHTML = emailTemplates.map(t => `
+        <div class="tmpl-card ${t.id === selectedTemplateId ? 'selected' : ''}" onclick="selectTemplate('${esc(t.id)}')">
+          <div class="tmpl-check"></div>
+          <div class="tmpl-info">
+            <div class="tmpl-name">${esc(t.name)}</div>
+            <div class="tmpl-subject">${esc(t.subject)}</div>
+          </div>
+          <div class="tmpl-actions">
+            <button class="tmpl-action-btn ${t.id === defaultTemplateId ? 'is-default' : ''}" onclick="event.stopPropagation();makeDefault('${esc(t.id)}')" title="Set as default">
+              <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" ${t.id === defaultTemplateId ? '' : 'opacity="0.3"'}/></svg>
+            </button>
+            <button class="tmpl-action-btn" onclick="event.stopPropagation();editTmpl('${esc(t.id)}')" title="Edit">
+              <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>
+            </button>
+            <button class="tmpl-action-btn del" onclick="event.stopPropagation();deleteTmpl('${esc(t.id)}')" title="Delete">
+              <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectTemplate(id) {
+      selectedTemplateId = id;
+      renderTemplates();
+    }
+
+    async function makeDefault(id) {
+      try {
+        await api('/api/templates/default', { method: 'PATCH', body: JSON.stringify({ templateId: id }) });
+        defaultTemplateId = id;
+        selectedTemplateId = id;
+        renderTemplates();
+        notify('Default Set', 'Template set as default.');
+      } catch(e) { notify('Error', e.message, 'error'); }
+    }
+
+    function openTmplForm(editId) {
+      const isEdit = !!editId;
+      document.getElementById('tmpl-form-eyebrow').textContent = isEdit ? 'Edit Template' : 'Add Template';
+      document.getElementById('tmpl-form-title').textContent = isEdit ? 'Edit Template' : 'Add New Template';
+      document.getElementById('tmpl-edit-id').value = editId || '';
+      if (isEdit) {
+        const t = emailTemplates.find(x => x.id === editId);
+        document.getElementById('tmpl-name').value = t.name;
+        document.getElementById('tmpl-subject').value = t.subject;
+        document.getElementById('tmpl-body').value = t.body;
+      } else {
+        document.getElementById('tmpl-name').value = '';
+        document.getElementById('tmpl-subject').value = '';
+        document.getElementById('tmpl-body').value = '';
+      }
+      document.getElementById('m-tmpl-form').hidden = false;
+      document.getElementById('tmpl-name').focus();
+    }
+
+    function editTmpl(id) { openTmplForm(id); }
+
+    function closeTmplForm() {
+      document.getElementById('m-tmpl-form').hidden = true;
+    }
+
+    async function saveTmpl() {
+      const editId = document.getElementById('tmpl-edit-id').value;
+      const name = document.getElementById('tmpl-name').value.trim();
+      const subject = document.getElementById('tmpl-subject').value.trim();
+      const body = document.getElementById('tmpl-body').value.trim();
+      if (!name || !subject || !body) { notify('Missing Fields', 'All fields are required.', 'error'); return; }
+      try {
+        if (editId) {
+          await api(`/api/templates/${editId}`, { method: 'PATCH', body: JSON.stringify({ name, subject, body }) });
+        } else {
+          await api('/api/templates', { method: 'POST', body: JSON.stringify({ name, subject, body }) });
+        }
+        closeTmplForm();
+        await loadTemplates();
+        notify(editId ? 'Updated' : 'Created', `Template "${name}" saved.`);
+      } catch(e) { notify('Error', e.message, 'error'); }
+    }
+
+    async function deleteTmpl(id) {
+      const t = emailTemplates.find(x => x.id === id);
+      if (!t) return;
+      if (!confirm(`Delete "${t.name}"?`)) return;
+      try {
+        await api(`/api/templates/${id}`, { method: 'DELETE' });
+        await loadTemplates();
+        notify('Deleted', `Template "${t.name}" removed.`);
+      } catch(e) { notify('Error', e.message, 'error'); }
+    }
+
+    // Get default template subject/body for single-lead email
+    function getDefaultTemplate() {
+      return emailTemplates.find(t => t.id === defaultTemplateId) || emailTemplates[0] || null;
+    }
+
     // ===== INIT =====
     loadSettings();
     loadLeads();
     initAdminPanel();
     loadProducts();
+    loadTemplates();
   </script>
 </body>
 </html>

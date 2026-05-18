@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Templates Preview</title>
+<style>
+  :root {
+    --bg: #f8f9fc; --surface: #fff; --border: #e8eaef; --border-light: #f1f3f8;
+    --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+    --blue: #3b82f6; --blue-50: #eff6ff; --blue-600: #2563eb;
+    --green: #10b981; --green-50: #ecfdf5; --red: #ef4444; --red-50: #fef2f2;
+    --purple: #8b5cf6; --amber: #f59e0b; --amber-50: #fffbeb;
+    --radius: 12px; --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; padding: 24px; }
+  .drawer { width: 400px; background: var(--surface); border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid var(--border); }
+  .drawer-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+  .drawer-header h3 { font-size: 18px; font-weight: 800; }
+  .drawer-header .close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 18px; color: var(--text-muted); display: grid; place-items: center; }
+  .drawer-body { padding: 16px 20px; max-height: 70vh; overflow-y: auto; }
+  .section-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; margin-top: 16px; }
+  .section-label:first-child { margin-top: 0; }
+  .form-field { margin-bottom: 10px; }
+  .form-field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+  .form-input { width: 100%; padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface); outline: none; transition: border-color 150ms; }
+  .form-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+  .form-textarea { width: 100%; padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 13px; font-family: inherit; color: var(--text); background: var(--surface); outline: none; resize: vertical; min-height: 80px; }
+  .form-textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 600; font-size: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-family: inherit; }
+  .btn-primary { background: var(--blue-600); border-color: var(--blue-600); color: #fff; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn-green { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn-sm { padding: 5px 10px; font-size: 11px; }
+
+  /* Template list */
+  .tmpl-list { display: flex; flex-direction: column; gap: 6px; }
+  .tmpl-card { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 150ms; position: relative; }
+  .tmpl-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
+  .tmpl-card.selected { border-color: var(--blue); background: var(--blue-50); }
+  .tmpl-card .tmpl-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: grid; place-items: center; flex-shrink: 0; margin-top: 1px; transition: all 150ms; }
+  .tmpl-card.selected .tmpl-check { border-color: var(--blue); background: var(--blue); }
+  .tmpl-card.selected .tmpl-check::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+  .tmpl-card .tmpl-info { flex: 1; min-width: 0; }
+  .tmpl-card .tmpl-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .tmpl-card .tmpl-subject { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tmpl-card .tmpl-default-badge { position: absolute; top: 8px; right: 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--green); background: var(--green-50); padding: 2px 6px; border-radius: 4px; }
+  .tmpl-card .tmpl-actions { display: flex; gap: 2px; flex-shrink: 0; margin-top: 2px; }
+  .tmpl-card .tmpl-action-btn { width: 26px; height: 26px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: grid; place-items: center; transition: all 150ms; }
+  .tmpl-card .tmpl-action-btn svg { width: 13px; height: 13px; fill: var(--text-muted); }
+  .tmpl-card .tmpl-action-btn:hover { background: var(--blue-50); }
+  .tmpl-card .tmpl-action-btn:hover svg { fill: var(--blue-600); }
+  .tmpl-card .tmpl-action-btn.del:hover { background: var(--red-50); }
+  .tmpl-card .tmpl-action-btn.del:hover svg { fill: var(--red); }
+  .tmpl-add-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: var(--radius-sm); border: 2px dashed var(--border); background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 150ms; }
+  .tmpl-add-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-50); }
+
+  /* Template form modal */
+  .overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.3); backdrop-filter: blur(3px); z-index: 100; display: grid; place-items: center; padding: 24px; }
+  .overlay[hidden] { display: none !important; }
+  .form-card { background: var(--surface); border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.12); width: 100%; max-width: 420px; padding: 24px; }
+  .form-card h3 { font-size: 16px; font-weight: 800; margin-bottom: 16px; }
+  .form-actions { display: flex; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+  .form-actions .btn { padding: 8px 18px; border-radius: 999px; }
+  .placeholder-hint { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+  .placeholder-hint code { background: var(--blue-50); color: var(--blue-600); padding: 1px 4px; border-radius: 3px; font-size: 10px; }
+
+  .empty-tmpl { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="drawer">
+  <div class="drawer-header">
+    <div><div style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px">Settings</div><h3>Configuration</h3></div>
+    <button class="close">&times;</button>
+  </div>
+  <div class="drawer-body">
+    <!-- Sender details -->
+    <div class="section-label">Sender Details</div>
+    <div class="form-field"><label>Sender Name</label><input class="form-input" value="Jackson"></div>
+    <div class="form-field"><label>Sender Email</label><input class="form-input" type="email" value="jacksongau0204@gmail.com"></div>
+
+    <!-- Templates section -->
+    <div class="section-label" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Email Templates</span>
+      <span style="font-size:11px;font-weight:500;color:var(--text-muted);text-transform:none;letter-spacing:0" id="tmpl-count">3 templates</span>
+    </div>
+    <div class="tmpl-list" id="tmpl-list"></div>
+    <button class="tmpl-add-btn" onclick="openTmplForm()" style="margin-top:8px">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      Add Template
+    </button>
+  </div>
+</div>
+
+<!-- Add/Edit Template Modal -->
+<div class="overlay" id="tmpl-overlay" hidden>
+  <div class="form-card">
+    <h3 id="tmpl-form-title">Add Template</h3>
+    <input type="hidden" id="tmpl-edit-id">
+    <div class="form-field"><label>Template Name</label><input class="form-input" id="tmpl-name" placeholder="e.g. Follow-up Reminder"></div>
+    <div class="form-field"><label>Subject</label><input class="form-input" id="tmpl-subject" placeholder="{{productName}} idea for {{company}}"></div>
+    <div class="form-field"><label>Body</label><textarea class="form-textarea" id="tmpl-body" rows="5" placeholder="Hi {{contactName}}, ..."></textarea></div>
+    <div class="placeholder-hint">
+      Available: <code>{{company}}</code> <code>{{contactName}}</code> <code>{{productName}}</code> <code>{{pitch}}</code> <code>{{region}}</code> <code>{{source}}</code> <code>{{senderName}}</code> <code>{{senderEmail}}</code>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="closeTmplForm()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTmpl()">Save Template</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== DATA STRUCTURE (stored in store.json / localStorage) =====
+// {
+//   "templates": [
+//     { id: "t1", name: "General Outreach", subject: "...", body: "..." },
+//     { id: "t2", name: "Follow-up", subject: "...", body: "..." },
+//     { id: "t3", name: "Partnership", subject: "...", body: "..." }
+//   ],
+//   "defaultTemplateId": "t1",
+//   "senderName": "Jackson",
+//   "senderEmail": "jacksongau0204@gmail.com"
+// }
+
+// Sample data — 3 pre-built templates
+let templates = [
+  {
+    id: 't1',
+    name: 'General Outreach',
+    subject: '{{productName}} idea for {{company}}',
+    body: `Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\nBased on your setup in {{industry}}, I believe {{productName}} could be a strong fit.\n\n{{pitch}}\n\nThe main opportunity I see is around the areas you're currently working to improve.\n\nBest,\n{{senderName}}\n{{senderEmail}}`
+  },
+  {
+    id: 't2',
+    name: 'Follow-up',
+    subject: 'Following up — {{productName}} for {{company}}',
+    body: `Hi {{contactName}},\n\nI wanted to follow up on my previous message about {{productName}} for {{company}}.\n\nI understand you're busy, but I truly believe this could help with:\n\n{{pitch}}\n\nWould you be open to a quick 10-minute call this week?\n\nBest regards,\n{{senderName}}`
+  },
+  {
+    id: 't3',
+    name: 'Partnership Inquiry',
+    subject: 'Partnership opportunity — {{company}} x {{productName}}',
+    body: `Dear {{contactName}},\n\nI'm reaching out from LeadGen AI. We've identified {{company}} as a potential partner for our {{productName}} solution.\n\n{{pitch}}\n\nWe'd love to explore how we can work together to benefit businesses in {{region}}.\n\nLooking forward to your response.\n\nSincerely,\n{{senderName}}\n{{senderEmail}}`
+  }
+];
+
+let defaultTemplateId = 't1';
+let selectedTemplateId = 't1';
+
+function renderTemplates() {
+  const list = document.getElementById('tmpl-list');
+  document.getElementById('tmpl-count').textContent = `${templates.length} template${templates.length !== 1 ? 's' : ''}`;
+  
+  if (templates.length === 0) {
+    list.innerHTML = '<div class="empty-tmpl">No templates yet. Add one to get started.</div>';
+    return;
+  }
+  
+  list.innerHTML = templates.map(t => `
+    <div class="tmpl-card ${t.id === selectedTemplateId ? 'selected' : ''}" onclick="selectTemplate('${t.id}')">
+      <div class="tmpl-check"></div>
+      <div class="tmpl-info">
+        <div class="tmpl-name">${esc(t.name)}</div>
+        <div class="tmpl-subject">${esc(t.subject)}</div>
+      </div>
+      ${t.id === defaultTemplateId ? '<span class="tmpl-default-badge">Default</span>' : ''}
+      <div class="tmpl-actions">
+        <button class="tmpl-action-btn" onclick="event.stopPropagation();makeDefault('${t.id}')" title="Set as default">
+          ${t.id === defaultTemplateId ? 
+            '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' :
+            '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" opacity="0.3"/></svg>'
+          }
+        </button>
+        <button class="tmpl-action-btn" onclick="event.stopPropagation();editTmpl('${t.id}')" title="Edit">
+          <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>
+        </button>
+        <button class="tmpl-action-btn del" onclick="event.stopPropagation();deleteTmpl('${t.id}')" title="Delete">
+          <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectTemplate(id) {
+  selectedTemplateId = id;
+  renderTemplates();
+}
+
+function makeDefault(id) {
+  defaultTemplateId = id;
+  renderTemplates();
+}
+
+function openTmplForm(editId) {
+  const isEdit = !!editId;
+  document.getElementById('tmpl-form-title').textContent = isEdit ? 'Edit Template' : 'Add Template';
+  document.getElementById('tmpl-edit-id').value = editId || '';
+  
+  if (isEdit) {
+    const t = templates.find(x => x.id === editId);
+    document.getElementById('tmpl-name').value = t.name;
+    document.getElementById('tmpl-subject').value = t.subject;
+    document.getElementById('tmpl-body').value = t.body;
+  } else {
+    document.getElementById('tmpl-name').value = '';
+    document.getElementById('tmpl-subject').value = '';
+    document.getElementById('tmpl-body').value = '';
+  }
+  
+  document.getElementById('tmpl-overlay').hidden = false;
+  document.getElementById('tmpl-name').focus();
+}
+
+function editTmpl(id) {
+  openTmplForm(id);
+}
+
+function closeTmplForm() {
+  document.getElementById('tmpl-overlay').hidden = true;
+}
+
+function saveTmpl() {
+  const editId = document.getElementById('tmpl-edit-id').value;
+  const name = document.getElementById('tmpl-name').value.trim();
+  const subject = document.getElementById('tmpl-subject').value.trim();
+  const body = document.getElementById('tmpl-body').value.trim();
+  
+  if (!name || !subject || !body) { alert('All fields are required.'); return; }
+  
+  if (editId) {
+    const t = templates.find(x => x.id === editId);
+    if (t) { t.name = name; t.subject = subject; t.body = body; }
+  } else {
+    templates.push({ id: 't_' + Date.now(), name, subject, body });
+  }
+  
+  closeTmplForm();
+  renderTemplates();
+}
+
+function deleteTmpl(id) {
+  if (!confirm('Delete this template?')) return;
+  templates = templates.filter(x => x.id !== id);
+  if (defaultTemplateId === id) defaultTemplateId = templates[0]?.id || '';
+  if (selectedTemplateId === id) selectedTemplateId = templates[0]?.id || '';
+  renderTemplates();
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+renderTemplates();
+document.getElementById('tmpl-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeTmplForm(); });
+</script>
+</body>
+</html>

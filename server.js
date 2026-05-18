@@ -174,7 +174,9 @@ function defaultStore() {
     leads: [],
     activities: [],
     users: [],
-    products: []
+    products: [],
+    emailTemplates: [],
+    defaultTemplateId: ""
   };
 }
 
@@ -236,6 +238,36 @@ function seedDefaultProducts(store) {
   writeStore(store);
 }
 
+function seedDefaultEmailTemplates(store) {
+  if (!Array.isArray(store.emailTemplates)) {
+    store.emailTemplates = [];
+  }
+  if (store.emailTemplates.length > 0) return;
+
+  store.emailTemplates = [
+    {
+      id: "tmpl_default_1",
+      name: "General Outreach",
+      subject: "{{productName}} idea for {{company}}",
+      body: "Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\nBased on your setup in {{industry}}, I believe {{productName}} could be a strong fit.\n\n{{pitch}}\n\nThe main opportunity I see is around the areas you're currently working to improve.\n\nBest,\n{{senderName}}\n{{senderEmail}}"
+    },
+    {
+      id: "tmpl_default_2",
+      name: "Follow-up",
+      subject: "Following up — {{productName}} for {{company}}",
+      body: "Hi {{contactName}},\n\nI wanted to follow up on my previous message about {{productName}} for {{company}}.\n\nI understand you're busy, but I truly believe this could help with:\n\n{{pitch}}\n\nWould you be open to a quick 10-minute call this week?\n\nBest regards,\n{{senderName}}"
+    },
+    {
+      id: "tmpl_default_3",
+      name: "Partnership Inquiry",
+      subject: "Partnership opportunity — {{company}} x {{productName}}",
+      body: "Dear {{contactName}},\n\nI'm reaching out from LeadGen AI. We've identified {{company}} as a potential partner for our {{productName}} solution.\n\n{{pitch}}\n\nWe'd love to explore how we can work together to benefit businesses in {{region}}.\n\nLooking forward to your response.\n\nSincerely,\n{{senderName}}\n{{senderEmail}}"
+    }
+  ];
+  store.defaultTemplateId = "tmpl_default_1";
+  writeStore(store);
+}
+
 // Migrate old global bigin to admin user
 function migrateGlobalBigin(store) {
   if (store.integrations && store.integrations.bigin) {
@@ -291,6 +323,9 @@ async function readStore() {
   // Seed default products if none exist
   seedDefaultProducts(store);
 
+  // Seed default email templates if none exist
+  seedDefaultEmailTemplates(store);
+
   return store;
 }
 
@@ -318,6 +353,14 @@ function ensureStoreShape(store) {
 
   if (!Array.isArray(store.products)) {
     store.products = [];
+  }
+
+  if (!Array.isArray(store.emailTemplates)) {
+    store.emailTemplates = [];
+  }
+
+  if (!store.defaultTemplateId) {
+    store.defaultTemplateId = "";
   }
 
   // Ensure each user has a bigin object
@@ -1943,6 +1986,83 @@ async function handleApi(request, response, pathname, options = {}) {
     store.products.splice(idx, 1);
     writeStore(store);
     sendJson(response, 200, { message: "Product deleted." });
+    return;
+  }
+
+  // ===== EMAIL TEMPLATES ENDPOINTS =====
+
+  if (request.method === "GET" && pathname === "/api/templates") {
+    sendJson(response, 200, {
+      templates: store.emailTemplates,
+      defaultTemplateId: store.defaultTemplateId
+    });
+    return;
+  }
+
+  if (request.method === "POST" && pathname === "/api/templates") {
+    const body = await readRequestBody(request);
+    const tmpl = {
+      id: `tmpl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      name: String(body.name || "").trim(),
+      subject: String(body.subject || "").trim(),
+      body: String(body.body || "").trim(),
+      createdAt: new Date().toISOString()
+    };
+    if (!tmpl.name || !tmpl.subject || !tmpl.body) {
+      sendJson(response, 400, { error: "Name, subject, and body are required." });
+      return;
+    }
+    store.emailTemplates.push(tmpl);
+    if (!store.defaultTemplateId) {
+      store.defaultTemplateId = tmpl.id;
+    }
+    writeStore(store);
+    sendJson(response, 201, { template: tmpl });
+    return;
+  }
+
+  if (request.method === "PATCH" && pathname.startsWith("/api/templates/")) {
+    const id = pathname.split("/api/templates/")[1];
+    if (id === "default") {
+      const body = await readRequestBody(request);
+      const tmplId = body.templateId;
+      const exists = store.emailTemplates.find(t => t.id === tmplId);
+      if (!exists) {
+        sendJson(response, 404, { error: "Template not found." });
+        return;
+      }
+      store.defaultTemplateId = tmplId;
+      writeStore(store);
+      sendJson(response, 200, { message: "Default template updated.", defaultTemplateId: tmplId });
+      return;
+    }
+    const body = await readRequestBody(request);
+    const idx = store.emailTemplates.findIndex(t => t.id === id);
+    if (idx === -1) {
+      sendJson(response, 404, { error: "Template not found." });
+      return;
+    }
+    if (body.name !== undefined) store.emailTemplates[idx].name = String(body.name).trim();
+    if (body.subject !== undefined) store.emailTemplates[idx].subject = String(body.subject).trim();
+    if (body.body !== undefined) store.emailTemplates[idx].body = String(body.body).trim();
+    writeStore(store);
+    sendJson(response, 200, { template: store.emailTemplates[idx] });
+    return;
+  }
+
+  if (request.method === "DELETE" && pathname.startsWith("/api/templates/")) {
+    const id = pathname.split("/api/templates/")[1];
+    const idx = store.emailTemplates.findIndex(t => t.id === id);
+    if (idx === -1) {
+      sendJson(response, 404, { error: "Template not found." });
+      return;
+    }
+    store.emailTemplates.splice(idx, 1);
+    if (store.defaultTemplateId === id) {
+      store.defaultTemplateId = store.emailTemplates[0]?.id || "";
+    }
+    writeStore(store);
+    sendJson(response, 200, { message: "Template deleted." });
     return;
   }
 
