@@ -1635,7 +1635,7 @@ async function searchGoogleMapsViaApify(
     throw new Error("Apify API token is not configured. Set APIFY_TOKEN in environment variables.");
   }
 
-  const actorId = process.env.APIFY_GOOGLE_MAPS_ACTOR_ID || "dtrungtin/google-maps-scraper";
+  const actorId = process.env.APIFY_GOOGLE_MAPS_ACTOR_ID || "lukaskrivka/google-maps-scraper";
   const limit = Number(process.env.APIFY_MAX_RESULTS) || maxResults || 500;
 
   // Build search query
