@@ -513,6 +513,17 @@
     .tmpl-card .tmpl-action-btn.del:hover svg { fill: var(--red); }
     .tmpl-add-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-50); }
     .tmpl-empty { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
+
+    /* ===== BULK TEMPLATE SELECTOR ===== */
+    .bulk-tmpl-card { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 150ms; }
+    .bulk-tmpl-card:hover { border-color: var(--blue); }
+    .bulk-tmpl-card.selected { border-color: var(--blue); background: var(--blue-50); }
+    .bulk-tmpl-card .btm-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); display: grid; place-items: center; flex-shrink: 0; margin-top: 1px; }
+    .bulk-tmpl-card.selected .btm-check { border-color: var(--blue); background: var(--blue); }
+    .bulk-tmpl-card.selected .btm-check::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
+    .bulk-tmpl-card .btm-info { flex: 1; min-width: 0; }
+    .bulk-tmpl-card .btm-name { font-size: 12px; font-weight: 700; }
+    .bulk-tmpl-card .btm-subject { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   </style>
 </head>
 <body>
@@ -760,8 +771,8 @@
     <div class="modal" style="max-width:560px">
       <button class="modal-close" onclick="closeBulkFlow()">&times;</button>
       <div class="modal-eyebrow">Bulk Email</div>
-      <div class="modal-title">Select Products & Tone</div>
-      <div class="modal-subtitle" id="b-step1-sub">Choose what to promote and how to say it.</div>
+      <div class="modal-title">Select Products & Template</div>
+      <div class="modal-subtitle" id="b-step1-sub">Choose what to promote and which template to use.</div>
       <div class="step-indicator">
         <div class="step-dot active" id="sd1">1</div>
         <div class="step-line" id="sl1"></div>
@@ -770,12 +781,10 @@
         <div class="step-dot" id="sd3">3</div>
       </div>
       <div style="padding:0 24px 20px">
+        <div class="bulk-section-label">Email Template</div>
+        <div class="bulk-template-select" id="b-template-select" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px"></div>
         <div class="bulk-section-label">Products to Promote <span class="bulk-badge" id="b-prod-count">0</span></div>
         <div id="b-prod-checks"></div>
-        <div style="margin-top:16px">
-          <div class="bulk-section-label">Email Tone</div>
-          <div class="bulk-tone-grid" id="b-tone-grid"></div>
-        </div>
       </div>
       <div style="display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--border-light)">
         <button class="btn" onclick="closeBulkFlow()">Cancel</button>
@@ -1699,34 +1708,8 @@
       ];
     }
 
-    const BULK_TONES = {
-      professional: { emoji: '', name: 'Professional', desc: 'Straightforward, business-focused' },
-      friendly: { emoji: '😄', name: 'Friendly', desc: 'Warm, conversational tone' },
-      informative: { emoji: '📊', name: 'Informative', desc: 'Detailed, feature-focused' },
-      short: { emoji: '⚡', name: 'Short & Punchy', desc: 'Brief, direct, no fluff' }
-    };
-
-    const TONE_TEMPLATES = {
-      professional: {
-        subject: '{{productName1}} for {{company}} — A Strong Fit',
-        body: `Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\nBased on your profile, here are solutions I believe would benefit your operations:\n\n{{productBlocks}}\n\nIf any of these interest you, I'd be happy to arrange a brief demo.\n\nBest regards,\n{{senderName}}\n{{senderEmail}}`
-      },
-      friendly: {
-        subject: 'Quick idea for {{company}} ',
-        body: `Hi {{contactName}}!\n\nHope you're doing well. I stumbled upon {{company}} through {{source}} in {{region}} and thought you might find these helpful:\n\n{{productBlocks}}\n\nNo pressure at all — just thought these could make your day-to-day a bit easier. Let me know if you'd like to chat!\n\nCheers,\n{{senderName}}\n{{senderEmail}}`
-      },
-      informative: {
-        subject: 'Recommended Solutions for {{company}}',
-        body: `Dear {{contactName}},\n\nAfter reviewing {{company}} from {{source}} in {{region}}, I've identified the following solutions that align with your business needs:\n\n{{productBlocks}}\n\nEach solution includes full support and training. I can provide a detailed walkthrough at your convenience.\n\nSincerely,\n{{senderName}}\n{{senderEmail}}`
-      },
-      short: {
-        subject: '{{productName1}} for {{company}}',
-        body: `Hi {{contactName}},\n\nFound {{company}} on {{source}} in {{region}}. These could be a fit:\n\n{{productBlocks}}\n\nInterested in a quick demo?\n\n{{senderName}}\n{{senderEmail}}`
-      }
-    };
-
     let bulkSelProducts = [];
-    let bulkSelTone = null;
+    let bulkSelTemplateId = '';
     let bulkPreviewIdx = 0;
 
     function closeBulkFlow() {
@@ -1737,12 +1720,35 @@
       const s = leads.filter(l => sel.has(l.id) && l.email);
       if (!s.length) { notify('No Recipients', 'Select leads with emails first.', 'error'); return; }
       bulkSelProducts = [];
-      bulkSelTone = null;
+      bulkSelTemplateId = defaultTemplateId || (emailTemplates[0]?.id || '');
       bulkPreviewIdx = 0;
+      renderBulkTemplates();
       renderBulkProducts();
-      renderBulkTones();
       updateBulkNextBtn();
       document.getElementById('m-bulk-step1').hidden = false;
+    }
+
+    function renderBulkTemplates() {
+      const el = document.getElementById('b-template-select');
+      if (emailTemplates.length === 0) {
+        el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0">No templates available. Create one in Settings first.</div>';
+        return;
+      }
+      el.innerHTML = emailTemplates.map(t => `
+        <div class="bulk-tmpl-card ${t.id === bulkSelTemplateId ? 'selected' : ''}" onclick="selectBulkTemplate('${esc(t.id)}')">
+          <div class="btm-check"></div>
+          <div class="btm-info">
+            <div class="btm-name">${esc(t.name)}</div>
+            <div class="btm-subject">${esc(t.subject)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectBulkTemplate(id) {
+      bulkSelTemplateId = id;
+      renderBulkTemplates();
+      updateBulkNextBtn();
     }
 
     function renderBulkProducts() {
@@ -1766,24 +1772,15 @@
       updateBulkNextBtn();
     }
 
-    function renderBulkTones() {
-      document.getElementById('b-tone-grid').innerHTML = Object.entries(BULK_TONES).map(([key, t]) => `
-        <div class="bulk-tone-card ${bulkSelTone === key ? 'selected' : ''}" onclick="selectBulkTone('${key}')">
-          <div class="bt-emoji">${t.emoji}</div>
-          <div class="bt-name">${t.name}</div>
-          <div class="bt-desc">${t.desc}</div>
-        </div>
-      `).join('');
-    }
-
-    function selectBulkTone(key) {
-      bulkSelTone = key;
-      renderBulkTones();
-      updateBulkNextBtn();
-    }
-
     function updateBulkNextBtn() {
-      document.getElementById('b-next-btn').disabled = !(bulkSelProducts.length > 0 && bulkSelTone);
+      document.getElementById('b-next-btn').disabled = !(bulkSelProducts.length > 0 && bulkSelTemplateId && emailTemplates.length > 0);
+    }
+
+    function buildProductBlocks(selProds) {
+      return selProds.map((p, i) => {
+        const tag = i === 0 ? `**${p.name}** — ${p.pitch}` : `• **${p.name}** — ${p.pitch}`;
+        return tag;
+      }).join('\n\n');
     }
 
     function bulkStep2() {
@@ -1791,16 +1788,22 @@
       const selLeads = leads.filter(l => sel.has(l.id) && l.email);
       const allProds = getActiveProducts();
       const selProds = bulkSelProducts.map(key => allProds.find(p => p.key === key)).filter(Boolean);
-      const tone = TONE_TEMPLATES[bulkSelTone];
+      const tmpl = emailTemplates.find(t => t.id === bulkSelTemplateId) || emailTemplates[0];
 
-      // Build product blocks string for template
-      const productBlocks = selProds.map((p, i) => {
-        const tag = i === 0 ? `**${p.name}** — ${p.pitch}` : `• **${p.name}** — ${p.pitch}`;
-        return tag;
-      }).join('\n\n');
+      const productBlocks = buildProductBlocks(selProds);
 
-      const subject = tone.subject.replace(/\{\{productName1\}\}/g, selProds[0].name);
-      const body = tone.body.replace(/\{\{productBlocks\}\}/g, productBlocks);
+      // Replace {{productBlocks}} in template body, or append if not present
+      let body = tmpl.body;
+      if (body.includes('{{productBlocks}}')) {
+        body = body.replace(/\{\{productBlocks\}\}/g, productBlocks);
+      } else {
+        body += `\n\n${productBlocks}`;
+      }
+
+      let subject = tmpl.subject;
+      if (selProds.length > 0) {
+        subject = subject.replace(/\{\{productName1\}\}/g, selProds[0].name);
+      }
 
       // Recipients
       document.getElementById('b-recipient-pills').innerHTML =
@@ -1809,11 +1812,10 @@
 
       // Product chips
       document.getElementById('b-selected-chips').innerHTML =
-        `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${selProds.map(p => `<span class="bulk-chip">✓ ${p.name}</span>`).join('')}</div>`;
+        `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${selProds.map(p => `<span class="bulk-chip">✓ ${esc(p.name)}</span>`).join('')}</div>`;
 
-      // Tone badge
-      const tObj = BULK_TONES[bulkSelTone];
-      document.getElementById('b-tone-badge').innerHTML = `${tObj.emoji} ${tObj.name} tone`;
+      // Template badge
+      document.getElementById('b-tone-badge').innerHTML = `📄 ${esc(tmpl.name)} template`;
 
       document.getElementById('b-subject2').value = subject;
       document.getElementById('b-body2').value = body;
