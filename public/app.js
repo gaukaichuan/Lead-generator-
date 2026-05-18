@@ -1074,6 +1074,25 @@ async function sendBulkEmails() {
   showNotification("Bulk email completed", `${successCount} sent, ${failureCount} failed.`);
 }
 
+function fieldRow(icon, label, value, hasValue, isLink, tagClass) {
+  const display = value || "Not stored";
+  const empty = !hasValue;
+  const check = hasValue ? `<span class="detail-check yes">✓</span>` : `<span class="detail-check no"></span>`;
+  let valueHtml = `<span class="detail-value ${empty ? "empty" : ""}">${display}</span>`;
+  if (isLink && value) {
+    valueHtml = `<a class="detail-value link" href="${value}" target="_blank" rel="noreferrer">${value}</a>`;
+  }
+  if (tagClass && value) {
+    valueHtml = `<span class="detail-value"><span class="${tagClass}">${display}</span></span>`;
+  }
+  return `<div class="detail-field-row">
+    <span class="detail-field-icon">${icon}</span>
+    <span class="detail-field-label">${label}</span>
+    ${valueHtml}
+    ${check}
+  </div>`;
+}
+
 function renderLeadDetail() {
   const lead = selectedLead();
 
@@ -1093,32 +1112,61 @@ function renderLeadDetail() {
     <span class="state-pill ${lead.sent ? "state-sent" : "state-pending"}">${lead.sent ? "Email Sent" : "Email Pending"}</span>
     <span class="state-pill ${lead.crmLogged ? "state-crm" : "state-pending"}">${lead.crmLogged ? "CRM Logged" : "CRM Pending"}</span>
   `;
-  detailCard.className = "detail-card";
+
+  // Data completeness score
+  const allFields = [lead.email, lead.phone, lead.website, lead.role, lead.source, lead.region !== "Other", lead.industry, lead.companyType];
+  const filledCount = allFields.filter(f => f && f !== "N/A" && f !== "Not stored").length;
+  const totalFields = allFields.length;
+  const completenessPct = Math.round(filledCount / totalFields * 100);
+  const scoreLevel = completenessPct < 40 ? "low" : completenessPct < 70 ? "mid" : "high";
+
+  const initials = (lead.company || "").split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
+  const industryLabel = lead.industry ? lead.industry.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : "N/A";
+
+  detailCard.className = "detail-card compact-detail";
   detailCard.innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-box"><strong>Lead Source</strong><p>${lead.source}</p></div>
-      <div class="detail-box"><strong>Region</strong><p>${lead.region}</p></div>
-      <div class="detail-box"><strong>Email</strong><p>${lead.email || "Not stored"}</p></div>
-      <div class="detail-box"><strong>Phone</strong><p>${lead.phone || "Not stored"}</p></div>
-      <div class="detail-box"><strong>Website</strong><p>${lead.website ? `<a class="detail-link" href="${lead.website}" target="_blank" rel="noreferrer">${lead.website}</a>` : "Not stored"}</p></div>
-      <div class="detail-box"><strong>Recommended Product</strong><p>${lead.recommendation.productName}</p></div>
-      <div class="detail-box"><strong>Reasons</strong><p>${lead.recommendation.reason}</p></div>
+    <div class="detail-compact-header">
+      <div class="detail-avatar">${initials}</div>
+      <div class="detail-header-info">
+        <h3>${lead.company}</h3>
+        <p class="detail-meta">Business Contact · ${lead.region}</p>
+      </div>
+      <span class="detail-status-pill">${lead.status}</span>
     </div>
-    <div class="detail-box">
-      <strong>Promotion Angle</strong>
+
+    <div class="detail-score-bar">
+      <span class="detail-score-label">Data</span>
+      <div class="detail-score-track"><div class="detail-score-fill ${scoreLevel}" style="width:${completenessPct}%"></div></div>
+      <span class="detail-score-pct ${scoreLevel}">${completenessPct}%</span>
+    </div>
+
+    <div class="detail-fields">
+      ${fieldRow("", "Email", lead.email, false)}
+      ${fieldRow("", "Phone", lead.phone, true)}
+      ${fieldRow("", "Website", lead.website, false, true)}
+      ${fieldRow("", "Role", lead.role, false)}
+    </div>
+
+    <div class="detail-section-label">Profile</div>
+    <div class="detail-fields">
+      ${fieldRow("🗺️", "Source", lead.source, true, false, "tag amber")}
+      ${fieldRow("", "Region", lead.region, lead.region !== "Other", false, lead.region !== "Other" ? "tag purple" : "")}
+      ${fieldRow("", "Industry", industryLabel, true)}
+      ${fieldRow("", "B-Type", lead.companyTypeLabel || "N/A", !!lead.companyType)}
+    </div>
+
+    <div class="detail-section-label">Recommendation</div>
+    <div class="detail-product-card">
+      <h4>${lead.recommendation.productName}</h4>
       <p>${lead.recommendation.pitch}</p>
     </div>
-    <div class="detail-box">
-      <strong>Notes</strong>
-      <p>${lead.notes || "No notes yet."}</p>
-    </div>
-    <div class="action-row">
-      <button class="button ghost" data-action="email">Send Email</button>
-      <button class="button ghost" data-action="qualified">Set Qualified</button>
-      <button class="button ghost" data-action="new">Set New</button>
-      <button class="button ghost${lead.sent ? " success" : ""}" data-action="sent" ${lead.sent ? "disabled" : ""}>${lead.sent ? "Sent" : "Mark Sent"}</button>
-      <button class="button ghost${lead.crmLogged ? " info" : ""}" data-action="crm" ${lead.crmLogged ? "disabled" : ""}>${lead.crmLogged ? "CRM Logged" : "Log CRM"}</button>
-      <button class="button danger" data-action="delete">Delete Lead</button>
+
+    ${lead.notes ? `<div class="detail-notes-row"><strong>Notes</strong> — ${lead.notes}</div>` : ""}
+
+    <div class="detail-actions">
+      <button class="detail-btn primary" data-action="email"> Send Email</button>
+      <button class="detail-btn" data-action="qualified">✓ Qualified</button>
+      <button class="detail-btn danger" data-action="delete">🗑 Delete</button>
     </div>
   `;
 
