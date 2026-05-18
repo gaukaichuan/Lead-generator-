@@ -264,6 +264,57 @@
     .sender-panel { display: none; }
     .sender-panel.show { display: block; }
     .notif-center { position: fixed; top: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+    .notif { padding: 12px 18px; border-radius: var(--radius); background: var(--text); color: white; font-size: 13px; font-weight: 500; box-shadow: var(--shadow-md); animation: notifIn 0.25s ease; }
+    .notif.hide { animation: notifOut 0.25s ease forwards; }
+    @keyframes notifIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes notifOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+
+    /* Assigned user avatar */
+    .assign-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+      transition: transform 0.15s ease;
+      cursor: default;
+      position: relative;
+    }
+    .assign-avatar:hover { transform: scale(1.15); }
+    .assign-avatar.assigned {
+      color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .assign-avatar.unassigned {
+      border: 2px dashed var(--border);
+      color: var(--text-muted);
+      background: var(--surface-hover);
+    }
+    .assign-avatar.unassigned:hover { border-color: var(--text-muted); }
+    .assign-avatar .assign-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .assign-avatar .assign-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: var(--text);
+    }
+    .assign-avatar:hover .assign-tooltip { display: block; }
     .notif { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; box-shadow: var(--shadow-lg); min-width: 260px; animation: notifIn 250ms ease; border-left: 3px solid var(--green); }
     .notif.error { border-left-color: var(--red); }
     .notif strong { display: block; font-size: 13px; font-weight: 600; }
@@ -815,8 +866,11 @@ Best,
       if (l.recommendation?.productName) tags += `<span class="tag tag-product">${l.recommendation.productName}</span>`;
       if (l.sent) tags += `<span class="tag tag-sent">Sent</span>`;
       if (l.crmLogged) tags += `<span class="tag tag-crm">CRM</span>`;
-      const aInit = (l.assignedTo || '?')[0].toUpperCase();
-      return `<div class="lead-card ${l.id === selId ? 'active' : ''}" onclick="openDetail('${l.id}')">${cb ? `<input class="checkbox" type="checkbox" ${sel.has(l.id) ? 'checked' : ''} onclick="event.stopPropagation();togSel('${l.id}',this.checked)">` : ''}<div class="lead-avatar">${init}</div><div class="lead-info"><div class="lead-name">${l.company}</div><div class="lead-sub">${l.contactName || 'No contact'} · ${l.region}</div></div><div class="lead-tags">${tags}</div><div style="width:24px;height:24px;border-radius:50%;background:var(--indigo);color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0" title="Assigned to ${l.assignedTo || 'unknown'}">${aInit}</div></div>`;
+      const isAssigned = !!l.assignedTo;
+      const aInit = isAssigned ? l.assignedTo[0].toUpperCase() : '?';
+      const userColors = { admin: '#7c3aed', user: '#059669', staff: '#2563eb', agent: '#d97706', jackson: '#ec4899', sarah: '#f97316' };
+      const bgColor = isAssigned ? (userColors[l.assignedTo] || '#6366f1') : '';
+      return `<div class="lead-card ${l.id === selId ? 'active' : ''}" onclick="openDetail('${l.id}')">${cb ? `<input class="checkbox" type="checkbox" ${sel.has(l.id) ? 'checked' : ''} onclick="event.stopPropagation();togSel('${l.id}',this.checked)">` : ''}<div class="lead-avatar">${init}</div><div class="lead-info"><div class="lead-name">${l.company}</div><div class="lead-sub">${l.contactName || 'No contact'} · ${l.region}</div></div><div class="lead-tags">${tags}</div><div class="assign-avatar ${isAssigned ? 'assigned' : 'unassigned'}" style="${bgColor ? 'background:' + bgColor : ''}"><span class="assign-tooltip">${l.assignedTo || 'Unassigned'}</span>${aInit}</div></div>`;
     }
 
     function renderQueue() {
