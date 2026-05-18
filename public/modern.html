@@ -588,7 +588,8 @@
           <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fcd34d;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:white;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow-sm)">🗺️</div><div><div style="font-size:22px;font-weight:800;color:#b45309" id="scanner-maps">0</div><div style="font-size:11px;color:#f59e0b;font-weight:500">From Maps</div></div></div>
           <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:white;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow-sm)">📍</div><div><div style="font-size:22px;font-weight:800;color:#6d28d9" id="scanner-regions">0</div><div style="font-size:11px;color:#8b5cf6;font-weight:500">Regions</div></div></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+          <!-- MANUAL ENTRY -->
           <div class="panel" style="padding:0;overflow:hidden">
             <div style="background:linear-gradient(135deg,#eff6ff,#ede9fe);padding:16px 20px;border-bottom:1px solid var(--border)">
               <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:10px;background:white;display:grid;place-items:center;box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--blue-600)"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><div><div style="font-size:14px;font-weight:700">Add Lead Manually</div><div style="font-size:11px;color:var(--text-secondary)">Fill in the details below</div></div></div>
@@ -608,22 +609,33 @@
               <div class="form-full"><button class="btn btn-primary" type="submit" style="width:100%;padding:12px;font-size:14px;font-weight:700"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Save Lead to Queue</button></div>
             </form>
           </div>
+
+          <!-- GOOGLE MAPS FINDER (Places API) -->
           <div class="panel" style="padding:0;overflow:hidden">
             <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);padding:16px 20px;border-bottom:1px solid var(--border)">
               <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:10px;background:white;display:grid;place-items:center;box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--green)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div><div><div style="font-size:14px;font-weight:700">Google Maps Finder</div><div style="font-size:11px;color:var(--text-secondary)">Discover nearby businesses</div></div></div>
             </div>
             <div style="padding:18px 20px">
-              <div class="import-step"><div class="import-step-header"><span class="step-num">1</span><strong>Search Source</strong></div>
-                <select class="form-select" id="gmaps-source" style="width:100%">
-                  <option value="places">Google Places API (up to 60 results)</option>
-                  <option value="apify">Google Maps via Apify (up to 500+ results)</option>
-                </select>
-              </div>
-              <div class="import-step"><div class="import-step-header"><span class="step-num">2</span><strong>Business Category</strong></div><input class="form-input" id="gmaps-query" placeholder="retail shops in Kuala Lumpur" style="width:100%"></div>
-              <div class="import-step" style="margin:10px 0"><div class="import-step-header"><span class="step-num">3</span><strong>Search Radius</strong></div><div class="radius-row"><input type="range" id="gmaps-radius" min="5" max="20" step="1" value="15" oninput="document.getElementById('rv').textContent=this.value+' KM'"><span class="radius-val" id="rv">15 KM</span></div></div>
-              <div class="import-step" style="margin-bottom:14px"><div class="import-step-header"><span class="step-num">4</span><strong>Location</strong></div><p style="font-size:11px;color:var(--text-secondary);margin-bottom:8px" id="loc-status-text">Filter by your current position.</p><button class="btn" id="loc-detect-btn" style="width:100%;font-size:12px" onclick="detectLocation()">📍 Detect Location</button></div>
+              <div class="import-step"><div class="import-step-header"><span class="step-num">1</span><strong>Business Category</strong></div><input class="form-input" id="gmaps-query" placeholder="retail shops in Kuala Lumpur" style="width:100%"></div>
+              <div class="import-step" style="margin:10px 0"><div class="import-step-header"><span class="step-num">2</span><strong>Search Radius</strong></div><div class="radius-row"><input type="range" id="gmaps-radius" min="5" max="20" step="1" value="15" oninput="document.getElementById('rv').textContent=this.value+' KM'"><span class="radius-val" id="rv">15 KM</span></div></div>
+              <div class="import-step" style="margin-bottom:14px"><div class="import-step-header"><span class="step-num">3</span><strong>Location</strong></div><p style="font-size:11px;color:var(--text-secondary);margin-bottom:8px" id="loc-status-text">Filter by your current position.</p><button class="btn" id="loc-detect-btn" style="width:100%;font-size:12px" onclick="detectLocation()">📍 Detect Location</button></div>
               <button class="btn btn-primary" id="gmaps-search-btn" onclick="searchGmaps()" style="width:100%;padding:11px;font-size:13px;font-weight:700"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Search & Import</button>
-              <p style="font-size:10px;color:var(--text-muted);margin-top:10px;text-align:center" id="gmaps-footer">Powered by Google Places API</p>
+              <p style="font-size:10px;color:var(--text-muted);margin-top:10px;text-align:center">Powered by Google Places API · Up to 60 results</p>
+            </div>
+          </div>
+
+          <!-- GOOGLE MAPS OUTSCRAPER (Apify) -->
+          <div class="panel" style="padding:0;overflow:hidden">
+            <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);padding:16px 20px;border-bottom:1px solid var(--border)">
+              <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:10px;background:white;display:grid;place-items:center;box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="#b45309"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg></div><div><div style="font-size:14px;font-weight:700">Google Maps Outscraper</div><div style="font-size:11px;color:var(--text-secondary)">Powered by Apify · 500+ results</div></div></div>
+            </div>
+            <div style="padding:18px 20px">
+              <div class="import-step"><div class="import-step-header"><span class="step-num">1</span><strong>Business Category</strong></div><input class="form-input" id="apify-query" placeholder="retail shops in Kuala Lumpur" style="width:100%"></div>
+              <div class="import-step" style="margin:10px 0"><div class="import-step-header"><span class="step-num">2</span><strong>Max Results</strong></div><div class="radius-row"><input type="range" id="apify-max" min="50" max="500" step="50" value="500" oninput="document.getElementById('apify-rv').textContent=this.value"><span class="radius-val" id="apify-rv">500</span></div></div>
+              <div class="import-step" style="margin:10px 0"><div class="import-step-header"><span class="step-num">3</span><strong>Search Radius</strong></div><div class="radius-row"><input type="range" id="apify-radius" min="5" max="30" step="1" value="15" oninput="document.getElementById('apify-radius-val').textContent=this.value+' KM'"><span class="radius-val" id="apify-radius-val">15 KM</span></div></div>
+              <div class="import-step" style="margin-bottom:14px"><div class="import-step-header"><span class="step-num">4</span><strong>Location</strong></div><p style="font-size:11px;color:var(--text-secondary);margin-bottom:8px" id="apify-loc-status-text">Filter by your current position.</p><button class="btn" id="apify-loc-detect-btn" style="width:100%;font-size:12px" onclick="detectApifyLocation()">📍 Detect Location</button></div>
+              <button class="btn btn-primary" id="apify-search-btn" onclick="searchApify()" style="width:100%;padding:11px;font-size:13px;font-weight:700"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Search & Import</button>
+              <p style="font-size:10px;color:var(--text-muted);margin-top:10px;text-align:center">Powered by Apify Google Maps Scraper</p>
             </div>
           </div>
         </div>
@@ -1524,7 +1536,6 @@
 
     async function searchGmaps() {
       const q = document.getElementById('gmaps-query').value.trim();
-      const source = document.getElementById('gmaps-source').value;
       if (!q) { notify('Search', 'Enter a business category.', 'error'); return; }
       if (detectedLat === null || detectedLng === null) {
         notify('Search', 'Click "Detect Location" first so the server can search nearby you.', 'error');
@@ -1532,15 +1543,12 @@
       }
       const radius = document.getElementById('gmaps-radius').value;
       const btn = document.getElementById('gmaps-search-btn');
-      const footer = document.getElementById('gmaps-footer');
       btn.disabled = true;
       btn.innerHTML = '<span class="loading-spinner"></span> Searching...';
       try {
-        const endpoint = source === 'apify' ? '/api/google-maps/apify-search' : '/api/google-maps/search';
-        footer.textContent = source === 'apify' ? 'Powered by Apify Google Maps Scraper' : 'Powered by Google Places API';
-        const result = await api(endpoint, {
+        const result = await api('/api/google-maps/search', {
           method: 'POST',
-          body: JSON.stringify({ query: q, radiusKm: parseInt(radius), latitude: detectedLat, longitude: detectedLng, maxResults: 500 })
+          body: JSON.stringify({ query: q, radiusKm: parseInt(radius), latitude: detectedLat, longitude: detectedLng })
         });
         gmapsResults = result.leads || [];
         gmapsFilteredCount = result.filteredCount || 0;
@@ -1549,6 +1557,64 @@
         document.getElementById('gmaps-modal').hidden = false;
       } catch (err) {
         notify('Search', err.message || 'Google Maps search failed.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Search & Import';
+      }
+    }
+
+    // ===== APIFY GOOGLE MAPS SCRAPER =====
+    let apifyLat = null, apifyLng = null;
+
+    function detectApifyLocation() {
+      const btn = document.getElementById('apify-loc-detect-btn');
+      const status = document.getElementById('apify-loc-status-text');
+      if (!navigator.geolocation) {
+        status.textContent = 'Geolocation not supported.';
+        return;
+      }
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Detecting...';
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          apifyLat = pos.coords.latitude;
+          apifyLng = pos.coords.longitude;
+          status.textContent = `Lat: ${apifyLat.toFixed(4)}, Lng: ${apifyLng.toFixed(4)} ✓`;
+          btn.disabled = false;
+          btn.innerHTML = '📍 Detected ✓';
+        },
+        () => {
+          status.textContent = 'Location denied. Enable location services.';
+          btn.disabled = false;
+          btn.innerHTML = '📍 Detect Location';
+        }
+      );
+    }
+
+    async function searchApify() {
+      const q = document.getElementById('apify-query').value.trim();
+      if (!q) { notify('Search', 'Enter a business category.', 'error'); return; }
+      if (apifyLat === null || apifyLng === null) {
+        notify('Search', 'Click "Detect Location" in the Outscraper panel first.', 'error');
+        return;
+      }
+      const maxResults = document.getElementById('apify-max').value;
+      const radius = document.getElementById('apify-radius').value;
+      const btn = document.getElementById('apify-search-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading-spinner"></span> Scraping...';
+      try {
+        const result = await api('/api/google-maps/apify-search', {
+          method: 'POST',
+          body: JSON.stringify({ query: q, radiusKm: parseInt(radius), latitude: apifyLat, longitude: apifyLng, maxResults: parseInt(maxResults) })
+        });
+        gmapsResults = result.leads || [];
+        gmapsFilteredCount = result.filteredCount || 0;
+        gmapsSelected = new Set();
+        renderGmapsModal();
+        document.getElementById('gmaps-modal').hidden = false;
+      } catch (err) {
+        notify('Search', err.message || 'Apify scraper failed.', 'error');
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Search & Import';
