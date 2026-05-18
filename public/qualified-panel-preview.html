@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qualified Leads Panel Preview</title>
+<style>
+  :root {
+    --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; --text: #0f172a;
+    --muted: #64748b; --muted-light: #94a3b8; --blue: #3b82f6; --blue-soft: #eff6ff;
+    --green: #10b981; --green-soft: #ecfdf5; --green-100: #d1fae5;
+    --amber: #f59e0b; --amber-soft: #fef3c7; --purple: #8b5cf6; --purple-soft: #f5f3ff;
+    --red: #ef4444; --red-soft: #fef2f2;
+    --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.06); --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 24px; }
+  .container { max-width: 900px; margin: 0 auto; }
+
+  /* Dashboard stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  @media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; position: relative; overflow: hidden;
+    transition: all 0.2s ease;
+  }
+  .stat-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+  .stat-card .stat-icon {
+    width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+    font-size: 16px; margin-bottom: 12px;
+  }
+  .stat-card .stat-label { font-size: 0.72rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .stat-card .stat-value { font-size: 1.6rem; font-weight: 800; line-height: 1.1; }
+  .stat-card .stat-sub { font-size: 0.72rem; color: var(--muted-light); margin-top: 4px; }
+  .stat-card .stat-clickable { cursor: pointer; }
+  .stat-card .stat-clickable::after {
+    content: 'click to view →';
+    position: absolute; bottom: 8px; right: 12px;
+    font-size: 0.62rem; color: var(--muted-light); font-weight: 500;
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .stat-card .stat-clickable:hover::after { opacity: 1; }
+
+  .stat-card.green { border-top: 3px solid var(--green); }
+  .stat-card.green .stat-icon { background: var(--green-soft); }
+  .stat-card.green .stat-value { color: var(--green); }
+  .stat-card.green .stat-sub { color: var(--green); }
+
+  .stat-card.blue { border-top: 3px solid var(--blue); }
+  .stat-card.blue .stat-icon { background: var(--blue-soft); }
+  .stat-card.blue .stat-value { color: var(--blue); }
+
+  .stat-card.amber { border-top: 3px solid var(--amber); }
+  .stat-card.amber .stat-icon { background: var(--amber-soft); }
+  .stat-card.amber .stat-value { color: var(--amber); }
+
+  .stat-card.purple { border-top: 3px solid var(--purple); }
+  .stat-card.purple .stat-icon { background: var(--purple-soft); }
+  .stat-card.purple .stat-value { color: var(--purple); }
+
+  /* Panel overlay */
+  .panel-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    display: grid; place-items: start center;
+    padding: 40px 24px;
+    background: rgba(15,23,42,0.3);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+  }
+  .panel-overlay[hidden] { display: none !important; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .panel {
+    background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 560px; max-height: 75vh; overflow: hidden;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--green-soft), #e0f7ef);
+  }
+  .panel-header h3 { font-size: 1rem; font-weight: 800; color: var(--green); }
+  .panel-header .panel-count { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+  .panel-close {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--green-100);
+    background: var(--surface); cursor: pointer; font-size: 18px; color: var(--muted);
+    display: grid; place-items: center; transition: all 0.15s;
+  }
+  .panel-close:hover { background: var(--red-soft); color: var(--red); border-color: var(--red); }
+
+  .panel-body { padding: 8px; max-height: calc(75vh - 70px); overflow-y: auto; }
+
+  .qualified-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 10px;
+    transition: background 0.12s; cursor: pointer;
+  }
+  .qualified-item:hover { background: #f8fafc; }
+  .qualified-item .q-avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--green-soft), var(--blue-soft));
+    display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--green);
+    flex-shrink: 0;
+  }
+  .qualified-item .q-info { flex: 1; min-width: 0; }
+  .qualified-item .q-name { font-size: 0.85rem; font-weight: 700; }
+  .qualified-item .q-sub { font-size: 0.72rem; color: var(--muted); }
+  .qualified-item .q-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .qualified-item .q-action-btn {
+    width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); cursor: pointer; font-size: 13px;
+    display: grid; place-items: center; transition: all 0.15s; color: var(--muted);
+  }
+  .qualified-item .q-action-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .qualified-item .q-action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+  .panel-footer {
+    padding: 14px 20px; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    background: #f8fafc;
+  }
+  .panel-footer .btn {
+    padding: 8px 16px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface); font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .panel-footer .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .panel-footer .btn.primary { background: var(--green); color: #fff; border-color: var(--green); }
+  .panel-footer .btn.primary:hover { background: #059669; }
+
+  .empty-state { padding: 40px 20px; text-align: center; color: var(--muted-light); }
+  .empty-state .empty-icon { font-size: 2rem; margin-bottom: 8px; }
+  .empty-state p { font-size: 0.85rem; }
+
+  /* Unqualified button */
+  .unqualify-btn {
+    margin-top: 8px; padding: 6px 12px; border-radius: 6px;
+    border: 1px solid var(--red); background: transparent; color: var(--red);
+    font-size: 0.72rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+  }
+  .unqualify-btn:hover { background: var(--red); color: #fff; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 style="font-size:1.3rem;font-weight:800;margin-bottom:4px;">Dashboard Preview</h1>
+  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px;">Click the <strong>Qualified</strong> card to open the leads panel.</p>
+
+  <div class="stats-row">
+    <div class="stat-card blue">
+      <div class="stat-icon">📋</div>
+      <div class="stat-label">Total Leads</div>
+      <div class="stat-value">43</div>
+      <div class="stat-sub">All time leads in system</div>
+    </div>
+    <div class="stat-card green stat-clickable" id="qualifiedCard" onclick="openPanel()">
+      <div class="stat-icon">✓</div>
+      <div class="stat-label">Qualified</div>
+      <div class="stat-value" id="qualifiedCount">3</div>
+      <div class="stat-sub">7% conversion rate</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-icon"></div>
+      <div class="stat-label">Priority Area</div>
+      <div class="stat-value">1</div>
+      <div class="stat-sub">2% in priority markets</div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-icon">✉️</div>
+      <div class="stat-label">Emails Sent</div>
+      <div class="stat-value">0</div>
+      <div class="stat-sub">0% outreach rate</div>
+    </div>
+  </div>
+</div>
+
+<!-- Qualified Leads Panel -->
+<div class="panel-overlay" id="panelOverlay" hidden>
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h3>✓ Qualified Leads</h3>
+        <span class="panel-count" id="panelCount">3 leads</span>
+      </div>
+      <button class="panel-close" onclick="closePanel()">&times;</button>
+    </div>
+    <div class="panel-body" id="panelBody"></div>
+    <div class="panel-footer">
+      <span style="font-size:0.72rem;color:var(--muted-light)">Click a lead to view details</span>
+      <button class="btn" onclick="closePanel()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const qualifiedLeads = [
+  { id: 1, company: 'New Factory', contact: 'Melissa', region: 'Shah Alam', product: 'AutoCount Accounting', date: '2026-05-15' },
+  { id: 2, company: 'Seri Setia Construction', contact: 'Mr. Tan', region: 'Kuala Lumpur', product: 'AutoCount Accounting', date: '2026-05-16' },
+  { id: 3, company: 'Dakwah Corner Bookstore', contact: 'Farid', region: 'Kuala Lumpur', product: 'AutoCount POS', date: '2026-05-17' },
+];
+
+function renderPanel() {
+  const body = document.getElementById('panelBody');
+  const count = document.getElementById('panelCount');
+  count.textContent = `${qualifiedLeads.length} lead${qualifiedLeads.length !== 1 ? 's' : ''}`;
+
+  if (qualifiedLeads.length === 0) {
+    body.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <p>No qualified leads yet.<br>Mark leads as qualified from the main list.</p>
+      </div>
+    `;
+    return;
+  }
+
+  body.innerHTML = qualifiedLeads.map(l => `
+    <div class="qualified-item" onclick="alert('Open detail for: ${l.company}')">
+      <div class="q-avatar">${l.company.substring(0,2).toUpperCase()}</div>
+      <div class="q-info">
+        <div class="q-name">${l.company}</div>
+        <div class="q-sub">${l.contact} · ${l.region} · ${l.product}</div>
+      </div>
+      <div class="q-actions">
+        <button class="q-action-btn" title="Send email" onclick="event.stopPropagation();alert('Email ${l.company}')">✉</button>
+        <button class="q-action-btn danger" title="Unqualify" onclick="event.stopPropagation();unqualify(${l.id})">✗</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openPanel() {
+  renderPanel();
+  document.getElementById('panelOverlay').hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+
+function closePanel() {
+  document.getElementById('panelOverlay').hidden = true;
+  document.body.style.overflow = '';
+}
+
+function unqualify(id) {
+  const idx = qualifiedLeads.findIndex(l => l.id === id);
+  if (idx >= 0) {
+    qualifiedLeads.splice(idx, 1);
+    document.getElementById('qualifiedCount').textContent = qualifiedLeads.length;
+    renderPanel();
+  }
+}
+
+// Close on backdrop click
+document.getElementById('panelOverlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closePanel();
+});
+
+// Close on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closePanel();
+});
+</script>
+</body>
+</html>

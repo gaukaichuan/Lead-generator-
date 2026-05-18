@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Email Flow Preview</title>
+<style>
+  :root {
+    --bg: #f1f5f9; --surface: #ffffff; --border: #e2e8f0; --text: #0f172a;
+    --muted: #64748b; --muted-light: #94a3b8; --blue: #3b82f6; --blue-soft: #eff6ff;
+    --green: #10b981; --green-soft: #ecfdf5; --amber: #f59e0b; --amber-soft: #fef3c7;
+    --purple: #8b5cf6; --purple-soft: #f5f3ff; --red: #ef4444; --red-soft: #fef2f2;
+    --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,0.06); --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 24px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
+
+  /* Lead table */
+  .lead-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 16px; }
+  .lead-table-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); background: #f8fafc; flex-wrap: wrap; }
+  .lead-table-header .count { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+  .lead-table-header .btn { padding: 7px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .lead-table-header .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .lead-table-header .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .lead-table-header .btn.primary:hover { background: #2563eb; }
+
+  .lead-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #f1f5f9; transition: background 0.12s; cursor: pointer; }
+  .lead-row:last-child { border-bottom: none; }
+  .lead-row:hover { background: #f8fafc; }
+  .lead-row.selected { background: var(--blue-soft); }
+  .lead-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--blue); cursor: pointer; }
+  .lead-row .avatar { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg, var(--blue-soft), var(--purple-soft)); display: grid; place-items: center; font-size: 10px; font-weight: 700; color: var(--blue); flex-shrink: 0; }
+  .lead-row .name { font-size: 0.85rem; font-weight: 700; }
+  .lead-row .sub { font-size: 0.72rem; color: var(--muted); }
+  .lead-row .product-tag { margin-left: auto; padding: 3px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; background: var(--blue-soft); color: var(--blue); }
+  .lead-row .email-badge { padding: 2px 8px; border-radius: 999px; font-size: 0.62rem; font-weight: 700; background: var(--green-soft); color: var(--green); }
+
+  /* Modal backdrop */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(3px); z-index: 100; display: grid; place-items: center; padding: 24px; }
+  .modal-backdrop[hidden] { display: none !important; }
+  .modal {
+    background: var(--surface); border-radius: 16px; box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 580px; max-height: 85vh; overflow-y: auto;
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px; }
+  .modal-header h2 { font-size: 1.1rem; font-weight: 800; }
+  .modal-header .close { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 16px; color: var(--muted); display: grid; place-items: center; }
+  .modal-header .close:hover { background: var(--red-soft); color: var(--red); }
+
+  /* Step indicator */
+  .step-indicator { display: flex; align-items: center; gap: 8px; padding: 0 24px 16px; }
+  .step-dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 0.72rem; font-weight: 700; border: 2px solid var(--border); color: var(--muted-light); transition: all 0.2s; }
+  .step-dot.active { border-color: var(--blue); background: var(--blue); color: #fff; }
+  .step-dot.done { border-color: var(--green); background: var(--green); color: #fff; }
+  .step-line { flex: 1; height: 2px; background: var(--border); }
+  .step-line.active { background: var(--blue); }
+
+  .modal-body { padding: 0 24px 20px; }
+
+  /* Product selection */
+  .product-check { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
+  .product-check:hover { border-color: var(--blue); background: var(--blue-soft); }
+  .product-check.selected { border-color: var(--blue); background: var(--blue-soft); }
+  .product-check input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--blue); cursor: pointer; }
+  .product-check .pname { font-size: 0.85rem; font-weight: 700; }
+  .product-check .ppitch { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+  /* Tone selection */
+  .tone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .tone-card {
+    padding: 14px; border-radius: 10px; border: 2px solid var(--border); cursor: pointer; transition: all 0.15s; text-align: center;
+  }
+  .tone-card:hover { border-color: var(--blue); }
+  .tone-card.selected { border-color: var(--blue); background: var(--blue-soft); }
+  .tone-card .emoji { font-size: 1.5rem; margin-bottom: 4px; }
+  .tone-card .tname { font-size: 0.82rem; font-weight: 700; }
+  .tone-card .tdesc { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+
+  /* Modal footer */
+  .modal-footer { display: flex; justify-content: space-between; padding: 16px 24px; border-top: 1px solid var(--border); }
+  .modal-footer .btn { padding: 9px 20px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+  .modal-footer .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .modal-footer .btn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .modal-footer .btn.primary:hover { background: #2563eb; }
+  .modal-footer .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Compose preview */
+  .compose-area { width: 100%; min-height: 100px; padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.82rem; font-family: inherit; resize: vertical; line-height: 1.5; }
+  .compose-area:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+  .compose-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; margin-top: 14px; }
+  .compose-label:first-child { margin-top: 0; }
+  .compose-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.85rem; font-family: inherit; }
+  .compose-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+
+  /* Recipient pills */
+  .recipient-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; max-height: 80px; overflow-y: auto; padding: 4px; }
+  .recipient-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 0.68rem; font-weight: 600; background: var(--blue-soft); color: var(--blue); border: 1px solid var(--blue-100); }
+  .recipient-pill .count-badge { background: var(--blue); color: #fff; padding: 0 5px; border-radius: 999px; font-size: 0.6rem; font-weight: 800; }
+
+  /* Section label */
+  .section-label { font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .section-label .badge { background: var(--blue-soft); color: var(--blue); padding: 1px 8px; border-radius: 999px; font-size: 0.65rem; }
+
+  /* Product summary in compose */
+  .selected-products-summary { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+  .selected-product-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 600; background: var(--green-soft); color: var(--green); border: 1px solid #a7f3d0; }
+
+  .tone-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; background: var(--purple-soft); color: var(--purple); border: 1px solid #ddd6fe; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Bulk Email — New Flow Preview</h1>
+  <p class="subtitle">Click "Bulk Email" to start the new multi-step flow.</p>
+
+  <div class="lead-table">
+    <div class="lead-table-header">
+      <span class="count" id="selCount">0 selected</span>
+      <button class="btn" onclick="selectAll()">Select All</button>
+      <button class="btn" onclick="clearAll()">Clear</button>
+      <div style="flex:1"></div>
+      <button class="btn primary" id="bulkEmailBtn" onclick="openBulkFlow()" disabled>📧 Bulk Email</button>
+    </div>
+    <div id="leadRows"></div>
+  </div>
+</div>
+
+<!-- STEP 1: Product & Tone Selection -->
+<div class="modal-backdrop" id="step1Modal" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📧 Bulk Email Setup</h2>
+      <button class="close" onclick="closeStep1()">&times;</button>
+    </div>
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot" id="dot2">2</div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-dot" id="dot3">3</div>
+    </div>
+    <div class="modal-body">
+      <div class="section-label">Select Products to Promote <span class="badge" id="prodCount">0</span></div>
+      <div id="productChecks"></div>
+
+      <div style="margin-top:20px">
+        <div class="section-label">Email Tone</div>
+        <div class="tone-grid" id="toneGrid"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeStep1()">Cancel</button>
+      <button class="btn primary" id="nextBtn" onclick="goToStep2()" disabled>Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: Compose & Preview -->
+<div class="modal-backdrop" id="step2Modal" hidden>
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h2>✉️ Compose Bulk Email</h2>
+      <button class="close" onclick="closeStep2()">&times;</button>
+    </div>
+    <div class="step-indicator">
+      <div class="step-dot done" id="dot1b">✓</div>
+      <div class="step-line active" id="line1b"></div>
+      <div class="step-dot active" id="dot2b">2</div>
+      <div class="step-line" id="line2b"></div>
+      <div class="step-dot" id="dot3b">3</div>
+    </div>
+    <div class="modal-body">
+      <div class="recipient-pills" id="recipientPills"></div>
+      <div class="selected-products-summary" id="selectedProductsSummary"></div>
+      <div class="tone-badge" id="toneBadge" style="margin-bottom:12px"></div>
+
+      <div class="compose-label">Subject Template</div>
+      <input class="compose-input" id="subjectTemplate" type="text">
+
+      <div class="compose-label">Message Template</div>
+      <textarea class="compose-area" id="bodyTemplate" rows="8"></textarea>
+
+      <div style="margin-top:12px;font-size:0.7rem;color:var(--muted-light)">
+        Available: <code>{{company}}</code> <code>{{contactName}}</code> <code>{{region}}</code> <code>{{source}}</code> <code>{{senderName}}</code> <code>{{senderEmail}}</code>
+        + product placeholders: <code>{{productName1}}</code> <code>{{pitch1}}</code> <code>{{productName2}}</code> <code>{{pitch2}}</code>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="goBackToStep1()">← Back</button>
+      <button class="btn primary" onclick="goToStep3()">Preview →</button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: Per-Lead Preview -->
+<div class="modal-backdrop" id="step3Modal" hidden>
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h2>👁️ Email Preview</h2>
+      <button class="close" onclick="closeStep3()">&times;</button>
+    </div>
+    <div class="step-indicator">
+      <div class="step-dot done">✓</div>
+      <div class="step-line active"></div>
+      <div class="step-dot done">✓</div>
+      <div class="step-line active"></div>
+      <div class="step-dot active">3</div>
+    </div>
+    <div class="modal-body">
+      <div class="section-label">Preview per lead <span class="badge" id="previewLeadCount"></span></div>
+      <div id="leadPreviewTabs" style="display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap"></div>
+      <div class="email-preview-box" id="emailPreviewBox" style="padding:16px;background:#f8fafc;border-radius:10px;border:1px solid var(--border);font-size:0.82rem;line-height:1.6;max-height:400px;overflow-y:auto;white-space:pre-wrap"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="goBackToStep2()">← Back</button>
+      <button class="btn primary" style="background:var(--green);border-color:var(--green)" onclick="alert('🚀 Emails sent! (Demo only)')">🚀 Send All Emails</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const allProducts = [
+  { key: 'autocount-accounting', name: 'AutoCount Accounting', pitch: 'Improve accounting control, reporting speed, and day-to-day finance visibility.' },
+  { key: 'autocount-pos', name: 'AutoCount POS', pitch: 'Upgrade in-store sales handling, stock sync, and branch reporting.' },
+  { key: 'presoft-mobile-stock', name: 'Presoft Mobile Stock', pitch: 'Give sales teams live stock visibility and reduce order mistakes on the road.' },
+  { key: 'cubehous-wms', name: 'Cubehous WMS System', pitch: 'Tighten warehouse control, trace stock movement, and improve picking accuracy.' },
+  { key: 'autocount-payroll', name: 'AutoCount Cloud Payroll', pitch: 'Simplify payroll processing, staff records, and monthly compliance work.' }
+];
+
+const tones = [
+  { key: 'professional', emoji: '🎯', name: 'Professional', desc: 'Straightforward, business-focused' },
+  { key: 'friendly', emoji: '😄', name: 'Friendly', desc: 'Warm, conversational tone' },
+  { key: 'informative', emoji: '📊', name: 'Informative', desc: 'Detailed, feature-focused' },
+  { key: 'short', emoji: '⚡', name: 'Short & Punchy', desc: 'Brief, direct, no fluff' }
+];
+
+const leads = [
+  { id: 1, company: 'New Factory', contactName: 'Melissa', region: 'Shah Alam', source: 'Google Maps', email: 'factory@demo.local', product: 'AutoCount Accounting' },
+  { id: 2, company: 'Seri Setia Construction', contactName: 'Mr. Tan', region: 'Kuala Lumpur', source: 'Google Maps', email: 'info@seriseta.com', product: 'AutoCount Accounting' },
+  { id: 3, company: 'Construction Company in Malaysia', contactName: 'Ahmad', region: 'Other', source: 'Google Maps', email: 'info@ccm.com', product: 'AutoCount POS' },
+  { id: 4, company: 'Dakwah Corner Bookstore', contactName: 'Farid', region: 'Kuala Lumpur', source: 'Google Maps', email: 'info@dakwahbookstore.com', product: 'AutoCount POS' },
+  { id: 5, company: 'BookXcess Amcorp Mall', contactName: 'Lisa', region: 'Petaling Jaya', source: 'Google Maps', email: 'support@bookxcess.com', product: 'Presoft Mobile Stock' },
+];
+
+const toneTemplates = {
+  professional: {
+    subject: '{{productName1}} for {{company}} — A Strong Fit',
+    body: `Hi {{contactName}},
+
+I came across {{company}} while reviewing businesses from {{source}} in {{region}}.
+
+Based on your profile, here are solutions I believe would benefit your operations:
+
+{{productBlocks}}
+
+If any of these interest you, I'd be happy to arrange a brief demo.
+
+Best regards,
+{{senderName}}
+{{senderEmail}}`
+  },
+  friendly: {
+    subject: 'Quick idea for {{company}} 👋',
+    body: `Hi {{contactName}}!
+
+Hope you're doing well. I stumbled upon {{company}} through {{source}} in {{region}} and thought you might find these helpful:
+
+{{productBlocks}}
+
+No pressure at all — just thought these could make your day-to-day a bit easier. Let me know if you'd like to chat!
+
+Cheers,
+{{senderName}}
+{{senderEmail}}`
+  },
+  informative: {
+    subject: 'Recommended Solutions for {{company}}',
+    body: `Dear {{contactName}},
+
+After reviewing {{company}} from {{source}} in {{region}}, I've identified the following solutions that align with your business needs:
+
+{{productBlocks}}
+
+Each solution includes full support and training. I can provide a detailed walkthrough at your convenience.
+
+Sincerely,
+{{senderName}}
+{{senderEmail}}`
+  },
+  short: {
+    subject: '{{productName1}} for {{company}}',
+    body: `Hi {{contactName}},
+
+Found {{company}} on {{source}} in {{region}}. These could be a fit:
+
+{{productBlocks}}
+
+Interested in a quick demo?
+
+{{senderName}}
+{{senderEmail}}`
+  }
+};
+
+let selectedLeads = new Set();
+let selectedProducts = [];
+let selectedTone = null;
+
+function renderLeads() {
+  const container = document.getElementById('leadRows');
+  container.innerHTML = leads.map(l => `
+    <div class="lead-row ${selectedLeads.has(l.id) ? 'selected' : ''}" onclick="toggleLead(${l.id})">
+      <input type="checkbox" ${selectedLeads.has(l.id) ? 'checked' : ''} onclick="event.stopPropagation();toggleLead(${l.id})">
+      <div class="avatar">${l.company.substring(0,2).toUpperCase()}</div>
+      <div>
+        <div class="name">${l.company}</div>
+        <div class="sub">${l.contactName} · ${l.region}</div>
+      </div>
+      <span class="product-tag">${l.product}</span>
+      <span class="email-badge">✉</span>
+    </div>
+  `).join('');
+  document.getElementById('selCount').textContent = `${selectedLeads.size} selected (${selectedLeads.size} with email)`;
+  document.getElementById('bulkEmailBtn').disabled = selectedLeads.size === 0;
+}
+
+function toggleLead(id) {
+  if (selectedLeads.has(id)) selectedLeads.delete(id); else selectedLeads.add(id);
+  renderLeads();
+}
+
+function selectAll() { leads.forEach(l => selectedLeads.add(l.id)); renderLeads(); }
+function clearAll() { selectedLeads.clear(); renderLeads(); }
+
+function openBulkFlow() {
+  selectedProducts = [];
+  selectedTone = null;
+  renderProductChecks();
+  renderTones();
+  updateNextBtn();
+  document.getElementById('step1Modal').hidden = false;
+}
+
+function closeStep1() { document.getElementById('step1Modal').hidden = true; }
+function closeStep2() { document.getElementById('step2Modal').hidden = true; }
+function closeStep3() { document.getElementById('step3Modal').hidden = true; }
+
+function renderProductChecks() {
+  const container = document.getElementById('productChecks');
+  container.innerHTML = allProducts.map(p => `
+    <div class="product-check ${selectedProducts.includes(p.key) ? 'selected' : ''}" onclick="toggleProduct('${p.key}')">
+      <input type="checkbox" ${selectedProducts.includes(p.key) ? 'checked' : ''} onclick="event.stopPropagation();toggleProduct('${p.key}')">
+      <div>
+        <div class="pname">${p.name}</div>
+        <div class="ppitch">${p.pitch}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('prodCount').textContent = selectedProducts.length;
+}
+
+function toggleProduct(key) {
+  const idx = selectedProducts.indexOf(key);
+  if (idx >= 0) selectedProducts.splice(idx, 1); else selectedProducts.push(key);
+  renderProductChecks();
+  updateNextBtn();
+}
+
+function renderTones() {
+  const container = document.getElementById('toneGrid');
+  container.innerHTML = tones.map(t => `
+    <div class="tone-card ${selectedTone === t.key ? 'selected' : ''}" onclick="selectTone('${t.key}')">
+      <div class="emoji">${t.emoji}</div>
+      <div class="tname">${t.name}</div>
+      <div class="tdesc">${t.desc}</div>
+    </div>
+  `).join('');
+}
+
+function selectTone(key) {
+  selectedTone = key;
+  renderTones();
+  updateNextBtn();
+}
+
+function updateNextBtn() {
+  document.getElementById('nextBtn').disabled = !(selectedProducts.length > 0 && selectedTone);
+}
+
+function goToStep2() {
+  closeStep1();
+
+  // Build the template with selected products
+  const tone = toneTemplates[selectedTone];
+  const selProds = selectedProducts.map(key => allProducts.find(p => p.key === key));
+
+  // Build product blocks
+  const productBlocks = selProds.map((p, i) => {
+    const tag = i === 0 ? `**${p.name}** — ${p.pitch}` : `• **${p.name}** — ${p.pitch}`;
+    return tag;
+  }).join('\n\n');
+
+  const subject = tone.subject.replace(/{{productName1}}/g, selProds[0].name);
+  const body = tone.body.replace(/{{productBlocks}}/g, productBlocks);
+
+  // Render recipients
+  const selLeads = leads.filter(l => selectedLeads.has(l.id));
+  document.getElementById('recipientPills').innerHTML = `<span class="recipient-pill">${selLeads.length} recipients <span class="count-badge">${selLeads.length}</span></span>` +
+    selLeads.map(l => `<span class="recipient-pill">${l.email}</span>`).join('');
+
+  document.getElementById('selectedProductsSummary').innerHTML = selProds.map(p => `<span class="selected-product-chip">✓ ${p.name}</span>`).join('');
+  const toneObj = tones.find(t => t.key === selectedTone);
+  document.getElementById('toneBadge').innerHTML = `${toneObj.emoji} ${toneObj.name} tone`;
+
+  document.getElementById('subjectTemplate').value = subject;
+  document.getElementById('bodyTemplate').value = body;
+
+  document.getElementById('step2Modal').hidden = false;
+}
+
+function goBackToStep1() {
+  closeStep2();
+  document.getElementById('step1Modal').hidden = false;
+}
+
+function goToStep3() {
+  closeStep2();
+
+  const selLeads = leads.filter(l => selectedLeads.has(l.id));
+  const selProds = selectedProducts.map(key => allProducts.find(p => p.key === key));
+  const subject = document.getElementById('subjectTemplate').value;
+  const body = document.getElementById('bodyTemplate').value;
+
+  document.getElementById('previewLeadCount').textContent = selLeads.length;
+
+  // Build preview tabs
+  document.getElementById('leadPreviewTabs').innerHTML = selLeads.map((l, i) =>
+    `<button class="btn" style="padding:5px 12px;font-size:0.72rem;${i === 0 ? 'background:var(--blue);color:#fff;border-color:var(--blue)' : ''}" onclick="previewLead(${i},this)">${l.company.substring(0, 15)}${l.company.length > 15 ? '...' : ''}</button>`
+  ).join('');
+
+  window._previewData = { selLeads, selProds, subject, body };
+  previewLead(0);
+
+  document.getElementById('step3Modal').hidden = false;
+}
+
+function previewLead(idx, btn) {
+  const { selLeads, selProds, subject, body } = window._previewData;
+  const lead = selLeads[idx];
+  const senderName = 'Jackson';
+  const senderEmail = 'jacksongau0204@gmail.com';
+
+  let rendered = `<strong>Subject:</strong> ${applyPlaceholders(subject, lead, selProds, senderName, senderEmail)}\n\n`;
+  rendered += `<strong>Body:</strong>\n${applyPlaceholders(body, lead, selProds, senderName, senderEmail)}`;
+
+  document.getElementById('emailPreviewBox').innerHTML = rendered;
+
+  // Update tab styles
+  document.querySelectorAll('#leadPreviewTabs .btn').forEach((b, i) => {
+    b.style.background = i === idx ? 'var(--blue)' : '';
+    b.style.color = i === idx ? '#fff' : '';
+    b.style.borderColor = i === idx ? 'var(--blue)' : '';
+  });
+}
+
+function applyPlaceholders(template, lead, prods, senderName, senderEmail) {
+  let result = template
+    .replace(/{{company}}/g, lead.company)
+    .replace(/{{contactName}}/g, lead.contactName)
+    .replace(/{{region}}/g, lead.region)
+    .replace(/{{source}}/g, lead.source)
+    .replace(/{{senderName}}/g, senderName)
+    .replace(/{{senderEmail}}/g, senderEmail)
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+
+  // Replace product placeholders
+  prods.forEach((p, i) => {
+    const n = i + 1;
+    result = result.replace(new RegExp(`{{productName${n}}}`, 'g'), p.name);
+    result = result.replace(new RegExp(`{{pitch${n}}}`, 'g'), p.pitch);
+  });
+
+  return result;
+}
+
+function goBackToStep2() {
+  closeStep3();
+  document.getElementById('step2Modal').hidden = false;
+}
+
+renderLeads();
+</script>
+</body>
+</html>

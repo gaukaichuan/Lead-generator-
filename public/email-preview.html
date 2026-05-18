@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi-Product Email Preview</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --muted-light: #94a3b8;
+    --blue: #3b82f6;
+    --blue-soft: #eff6ff;
+    --green: #10b981;
+    --green-soft: #ecfdf5;
+    --amber: #f59e0b;
+    --amber-soft: #fef3c7;
+    --purple: #8b5cf6;
+    --purple-soft: #f5f3ff;
+    --red: #ef4444;
+    --red-soft: #fef2f2;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 24px; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 18px; border-radius: 999px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .tab:hover { border-color: var(--blue); color: var(--blue); }
+  .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+
+  /* Layout */
+  .preview-layout { display: grid; grid-template-columns: 280px 1fr; gap: 16px; }
+  @media (max-width: 800px) { .preview-layout { grid-template-columns: 1fr; } }
+
+  /* Lead selector */
+  .lead-selector {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .lead-selector h3 { font-size: 0.82rem; font-weight: 700; margin-bottom: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .lead-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px; border-radius: 10px; cursor: pointer;
+    transition: background 0.15s ease;
+    border: 2px solid transparent;
+  }
+  .lead-item:hover { background: #f8fafc; }
+  .lead-item.active { border-color: var(--blue); background: var(--blue-soft); }
+  .lead-item .avatar {
+    width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--blue-50), var(--purple-50));
+    display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--blue); flex-shrink: 0;
+  }
+  .lead-item .name { font-size: 0.82rem; font-weight: 700; }
+  .lead-item .sub { font-size: 0.7rem; color: var(--muted); }
+  .lead-item .badge {
+    margin-left: auto; padding: 2px 8px; border-radius: 999px; font-size: 0.62rem; font-weight: 700;
+  }
+  .badge-retail { background: var(--blue-soft); color: var(--blue); }
+  .badge-warehouse { background: var(--purple-soft); color: var(--purple); }
+  .badge-wholesale { background: var(--amber-soft); color: #92400e; }
+
+  /* Email preview */
+  .email-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow: hidden;
+  }
+  .email-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+  }
+  .email-header h3 { font-size: 0.82rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .email-meta { font-size: 0.75rem; color: var(--muted-light); margin-top: 4px; }
+  .email-body { padding: 20px; font-size: 0.85rem; line-height: 1.6; }
+  .email-body .subject { font-size: 1rem; font-weight: 700; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .email-body p { margin-bottom: 12px; }
+  .email-body .product-card {
+    padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--green-soft); margin-bottom: 10px;
+  }
+  .email-body .product-card h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 3px; }
+  .email-body .product-card p { font-size: 0.78rem; color: var(--muted); margin: 0; }
+  .email-body .product-card.main { border-color: var(--green); background: linear-gradient(135deg, var(--green-soft), #e0f7ef); }
+  .email-body .product-card .tag {
+    display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.62rem; font-weight: 700;
+    background: var(--green); color: #fff; margin-bottom: 4px;
+  }
+  .email-body .footer-catalog {
+    margin-top: 20px; padding-top: 16px; border-top: 2px solid var(--border);
+    font-size: 0.78rem; color: var(--muted);
+  }
+  .email-body .footer-catalog strong { color: var(--text); }
+  .email-body .footer-catalog .products { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .email-body .footer-catalog .product-tag {
+    padding: 4px 10px; border-radius: 999px; font-size: 0.7rem; font-weight: 600;
+    background: var(--blue-soft); color: var(--blue); border: 1px solid var(--blue-100);
+  }
+  .email-body .closing { margin-top: 16px; font-size: 0.82rem; color: var(--muted); }
+
+  /* Approach description */
+  .approach-desc {
+    padding: 12px 20px;
+    background: var(--amber-soft);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: #92400e;
+    line-height: 1.5;
+  }
+  .approach-desc strong { font-weight: 700; }
+
+  /* Segment indicator */
+  .segment-bar {
+    display: flex; align-items: center; gap: 8px; padding: 10px 20px;
+    background: var(--purple-soft);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.75rem; font-weight: 600; color: var(--purple);
+  }
+  .segment-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Multi-Product Email Preview</h1>
+  <p class="subtitle">Select an approach and a lead to see exactly what the recipient gets.</p>
+
+  <div class="tabs">
+    <button class="tab active" data-approach="hybrid">A — Main + Footer Catalog</button>
+    <button class="tab" data-approach="multi">B — Multi-Product List</button>
+    <button class="tab" data-approach="dynamic">C — Dynamic Per-Lead</button>
+    <button class="tab" data-approach="segmented">D — Segmented Bulk</button>
+  </div>
+
+  <div class="preview-layout">
+    <div class="lead-selector">
+      <h3>Sample Leads</h3>
+      <div class="lead-item active" data-lead="0" onclick="selectLead(0)">
+        <div class="avatar">SS</div>
+        <div>
+          <div class="name">Seri Setia Construction</div>
+          <div class="sub">General Contractor · Kuala Lumpur</div>
+        </div>
+        <span class="badge badge-retail">Retail</span>
+      </div>
+      <div class="lead-item" data-lead="1" onclick="selectLead(1)">
+        <div class="avatar">FH</div>
+        <div>
+          <div class="name">Fulfillment Hub</div>
+          <div class="sub">Warehouse · Petaling Jaya</div>
+        </div>
+        <span class="badge badge-warehouse">Warehouse</span>
+      </div>
+      <div class="lead-item" data-lead="2" onclick="selectLead(2)">
+        <div class="avatar">BT</div>
+        <div>
+          <div class="name">Batu Trading Co</div>
+          <div class="sub">Wholesale · Shah Alam</div>
+        </div>
+        <span class="badge badge-wholesale">Wholesale</span>
+      </div>
+    </div>
+
+    <div class="email-preview">
+      <div class="email-header">
+        <h3>Email Preview</h3>
+        <div class="email-meta">This is what the recipient will see in their inbox.</div>
+      </div>
+      <div id="approachDesc"></div>
+      <div id="segmentBar"></div>
+      <div class="email-body" id="emailBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const leads = [
+  {
+    company: "Seri Setia Construction",
+    contactName: "Mr. Tan",
+    region: "Kuala Lumpur",
+    source: "Google Maps",
+    industry: "Construction",
+    recommendation: { productName: "AutoCount POS", pitch: "Upgrade in-store sales handling, stock sync, and branch reporting." },
+    allProducts: [
+      { name: "AutoCount POS", pitch: "Upgrade in-store sales handling, stock sync, and branch reporting." },
+      { name: "AutoCount Accounting", pitch: "Improve accounting control, reporting speed, and day-to-day finance visibility." },
+      { name: "Presoft Mobile Stock", pitch: "Give sales teams live stock visibility and reduce order mistakes on the road." }
+    ]
+  },
+  {
+    company: "Fulfillment Hub",
+    contactName: "Sarah Lim",
+    region: "Petaling Jaya",
+    source: "Google Maps",
+    industry: "Warehouse",
+    recommendation: { productName: "Cubehous WMS", pitch: "Tighten warehouse control, trace stock movement, and improve picking accuracy." },
+    allProducts: [
+      { name: "Cubehous WMS", pitch: "Tighten warehouse control, trace stock movement, and improve picking accuracy." },
+      { name: "Presoft Mobile Stock", pitch: "Give sales teams live stock visibility and reduce order mistakes on the road." },
+      { name: "AutoCount Accounting", pitch: "Improve accounting control, reporting speed, and day-to-day finance visibility." }
+    ]
+  },
+  {
+    company: "Batu Trading Co",
+    contactName: "Rahman",
+    region: "Shah Alam",
+    source: "Google Maps",
+    industry: "Wholesale",
+    recommendation: { productName: "Presoft Mobile Stock", pitch: "Give sales teams live stock visibility and reduce order mistakes on the road." },
+    allProducts: [
+      { name: "Presoft Mobile Stock", pitch: "Give sales teams live stock visibility and reduce order mistakes on the road." },
+      { name: "AutoCount Accounting", pitch: "Improve accounting control, reporting speed, and day-to-day finance visibility." },
+      { name: "AutoCount POS", pitch: "Upgrade in-store sales handling, stock sync, and branch reporting." }
+    ]
+  }
+];
+
+const allProducts = [
+  "AutoCount Accounting",
+  "AutoCount POS",
+  "Presoft Mobile Stock",
+  "Cubehous WMS",
+  "AutoCount Cloud Payroll"
+];
+
+let currentApproach = 'hybrid';
+let currentLead = 0;
+
+const approachDescs = {
+  hybrid: `<strong>Approach A — Main Product + Footer Catalog:</strong> Each lead gets their personalized product featured in the body, plus a static footer listing ALL products. Works great for bulk — one send, but each email is still personalized.`,
+  multi: `<strong>Approach B — Multi-Product List:</strong> The email body lists 2-3 recommended products with pitches. More comprehensive but slightly longer. Same template structure for bulk, but body grows per lead.`,
+  dynamic: `<strong>Approach C — Dynamic Per-Lead:</strong> The bulk template uses placeholders like {{productName1}}, {{pitch1}}, {{productName2}}. The system generates a unique email per lead from one template. Most personalized for bulk.`,
+  segmented: `<strong>Approach D — Segmented Bulk:</strong> You filter the queue by product first, then send separate bulk emails to each segment. Each batch is highly targeted. Best quality but more steps.`
+};
+
+function render() {
+  const lead = leads[currentLead];
+  const desc = document.getElementById('approachDesc');
+  const seg = document.getElementById('segmentBar');
+  const body = document.getElementById('emailBody');
+
+  desc.innerHTML = `<div class="approach-desc">${approachDescs[currentApproach]}</div>`;
+  seg.innerHTML = '';
+
+  if (currentApproach === 'segmented') {
+    seg.innerHTML = `<div class="segment-bar"><span class="dot"></span>Segment: ${lead.recommendation.productName} leads only — ${leads.length} recipients in this batch</div>`;
+  }
+
+  if (currentApproach === 'hybrid') {
+    body.innerHTML = `
+      <div class="subject">🚀 ${lead.recommendation.productName} idea for ${lead.company}</div>
+      <p>Hi ${lead.contactName},</p>
+      <p>I came across <strong>${lead.company}</strong> while reviewing businesses from ${lead.source} in ${lead.region}.</p>
+      <p>Based on your setup in ${lead.industry}, I believe <strong>${lead.recommendation.productName}</strong> could be a strong fit.</p>
+      <div class="product-card main">
+        <span class="tag">Recommended</span>
+        <h4>${lead.recommendation.productName}</h4>
+        <p>${lead.recommendation.pitch}</p>
+      </div>
+      <p>If helpful, I can walk you through a short demo based on your current workflow.</p>
+      <div class="footer-catalog">
+        <strong>We also offer:</strong>
+        <div class="products">
+          ${allProducts.map(p => `<span class="product-tag">${p}</span>`).join('')}
+        </div>
+      </div>
+      <div class="closing">
+        Best,<br>
+        Your Name<br>
+        your@email.com
+      </div>
+    `;
+  } else if (currentApproach === 'multi') {
+    const products = lead.allProducts.slice(0, 3);
+    body.innerHTML = `
+      <div class="subject">Solutions for ${lead.company} — ${lead.region}</div>
+      <p>Hi ${lead.contactName},</p>
+      <p>I came across <strong>${lead.company}</strong> via ${lead.source} and reviewed your setup in ${lead.industry}. Based on your business profile, here are our top recommendations:</p>
+      ${products.map((p, i) => `
+        <div class="product-card ${i === 0 ? 'main' : ''}">
+          ${i === 0 ? '<span class="tag">Top Pick</span>' : ''}
+          <h4>${p.name}</h4>
+          <p>${p.pitch}</p>
+        </div>
+      `).join('')}
+      <p>I'd be happy to walk you through a demo of whichever solution interests you most.</p>
+      <div class="closing">
+        Best,<br>
+        Your Name<br>
+        your@email.com
+      </div>
+    `;
+  } else if (currentApproach === 'dynamic') {
+    const products = lead.allProducts.slice(0, 2);
+    body.innerHTML = `
+      <div class="subject">🚀 {{productName1}} for {{company}}</div>
+      <p>Hi {{contactName}},</p>
+      <p>I came across <strong>{{company}}</strong> while reviewing businesses from {{source}} in {{region}}.</p>
+      <p>Based on your setup in {{industry}}, here are our top recommendations:</p>
+      ${products.map((p, i) => `
+        <div class="product-card ${i === 0 ? 'main' : ''}">
+          ${i === 0 ? '<span class="tag">Top Pick</span>' : '<span class="tag" style="background:var(--blue)">Also Consider</span>'}
+          <h4>${p.name} <span style="font-weight:400;font-size:0.7rem;color:var(--muted-light)">← {{productName${i+1}}}</span></h4>
+          <p>${p.pitch} <span style="font-weight:400;font-size:0.7rem;color:var(--muted-light)">← {{pitch${i+1}}}</span></p>
+        </div>
+      `).join('')}
+      <p>If helpful, I can walk you through a short demo based on your current workflow.</p>
+      <div class="closing">
+        Best,<br>
+        {{senderName}}<br>
+        {{senderEmail}}
+      </div>
+      <div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:0.72rem;color:var(--muted-light)">
+        <strong>Template placeholders:</strong> {{company}}, {{contactName}}, {{productName1}}, {{pitch1}}, {{productName2}}, {{pitch2}}, {{senderName}}, {{senderEmail}}
+      </div>
+    `;
+  } else if (currentApproach === 'segmented') {
+    body.innerHTML = `
+      <div class="subject">🚀 ${lead.recommendation.productName} idea for ${lead.company}</div>
+      <p>Hi ${lead.contactName},</p>
+      <p>I came across <strong>${lead.company}</strong> while reviewing ${lead.industry} businesses from ${lead.source} in ${lead.region}.</p>
+      <p>Since you're in ${lead.industry}, I believe <strong>${lead.recommendation.productName}</strong> could be a strong fit.</p>
+      <div class="product-card main">
+        <span class="tag">Recommended</span>
+        <h4>${lead.recommendation.productName}</h4>
+        <p>${lead.recommendation.pitch}</p>
+      </div>
+      <p>This solution is specifically designed for ${lead.industry.toLowerCase()} businesses like yours. If helpful, I can walk you through a short demo.</p>
+      <div class="closing">
+        Best,<br>
+        Your Name<br>
+        your@email.com
+      </div>
+      <div style="margin-top:16px;padding:12px;background:var(--purple-soft);border-radius:8px;font-size:0.72rem;color:var(--purple)">
+        <strong>Segmented batch:</strong> This email is sent only to leads where the recommended product is "${lead.recommendation.productName}". Other leads get their own targeted batch.
+      </div>
+    `;
+  }
+}
+
+function selectLead(idx) {
+  currentLead = idx;
+  document.querySelectorAll('.lead-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+  render();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentApproach = tab.dataset.approach;
+    render();
+  });
+});
+
+render();
+</script>
+</body>
+</html>

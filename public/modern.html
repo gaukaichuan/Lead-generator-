@@ -242,6 +242,52 @@
     .badge-priority { background: var(--amber-50); color: var(--amber); border: 1px solid var(--amber-100); }
     .badge-standard { background: var(--surface-hover); color: var(--text-muted); border: 1px solid var(--border); }
     .detail-actions { display: flex; gap: 10px; flex-wrap: wrap; padding-top: 16px; border-top: 1px solid var(--border-light); }
+
+    /* ===== BULK EMAIL 3-STEP FLOW ===== */
+    .step-indicator { display: flex; align-items: center; gap: 8px; padding: 0 24px 16px; }
+    .step-dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; border: 2px solid var(--border); color: var(--text-muted); transition: all 200ms ease; }
+    .step-dot.active { border-color: var(--blue-600); background: var(--blue-600); color: white; }
+    .step-dot.done { border-color: var(--green); background: var(--green); color: white; }
+    .step-line { flex: 1; height: 2px; background: var(--border); border-radius: 1px; }
+    .step-line.active { background: var(--blue-600); }
+
+    .bulk-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .bulk-badge { padding: 2px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; background: var(--blue-50); color: var(--blue-600); }
+
+    .bulk-product-check { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 8px; cursor: pointer; transition: all 150ms ease; }
+    .bulk-product-check:hover { border-color: var(--blue-100); background: var(--blue-50); }
+    .bulk-product-check.selected { border-color: var(--blue-600); background: var(--blue-50); }
+    .bulk-product-check input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--blue-600); cursor: pointer; }
+    .bulk-product-check .bp-name { font-size: 13px; font-weight: 700; }
+    .bulk-product-check .bp-pitch { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    .bulk-tone-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .bulk-tone-card { padding: 14px; border-radius: var(--radius); border: 2px solid var(--border); cursor: pointer; transition: all 150ms ease; text-align: center; }
+    .bulk-tone-card:hover { border-color: var(--blue-100); }
+    .bulk-tone-card.selected { border-color: var(--blue-600); background: var(--blue-50); }
+    .bulk-tone-card .bt-emoji { font-size: 22px; margin-bottom: 4px; }
+    .bulk-tone-card .bt-name { font-size: 13px; font-weight: 700; }
+    .bulk-tone-card .bt-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+    .bulk-recipients { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; max-height: 80px; overflow-y: auto; padding: 4px; }
+    .bulk-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--blue-50); color: var(--blue-600); border: 1px solid var(--blue-100); }
+    .bulk-chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--green-50); color: var(--green); border: 1px solid var(--green-100); }
+    .bulk-tone-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--purple-50); color: var(--purple); border: 1px solid var(--purple-100); margin-bottom: 12px; }
+
+    .bulk-preview-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+    .bulk-preview-tab { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 150ms; color: var(--text-muted); }
+    .bulk-preview-tab:hover { border-color: var(--blue-100); }
+    .bulk-preview-tab.active { background: var(--blue-600); color: white; border-color: var(--blue-600); }
+
+    .bulk-email-preview-box { padding: 16px; background: var(--surface-hover); border-radius: var(--radius); border: 1px solid var(--border); font-size: 13px; line-height: 1.6; max-height: 350px; overflow-y: auto; white-space: pre-wrap; }
+    .bulk-email-preview-box .preview-subject { font-weight: 700; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .bulk-email-preview-box .preview-body { color: var(--text-secondary); }
+
+    .bulk-segment-bar { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: var(--purple-50); border-radius: var(--radius-sm); font-size: 11px; font-weight: 600; color: var(--purple); margin-bottom: 12px; }
+    .bulk-segment-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); }
+
+    .placeholder-hint { margin-top: 8px; padding: 10px 14px; background: #f8fafc; border-radius: var(--radius-sm); font-size: 10px; color: var(--text-muted); line-height: 1.8; }
+    .placeholder-hint code { padding: 1px 5px; background: var(--blue-50); color: var(--blue-600); border-radius: 3px; font-size: 10px; }
     .email-recipient { background: var(--surface-hover); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px; }
     .email-recipient-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
     .email-recipient-value { font-size: 14px; color: var(--text); font-weight: 500; }
@@ -587,28 +633,83 @@
     </div>
   </div>
 
-  <!-- BULK EMAIL MODAL -->
-  <div class="modal-backdrop" id="m-bulk" hidden>
-    <div class="modal">
-      <button class="modal-close" onclick="closeM('m-bulk')">&times;</button>
+  <!-- BULK EMAIL 3-STEP FLOW -->
+  <div class="modal-backdrop" id="m-bulk-step1" hidden>
+    <div class="modal" style="max-width:560px">
+      <button class="modal-close" onclick="closeBulkFlow()">&times;</button>
       <div class="modal-eyebrow">Bulk Email</div>
-      <div class="modal-title">Compose Bulk Email</div>
-      <div class="modal-subtitle" id="b-recipients">0 selected</div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div><label class="form-label">Subject Template</label><input class="form-input" id="b-subject" value="{{productName}} idea for {{company}}"></div>
-        <div><label class="form-label">Message Template</label><textarea class="form-textarea" id="b-body" rows="5">Hi {{contactName}},
-
-I came across {{company}} while reviewing businesses from {{source}} in {{region}}.
-Based on your setup in {{industry}}, I believe {{productName}} could be a strong fit.
-
-{{pitch}}
-
-Best,
-{{senderName}}</textarea>
-          <p style="font-size:11px;color:var(--text-muted);margin-top:4px">Placeholders: <span class="code">{{contactName}}</span> <span class="code">{{company}}</span> <span class="code">{{productName}}</span> <span class="code">{{pitch}}</span> <span class="code">{{senderName}}</span></p>
+      <div class="modal-title">Select Products & Tone</div>
+      <div class="modal-subtitle" id="b-step1-sub">Choose what to promote and how to say it.</div>
+      <div class="step-indicator">
+        <div class="step-dot active" id="sd1">1</div>
+        <div class="step-line" id="sl1"></div>
+        <div class="step-dot" id="sd2">2</div>
+        <div class="step-line" id="sl2"></div>
+        <div class="step-dot" id="sd3">3</div>
+      </div>
+      <div style="padding:0 24px 20px">
+        <div class="bulk-section-label">Products to Promote <span class="bulk-badge" id="b-prod-count">0</span></div>
+        <div id="b-prod-checks"></div>
+        <div style="margin-top:16px">
+          <div class="bulk-section-label">Email Tone</div>
+          <div class="bulk-tone-grid" id="b-tone-grid"></div>
         </div>
       </div>
-      <div style="display:flex;gap:10px;margin-top:18px"><button class="btn" onclick="closeM('m-bulk')">Cancel</button><button class="btn btn-primary" id="b-send-btn" onclick="sendBulk()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>Send to All</button></div>
+      <div style="display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--border-light)">
+        <button class="btn" onclick="closeBulkFlow()">Cancel</button>
+        <button class="btn btn-primary" id="b-next-btn" onclick="bulkStep2()" disabled style="margin-left:auto">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="m-bulk-step2" hidden>
+    <div class="modal" style="max-width:620px">
+      <button class="modal-close" onclick="closeBulkFlow()">&times;</button>
+      <div class="modal-eyebrow">Bulk Email</div>
+      <div class="modal-title">Compose Email</div>
+      <div class="step-indicator">
+        <div class="step-dot done">✓</div>
+        <div class="step-line active" id="sl1b"></div>
+        <div class="step-dot active" id="sd2b">2</div>
+        <div class="step-line" id="sl2b"></div>
+        <div class="step-dot" id="sd3b">3</div>
+      </div>
+      <div style="padding:0 24px 20px">
+        <div class="bulk-recipients" id="b-recipient-pills"></div>
+        <div id="b-selected-chips"></div>
+        <div class="bulk-tone-badge" id="b-tone-badge"></div>
+        <div><label class="form-label">Subject Template</label><input class="form-input" id="b-subject2"></div>
+        <div style="margin-top:10px"><label class="form-label">Message Template</label><textarea class="form-textarea" id="b-body2" rows="7"></textarea></div>
+        <div class="placeholder-hint">Available: <code>{{company}}</code> <code>{{contactName}}</code> <code>{{region}}</code> <code>{{source}}</code> <code>{{senderName}}</code> <code>{{senderEmail}}</code> <code>{{productName1}}</code> <code>{{pitch1}}</code> <code>{{productName2}}</code> <code>{{pitch2}}</code></div>
+      </div>
+      <div style="display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--border-light)">
+        <button class="btn" onclick="bulkBackToStep1()">← Back</button>
+        <button class="btn btn-primary" onclick="bulkStep3()" style="margin-left:auto">Preview →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="m-bulk-step3" hidden>
+    <div class="modal" style="max-width:620px">
+      <button class="modal-close" onclick="closeBulkFlow()">&times;</button>
+      <div class="modal-eyebrow">Bulk Email</div>
+      <div class="modal-title">Preview Emails</div>
+      <div class="step-indicator">
+        <div class="step-dot done">✓</div>
+        <div class="step-line active"></div>
+        <div class="step-dot done">✓</div>
+        <div class="step-line active"></div>
+        <div class="step-dot active" id="sd3c">3</div>
+      </div>
+      <div style="padding:0 24px 20px">
+        <div class="bulk-section-label">Preview per lead <span class="bulk-badge" id="b-preview-count"></span></div>
+        <div class="bulk-preview-tabs" id="b-preview-tabs"></div>
+        <div class="bulk-email-preview-box" id="b-preview-box"></div>
+      </div>
+      <div style="display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--border-light)">
+        <button class="btn" onclick="bulkBackToStep2()">← Back</button>
+        <button class="btn btn-primary" id="b-send-final-btn" onclick="sendBulkFromStep3()" style="margin-left:auto;background:var(--green);border-color:var(--green)">🚀 Send All Emails</button>
+      </div>
     </div>
   </div>
 
@@ -1352,36 +1453,228 @@ Best,
       }
     }
 
+    // ===== BULK EMAIL 3-STEP FLOW =====
+    const ALL_PRODUCTS = [
+      { key: 'autocount-accounting', name: 'AutoCount Accounting', pitch: 'Improve accounting control, reporting speed, and day-to-day finance visibility.' },
+      { key: 'autocount-pos', name: 'AutoCount POS', pitch: 'Upgrade in-store sales handling, stock sync, and branch reporting.' },
+      { key: 'presoft-mobile-stock', name: 'Presoft Mobile Stock', pitch: 'Give sales teams live stock visibility and reduce order mistakes on the road.' },
+      { key: 'cubehous-wms', name: 'Cubehous WMS System', pitch: 'Tighten warehouse control, trace stock movement, and improve picking accuracy.' },
+      { key: 'autocount-payroll', name: 'AutoCount Cloud Payroll', pitch: 'Simplify payroll processing, staff records, and monthly compliance work.' }
+    ];
+
+    const BULK_TONES = {
+      professional: { emoji: '', name: 'Professional', desc: 'Straightforward, business-focused' },
+      friendly: { emoji: '😄', name: 'Friendly', desc: 'Warm, conversational tone' },
+      informative: { emoji: '📊', name: 'Informative', desc: 'Detailed, feature-focused' },
+      short: { emoji: '⚡', name: 'Short & Punchy', desc: 'Brief, direct, no fluff' }
+    };
+
+    const TONE_TEMPLATES = {
+      professional: {
+        subject: '{{productName1}} for {{company}} — A Strong Fit',
+        body: `Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\nBased on your profile, here are solutions I believe would benefit your operations:\n\n{{productBlocks}}\n\nIf any of these interest you, I'd be happy to arrange a brief demo.\n\nBest regards,\n{{senderName}}\n{{senderEmail}}`
+      },
+      friendly: {
+        subject: 'Quick idea for {{company}} ',
+        body: `Hi {{contactName}}!\n\nHope you're doing well. I stumbled upon {{company}} through {{source}} in {{region}} and thought you might find these helpful:\n\n{{productBlocks}}\n\nNo pressure at all — just thought these could make your day-to-day a bit easier. Let me know if you'd like to chat!\n\nCheers,\n{{senderName}}\n{{senderEmail}}`
+      },
+      informative: {
+        subject: 'Recommended Solutions for {{company}}',
+        body: `Dear {{contactName}},\n\nAfter reviewing {{company}} from {{source}} in {{region}}, I've identified the following solutions that align with your business needs:\n\n{{productBlocks}}\n\nEach solution includes full support and training. I can provide a detailed walkthrough at your convenience.\n\nSincerely,\n{{senderName}}\n{{senderEmail}}`
+      },
+      short: {
+        subject: '{{productName1}} for {{company}}',
+        body: `Hi {{contactName}},\n\nFound {{company}} on {{source}} in {{region}}. These could be a fit:\n\n{{productBlocks}}\n\nInterested in a quick demo?\n\n{{senderName}}\n{{senderEmail}}`
+      }
+    };
+
+    let bulkSelProducts = [];
+    let bulkSelTone = null;
+    let bulkPreviewIdx = 0;
+
+    function closeBulkFlow() {
+      ['m-bulk-step1','m-bulk-step2','m-bulk-step3'].forEach(id => document.getElementById(id).hidden = true);
+    }
+
     function bulkEmail() {
       const s = leads.filter(l => sel.has(l.id) && l.email);
       if (!s.length) { notify('No Recipients', 'Select leads with emails first.', 'error'); return; }
-      document.getElementById('b-recipients').textContent = s.map(l => `${l.company} <${l.email}>`).join(', ');
-      document.getElementById('b-subject').value = eSubj;
-      document.getElementById('b-body').value = eBody;
-      document.getElementById('m-bulk').hidden = false;
+      bulkSelProducts = [];
+      bulkSelTone = null;
+      bulkPreviewIdx = 0;
+      renderBulkProducts();
+      renderBulkTones();
+      updateBulkNextBtn();
+      document.getElementById('m-bulk-step1').hidden = false;
     }
 
-    async function sendBulk() {
-      const s = leads.filter(l => sel.has(l.id) && l.email);
-      if (!s.length) return;
-      const subjectTpl = document.getElementById('b-subject').value.trim();
-      const bodyTpl = document.getElementById('b-body').value.trim();
-      const btn = document.getElementById('b-send-btn');
+    function renderBulkProducts() {
+      document.getElementById('b-prod-checks').innerHTML = ALL_PRODUCTS.map(p => `
+        <div class="bulk-product-check ${bulkSelProducts.includes(p.key) ? 'selected' : ''}" onclick="toggleBulkProd('${p.key}')">
+          <input type="checkbox" ${bulkSelProducts.includes(p.key) ? 'checked' : ''} onclick="event.stopPropagation();toggleBulkProd('${p.key}')">
+          <div>
+            <div class="bp-name">${p.name}</div>
+            <div class="bp-pitch">${p.pitch}</div>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('b-prod-count').textContent = bulkSelProducts.length;
+    }
+
+    function toggleBulkProd(key) {
+      const idx = bulkSelProducts.indexOf(key);
+      if (idx >= 0) bulkSelProducts.splice(idx, 1); else bulkSelProducts.push(key);
+      renderBulkProducts();
+      updateBulkNextBtn();
+    }
+
+    function renderBulkTones() {
+      document.getElementById('b-tone-grid').innerHTML = Object.entries(BULK_TONES).map(([key, t]) => `
+        <div class="bulk-tone-card ${bulkSelTone === key ? 'selected' : ''}" onclick="selectBulkTone('${key}')">
+          <div class="bt-emoji">${t.emoji}</div>
+          <div class="bt-name">${t.name}</div>
+          <div class="bt-desc">${t.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectBulkTone(key) {
+      bulkSelTone = key;
+      renderBulkTones();
+      updateBulkNextBtn();
+    }
+
+    function updateBulkNextBtn() {
+      document.getElementById('b-next-btn').disabled = !(bulkSelProducts.length > 0 && bulkSelTone);
+    }
+
+    function bulkStep2() {
+      document.getElementById('m-bulk-step1').hidden = true;
+      const selLeads = leads.filter(l => sel.has(l.id) && l.email);
+      const selProds = bulkSelProducts.map(key => ALL_PRODUCTS.find(p => p.key === key));
+      const tone = TONE_TEMPLATES[bulkSelTone];
+
+      // Build product blocks string for template
+      const productBlocks = selProds.map((p, i) => {
+        const tag = i === 0 ? `**${p.name}** — ${p.pitch}` : `• **${p.name}** — ${p.pitch}`;
+        return tag;
+      }).join('\n\n');
+
+      const subject = tone.subject.replace(/\{\{productName1\}\}/g, selProds[0].name);
+      const body = tone.body.replace(/\{\{productBlocks\}\}/g, productBlocks);
+
+      // Recipients
+      document.getElementById('b-recipient-pills').innerHTML =
+        `<span class="bulk-pill">${selLeads.length} recipients</span>` +
+        selLeads.map(l => `<span class="bulk-pill">${l.email}</span>`).join('');
+
+      // Product chips
+      document.getElementById('b-selected-chips').innerHTML =
+        `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${selProds.map(p => `<span class="bulk-chip">✓ ${p.name}</span>`).join('')}</div>`;
+
+      // Tone badge
+      const tObj = BULK_TONES[bulkSelTone];
+      document.getElementById('b-tone-badge').innerHTML = `${tObj.emoji} ${tObj.name} tone`;
+
+      document.getElementById('b-subject2').value = subject;
+      document.getElementById('b-body2').value = body;
+
+      document.getElementById('m-bulk-step2').hidden = false;
+    }
+
+    function bulkBackToStep1() {
+      document.getElementById('m-bulk-step2').hidden = true;
+      document.getElementById('m-bulk-step1').hidden = false;
+    }
+
+    function bulkStep3() {
+      document.getElementById('m-bulk-step2').hidden = true;
+      const selLeads = leads.filter(l => sel.has(l.id) && l.email);
+      const selProds = bulkSelProducts.map(key => ALL_PRODUCTS.find(p => p.key === key));
+
+      bulkPreviewIdx = 0;
+      document.getElementById('b-preview-count').textContent = selLeads.length;
+
+      // Build tabs
+      document.getElementById('b-preview-tabs').innerHTML = selLeads.map((l, i) =>
+        `<button class="bulk-preview-tab ${i === 0 ? 'active' : ''}" onclick="previewBulkLead(${i},this)">${l.company.substring(0, 18)}${l.company.length > 18 ? '...' : ''}</button>`
+      ).join('');
+
+      previewBulkLead(0);
+      document.getElementById('m-bulk-step3').hidden = false;
+    }
+
+    function bulkBackToStep2() {
+      document.getElementById('m-bulk-step3').hidden = true;
+      document.getElementById('m-bulk-step2').hidden = false;
+    }
+
+    function previewBulkLead(idx, btn) {
+      const selLeads = leads.filter(l => sel.has(l.id) && l.email);
+      const selProds = bulkSelProducts.map(key => ALL_PRODUCTS.find(p => p.key === key));
+      const lead = selLeads[idx];
+      bulkPreviewIdx = idx;
+
+      const subject = document.getElementById('b-subject2').value;
+      const body = document.getElementById('b-body2').value;
+
+      const rendered = bulkApplyTpl(subject, lead, selProds) + '\n\n---\n\n' + bulkApplyTpl(body, lead, selProds);
+      document.getElementById('b-preview-box').innerHTML = rendered.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      // Update tabs
+      document.querySelectorAll('#b-preview-tabs .bulk-preview-tab').forEach((t, i) => {
+        t.classList.toggle('active', i === idx);
+      });
+    }
+
+    function bulkApplyTpl(template, lead, prods) {
+      let result = template
+        .replace(/\{\{company\}\}/g, lead.company || '')
+        .replace(/\{\{contactName\}\}/g, lead.contactName || 'there')
+        .replace(/\{\{region\}\}/g, lead.region || '')
+        .replace(/\{\{source\}\}/g, lead.source || '')
+        .replace(/\{\{industry\}\}/g, lead.industry || '')
+        .replace(/\{\{senderName\}\}/g, sName)
+        .replace(/\{\{senderEmail\}\}/g, sEmail);
+
+      prods.forEach((p, i) => {
+        const n = i + 1;
+        result = result.replace(new RegExp(`\\{\\{productName${n}\\}\\}`, 'g'), p.name);
+        result = result.replace(new RegExp(`\\{\\{pitch${n}\\}\\}`, 'g'), p.pitch);
+      });
+
+      return result;
+    }
+
+    async function sendBulkFromStep3() {
+      const selLeads = leads.filter(l => sel.has(l.id) && l.email);
+      const selProds = bulkSelProducts.map(key => ALL_PRODUCTS.find(p => p.key === key));
+      const subjectTpl = document.getElementById('b-subject2').value.trim();
+      const bodyTpl = document.getElementById('b-body2').value.trim();
+      const btn = document.getElementById('b-send-final-btn');
+
       btn.disabled = true;
       btn.textContent = 'Sending...';
       let success = 0, failed = 0;
-      for (const l of s) {
+
+      for (const l of selLeads) {
         try {
           await api(`/api/leads/${l.id}/send-email`, {
             method: 'POST',
-            body: JSON.stringify({ senderName: sName, senderEmail: sEmail, subject: tpl(subjectTpl, l), body: tpl(bodyTpl, l) })
+            body: JSON.stringify({
+              senderName: sName,
+              senderEmail: sEmail,
+              subject: bulkApplyTpl(subjectTpl, l, selProds),
+              body: bulkApplyTpl(bodyTpl, l, selProds)
+            })
           });
           success++;
         } catch (err) { failed++; }
       }
+
       btn.disabled = false;
-      btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>Send to All';
-      closeM('m-bulk');
+      btn.innerHTML = '🚀 Send All Emails';
+      closeBulkFlow();
       sel.clear();
       await loadLeads();
       notify('Bulk Sent', `${success} sent, ${failed} failed.`);
