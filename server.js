@@ -1646,9 +1646,12 @@ async function searchGoogleMapsViaApify(
 
   // Start the Apify actor run
   const encodedActorId = encodeURIComponent(actorId);
-  const runResponse = await fetchImpl(`https://api.apify.com/v2/acts/${encodedActorId}/runs?token=${apifyToken}`, {
+  const runResponse = await fetchImpl(`https://api.apify.com/v2/acts/${encodedActorId}/runs`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apifyToken}`
+    },
     body: JSON.stringify({
       searchStringsArray: [locationQuery],
       maxCrawledPlacesPerSearch: limit,
@@ -1674,7 +1677,9 @@ async function searchGoogleMapsViaApify(
   while (Date.now() - startTime < maxWait) {
     await new Promise(r => setTimeout(r, pollInterval));
 
-    const statusResponse = await fetchImpl(`https://api.apify.com/v2/actor-runs/${runId}?token=${apifyToken}`);
+    const statusResponse = await fetchImpl(`https://api.apify.com/v2/actor-runs/${runId}`, {
+      headers: { "Authorization": `Bearer ${apifyToken}` }
+    });
     const statusData = await statusResponse.json();
     const status = statusData.data.status;
 
@@ -1687,8 +1692,11 @@ async function searchGoogleMapsViaApify(
 
   // Fetch results from dataset
   const datasetResponse = await fetchImpl(
-    `https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${apifyToken}&format=json&clean=true&desc=true&limit=${limit}`,
-    { method: "GET" }
+    `https://api.apify.com/v2/actor-runs/${runId}/dataset/items?format=json&clean=true&desc=true&limit=${limit}`,
+    {
+      method: "GET",
+      headers: { "Authorization": `Bearer ${apifyToken}` }
+    }
   );
 
   if (!datasetResponse.ok) {
