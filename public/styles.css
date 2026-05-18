@@ -406,43 +406,148 @@ body.dark-mode .settings-icon-button {
 }
 
 .metric-card {
-  padding: 10px 10px 8px;
-  border-radius: 14px;
-  min-height: 72px;
-  display: grid;
-  align-content: space-between;
+  padding: 18px;
+  border-radius: 18px;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   position: relative;
   overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
 }
 
 .metric-card strong {
-  font-size: 1.45rem;
-  line-height: 1;
+  font-size: 1.5rem;
+  line-height: 1.1;
 }
 
-.metric-card.accent {
-  background: linear-gradient(145deg, #f5faff, #eaf2ff);
+.metric-card .metric-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
 }
 
-.metric-card.dark {
-  background: linear-gradient(180deg, #111827, #1f2937);
-  border-color: #0f172a;
+.metric-card .metric-icon svg {
+  width: 22px;
+  height: 22px;
+  fill: #fff;
 }
 
-.metric-card::after {
-  content: "";
-  position: absolute;
-  inset: auto -16px -16px auto;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: rgba(37, 99, 235, 0.08);
+.metric-card .metric-text {
+  display: grid;
+  gap: 2px;
+  flex: 1;
 }
 
-.metric-card.dark span,
-.metric-card.dark strong {
-  color: #f8fafc;
+.metric-card .metric-text strong {
+  font-size: 1.35rem;
+  font-weight: 800;
 }
+
+.metric-card .metric-text span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.metric-card .metric-trend {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+
+/* Blue — Total Leads */
+.metric-card.card-blue {
+  background: linear-gradient(160deg, #e0f2fe, #dbeafe 60%);
+}
+.metric-card.card-blue .metric-icon {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+.metric-card.card-blue .metric-text strong { color: #1d4ed8; }
+.metric-card.card-blue .metric-text span { color: #3b82f6; }
+.metric-card.card-blue:hover { box-shadow: 0 10px 30px rgba(59, 130, 246, 0.15); }
+
+/* Green — Manual Entry */
+.metric-card.card-green {
+  background: linear-gradient(160deg, #d1fae5, #bbf7d0 60%);
+}
+.metric-card.card-green .metric-icon {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+.metric-card.card-green .metric-text strong { color: #047857; }
+.metric-card.card-green .metric-text span { color: #10b981; }
+.metric-card.card-green:hover { box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15); }
+
+/* Amber — From Maps */
+.metric-card.card-amber {
+  background: linear-gradient(160deg, #fef3c7, #fde68a 60%);
+}
+.metric-card.card-amber .metric-icon {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3);
+}
+.metric-card.card-amber .metric-text strong { color: #b45309; }
+.metric-card.card-amber .metric-text span { color: #f59e0b; }
+.metric-card.card-amber:hover { box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15); }
+
+/* Purple — Regions */
+.metric-card.card-purple {
+  background: linear-gradient(160deg, #ede9fe, #ddd6fe 60%);
+}
+.metric-card.card-purple .metric-icon {
+  background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+}
+.metric-card.card-purple .metric-text strong { color: #6d28d9; }
+.metric-card.card-purple .metric-text span { color: #8b5cf6; }
+.metric-card.card-purple:hover { box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15); }
+
+/* Dark mode overrides for metric cards */
+body.dark-mode .metric-card.card-blue {
+  background: linear-gradient(160deg, #1e293b, #0f172a);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+body.dark-mode .metric-card.card-blue .metric-text strong { color: #93c5fd; }
+body.dark-mode .metric-card.card-blue .metric-text span { color: #60a5fa; }
+body.dark-mode .metric-card.card-blue .metric-trend { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+
+body.dark-mode .metric-card.card-green {
+  background: linear-gradient(160deg, #1a2e1a, #0f1f0f);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+body.dark-mode .metric-card.card-green .metric-text strong { color: #6ee7b7; }
+body.dark-mode .metric-card.card-green .metric-text span { color: #34d399; }
+body.dark-mode .metric-card.card-green .metric-trend { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+
+body.dark-mode .metric-card.card-amber {
+  background: linear-gradient(160deg, #2a1f0f, #1f1708);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+body.dark-mode .metric-card.card-amber .metric-text strong { color: #fcd34d; }
+body.dark-mode .metric-card.card-amber .metric-text span { color: #fbbf24; }
+body.dark-mode .metric-card.card-amber .metric-trend { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
+
+body.dark-mode .metric-card.card-purple {
+  background: linear-gradient(160deg, #1f1a2e, #14101f);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+body.dark-mode .metric-card.card-purple .metric-text strong { color: #c4b5fd; }
+body.dark-mode .metric-card.card-purple .metric-text span { color: #a78bfa; }
+body.dark-mode .metric-card.card-purple .metric-trend { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); }
 
 .workspace-shell {
   display: grid;

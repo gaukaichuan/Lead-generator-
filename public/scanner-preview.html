@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inbound Scanner — Interactive Preview</title>
+<style>
+  :root {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --muted-soft: #94a3b8;
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-500: #3b82f6;
+    --blue-600: #2563eb;
+    --blue-700: #1d4ed8;
+    --green-50: #ecfdf5;
+    --green-100: #d1fae5;
+    --green-500: #10b981;
+    --green-600: #059669;
+    --green-700: #047857;
+    --amber-50: #fef3c7;
+    --amber-100: #fde68a;
+    --amber-500: #f59e0b;
+    --amber-600: #d97706;
+    --amber-700: #b45309;
+    --purple-50: #f5f3ff;
+    --purple-100: #ede9fe;
+    --purple-500: #8b5cf6;
+    --purple-600: #7c3aed;
+    --purple-700: #6d28d9;
+    --radius: 16px;
+    --radius-lg: 20px;
+    --shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.1);
+    --transition: 0.25s ease;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 20px;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* ===== HEADER ===== */
+  .page-header { margin-bottom: 24px; }
+  .page-eyebrow {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--blue-600);
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  .page-title { font-size: 1.9rem; font-weight: 800; margin-bottom: 6px; }
+  .page-subtitle { color: var(--muted); font-size: 0.9rem; }
+
+  /* ===== DESIGN SELECTOR ===== */
+  .design-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .design-btn {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .design-btn:hover { border-color: var(--blue-500); color: var(--blue-600); }
+  .design-btn.active {
+    background: var(--blue-600);
+    color: #fff;
+    border-color: var(--blue-600);
+    box-shadow: 0 4px 14px rgba(37,99,235,0.25);
+  }
+
+  /* ===== STATS GRID ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+    transition: opacity 0.3s ease;
+  }
+  @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+
+  /* ===== V1: Glow Cards ===== */
+  .glow-card {
+    border-radius: 18px;
+    padding: 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .glow-card:hover { transform: translateY(-3px); }
+  .glow-card:active { transform: translateY(-1px) scale(0.98); }
+
+  .glow-card::before {
+    content: '';
+    position: absolute;
+    top: -30%; right: -30%;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    opacity: 0.5;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+  }
+  .glow-card:hover::before { opacity: 0.8; transform: scale(1.3); }
+
+  .glow-card .icon-glow {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    position: relative; z-index: 1;
+  }
+  .glow-card .card-text { position: relative; z-index: 1; flex: 1; }
+  .glow-card .value { font-size: 24px; font-weight: 800; line-height: 1.1; transition: transform 0.15s ease; }
+  .glow-card .value.bump { animation: bump 0.2s ease; }
+  @keyframes bump { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  .glow-card .label { font-size: 11px; font-weight: 600; margin-top: 2px; }
+  .glow-card .trend {
+    font-size: 10px; font-weight: 700;
+    margin-top: 4px; display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 6px;
+  }
+  .trend-up { color: #059669; background: rgba(5,150,105,0.1); }
+  .trend-flat { color: var(--muted); background: rgba(100,116,139,0.1); }
+
+  .g-blue   { background: linear-gradient(160deg, #e0f2fe, #dbeafe 60%); }
+  .g-blue   .icon-glow { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: #fff; box-shadow: 0 6px 18px rgba(59,130,246,0.35); }
+  .g-blue   .value { color: #1d4ed8; } .g-blue   .label { color: #3b82f6; }
+  .g-blue::before { background: radial-gradient(circle, rgba(59,130,246,0.18), transparent); }
+  .g-blue:hover { box-shadow: 0 12px 36px rgba(59,130,246,0.2); }
+
+  .g-green  { background: linear-gradient(160deg, #d1fae5, #bbf7d0 60%); }
+  .g-green  .icon-glow { background: linear-gradient(135deg, #10b981, #34d399); color: #fff; box-shadow: 0 6px 18px rgba(16,185,129,0.35); }
+  .g-green  .value { color: #047857; } .g-green  .label { color: #10b981; }
+  .g-green::before { background: radial-gradient(circle, rgba(16,185,129,0.18), transparent); }
+  .g-green:hover { box-shadow: 0 12px 36px rgba(16,185,129,0.2); }
+
+  .g-amber  { background: linear-gradient(160deg, #fef3c7, #fde68a 60%); }
+  .g-amber  .icon-glow { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; box-shadow: 0 6px 18px rgba(245,158,11,0.35); }
+  .g-amber  .value { color: #b45309; } .g-amber  .label { color: #f59e0b; }
+  .g-amber::before { background: radial-gradient(circle, rgba(245,158,11,0.18), transparent); }
+  .g-amber:hover { box-shadow: 0 12px 36px rgba(245,158,11,0.2); }
+
+  .g-purple { background: linear-gradient(160deg, #ede9fe, #ddd6fe 60%); }
+  .g-purple .icon-glow { background: linear-gradient(135deg, #8b5cf6, #a78bfa); color: #fff; box-shadow: 0 6px 18px rgba(139,92,246,0.35); }
+  .g-purple .value { color: #6d28d9; } .g-purple .label { color: #8b5cf6; }
+  .g-purple::before { background: radial-gradient(circle, rgba(139,92,246,0.18), transparent); }
+  .g-purple:hover { box-shadow: 0 12px 36px rgba(139,92,246,0.2); }
+
+  /* ===== V2: Glass Cards ===== */
+  .glass-card {
+    border-radius: var(--radius-lg);
+    padding: 22px 18px;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    backdrop-filter: blur(12px);
+    transition: transform var(--transition), box-shadow var(--transition);
+  }
+  .glass-card:hover { transform: translateY(-3px); }
+  .glass-card:active { transform: translateY(-1px) scale(0.98); }
+  .glass-card .card-bg { position: absolute; inset: 0; z-index: 0; }
+  .glass-card .inner { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; }
+  .glass-card .icon-ring {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: grid; place-items: center; font-size: 22px; flex-shrink: 0;
+  }
+  .glass-card .value { font-size: 26px; font-weight: 800; line-height: 1.1; }
+  .glass-card .value.bump { animation: bump 0.2s ease; }
+  .glass-card .label { font-size: 11px; font-weight: 600; margin-top: 2px; }
+  .glass-card .progress-bar {
+    margin-top: 8px; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.4); overflow: hidden;
+  }
+  .glass-card .progress-fill {
+    height: 100%; border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .gl-blue   { border: 1px solid rgba(59,130,246,0.2); }
+  .gl-blue   .card-bg { background: linear-gradient(160deg, rgba(219,234,254,0.6), rgba(191,219,254,0.3)); }
+  .gl-blue   .icon-ring { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; box-shadow: 0 0 20px rgba(59,130,246,0.3); }
+  .gl-blue   .value { color: #1e40af; } .gl-blue   .label { color: #3b82f6; }
+  .gl-blue   .progress-fill { background: #3b82f6; }
+  .gl-blue:hover { box-shadow: 0 8px 32px rgba(59,130,246,0.15); }
+
+  .gl-green  { border: 1px solid rgba(16,185,129,0.2); }
+  .gl-green  .card-bg { background: linear-gradient(160deg, rgba(209,250,229,0.6), rgba(167,243,208,0.3)); }
+  .gl-green  .icon-ring { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 0 20px rgba(16,185,129,0.3); }
+  .gl-green  .value { color: #047857; } .gl-green  .label { color: #10b981; }
+  .gl-green  .progress-fill { background: #10b981; }
+  .gl-green:hover { box-shadow: 0 8px 32px rgba(16,185,129,0.15); }
+
+  .gl-amber  { border: 1px solid rgba(245,158,11,0.2); }
+  .gl-amber  .card-bg { background: linear-gradient(160deg, rgba(254,243,199,0.6), rgba(253,230,138,0.3)); }
+  .gl-amber  .icon-ring { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; box-shadow: 0 0 20px rgba(245,158,11,0.3); }
+  .gl-amber  .value { color: #b45309; } .gl-amber  .label { color: #f59e0b; }
+  .gl-amber  .progress-fill { background: #f59e0b; }
+  .gl-amber:hover { box-shadow: 0 8px 32px rgba(245,158,11,0.15); }
+
+  .gl-purple { border: 1px solid rgba(139,92,246,0.2); }
+  .gl-purple .card-bg { background: linear-gradient(160deg, rgba(237,233,254,0.6), rgba(221,214,254,0.3)); }
+  .gl-purple .icon-ring { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; box-shadow: 0 0 20px rgba(139,92,246,0.3); }
+  .gl-purple .value { color: #6d28d9; } .gl-purple .label { color: #8b5cf6; }
+  .gl-purple .progress-fill { background: #8b5cf6; }
+  .gl-purple:hover { box-shadow: 0 8px 32px rgba(139,92,246,0.15); }
+
+  /* ===== V3: Dark Cards ===== */
+  .dark-card {
+    border-radius: 18px;
+    padding: 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: default;
+    transition: transform var(--transition), box-shadow var(--transition);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .dark-card:hover { transform: translateY(-3px); }
+  .dark-card:active { transform: translateY(-1px) scale(0.98); }
+  .dark-card .icon-dk {
+    width: 46px; height: 46px; border-radius: 12px;
+    display: grid; place-items: center; font-size: 22px; flex-shrink: 0;
+  }
+  .dark-card .value { font-size: 24px; font-weight: 800; line-height: 1.1; }
+  .dark-card .value.bump { animation: bump 0.2s ease; }
+  .dark-card .label { font-size: 11px; font-weight: 600; margin-top: 2px; }
+  .dark-card .sparkline { margin-top: 8px; display: flex; align-items: flex-end; gap: 3px; height: 20px; }
+  .dark-card .spark-bar {
+    width: 5px; border-radius: 2.5px; transition: height 0.4s ease;
+    opacity: 0.7;
+  }
+  .dark-card .spark-bar:hover { opacity: 1; }
+
+  .d-blue   { background: linear-gradient(160deg, #1e293b, #0f172a); }
+  .d-blue   .icon-dk { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: #fff; box-shadow: 0 0 16px rgba(59,130,246,0.4); }
+  .d-blue   .value { color: #93c5fd; } .d-blue   .label { color: #60a5fa; }
+  .d-blue   .spark-bar { background: rgba(59,130,246,0.6); }
+  .d-blue:hover { box-shadow: 0 8px 32px rgba(59,130,246,0.12); }
+
+  .d-green  { background: linear-gradient(160deg, #1a2e1a, #0f1f0f); }
+  .d-green  .icon-dk { background: linear-gradient(135deg, #10b981, #34d399); color: #fff; box-shadow: 0 0 16px rgba(16,185,129,0.4); }
+  .d-green  .value { color: #6ee7b7; } .d-green  .label { color: #34d399; }
+  .d-green  .spark-bar { background: rgba(16,185,129,0.6); }
+  .d-green:hover { box-shadow: 0 8px 32px rgba(16,185,129,0.12); }
+
+  .d-amber  { background: linear-gradient(160deg, #2a1f0f, #1f1708); }
+  .d-amber  .icon-dk { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; box-shadow: 0 0 16px rgba(245,158,11,0.4); }
+  .d-amber  .value { color: #fcd34d; } .d-amber  .label { color: #fbbf24; }
+  .d-amber  .spark-bar { background: rgba(245,158,11,0.6); }
+  .d-amber:hover { box-shadow: 0 8px 32px rgba(245,158,11,0.12); }
+
+  .d-purple { background: linear-gradient(160deg, #1f1a2e, #14101f); }
+  .d-purple .icon-dk { background: linear-gradient(135deg, #8b5cf6, #a78bfa); color: #fff; box-shadow: 0 0 16px rgba(139,92,246,0.4); }
+  .d-purple .value { color: #c4b5fd; } .d-purple .label { color: #a78bfa; }
+  .d-purple .spark-bar { background: rgba(139,92,246,0.6); }
+  .d-purple:hover { box-shadow: 0 8px 32px rgba(139,92,246,0.12); }
+
+  /* ===== DONUT CHART ===== */
+  .chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 700px) { .chart-row { grid-template-columns: 1fr; } }
+
+  .chart-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .chart-panel h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 4px; }
+  .chart-panel .desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 16px; }
+
+  .donut-wrap { display: flex; align-items: center; gap: 24px; }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend-item .count { font-weight: 700; margin-left: auto; font-size: 0.9rem; }
+  .legend-item .pct { color: var(--muted-soft); font-size: 0.78rem; min-width: 36px; text-align: right; }
+
+  /* ===== REGION BADGES ===== */
+  .region-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .region-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 0.78rem; font-weight: 600;
+    background: var(--purple-50); color: var(--purple-700);
+    border: 1px solid var(--purple-100);
+    cursor: default; transition: all 0.15s ease;
+  }
+  .region-tag:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(139,92,246,0.15); }
+  .region-tag .count-badge {
+    background: var(--purple-600); color: #fff;
+    font-size: 0.65rem; padding: 1px 6px; border-radius: 999px; font-weight: 800;
+  }
+
+  /* ===== ACTIVITY LOG ===== */
+  .activity-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .activity-panel h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 4px; }
+  .activity-panel .desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 14px; }
+
+  .activity-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
+  .activity-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 12px;
+    background: #f8fafc; font-size: 0.82rem;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .activity-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: grid; place-items: center; font-size: 16px; flex-shrink: 0;
+  }
+  .activity-icon.manual { background: var(--green-100); }
+  .activity-icon.maps { background: var(--amber-100); }
+  .activity-text { flex: 1; }
+  .activity-text strong { font-weight: 700; }
+  .activity-text .time { color: var(--muted-soft); font-size: 0.72rem; }
+
+  /* ===== QUICK ADD FORM ===== */
+  .quick-add-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+  }
+  .quick-add-panel h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 4px; }
+  .quick-add-panel .desc { font-size: 0.78rem; color: var(--muted); margin-bottom: 16px; }
+
+  .quick-form { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
+  @media (max-width: 800px) { .quick-form { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .quick-form { grid-template-columns: 1fr; } }
+
+  .quick-form label { display: flex; flex-direction: column; gap: 4px; }
+  .quick-form label span { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .quick-form input, .quick-form select {
+    padding: 10px 14px; border-radius: 12px;
+    border: 1px solid var(--border); background: #f8fafc;
+    font-size: 0.88rem; font-weight: 600; color: var(--text);
+    transition: border-color 0.15s ease;
+    outline: none;
+  }
+  .quick-form input:focus, .quick-form select:focus {
+    border-color: var(--blue-500);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+  }
+
+  .quick-add-btn {
+    padding: 10px 20px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff; font-weight: 700; font-size: 0.88rem;
+    cursor: pointer; transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .quick-add-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(37,99,235,0.3); }
+  .quick-add-btn:active { transform: translateY(0); }
+
+  .demo-btn {
+    padding: 10px 20px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); font-weight: 700; font-size: 0.82rem;
+    cursor: pointer; transition: all var(--transition);
+  }
+  .demo-btn:hover { border-color: var(--amber-500); color: var(--amber-600); }
+
+  .quick-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state { text-align: center; padding: 20px; color: var(--muted-soft); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="page-header">
+    <p class="page-eyebrow">Inbound Scanner</p>
+    <h1 class="page-title">Lead Intake Preview</h1>
+    <p class="page-subtitle">Interactive preview — add leads, switch designs, and see live updates.</p>
+  </div>
+
+  <div class="design-selector">
+    <button class="design-btn active" data-design="glow">V1 — Glow Cards</button>
+    <button class="design-btn" data-design="glass">V2 — Glass Cards</button>
+    <button class="design-btn" data-design="dark">V3 — Dark Cards</button>
+  </div>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="chart-row">
+    <div class="chart-panel">
+      <h3>Source Distribution</h3>
+      <p class="desc">Breakdown of how leads were captured</p>
+      <div class="donut-wrap">
+        <svg class="donut-svg" id="donutSvg" width="140" height="140" viewBox="0 0 140 140"></svg>
+        <div class="donut-legend" id="donutLegend"></div>
+      </div>
+    </div>
+    <div class="chart-panel">
+      <h3>Regions Covered</h3>
+      <p class="desc">Unique regions from all captured leads</p>
+      <div id="regionTags" class="region-tags"></div>
+      <div id="regionEmpty" class="empty-state" hidden>No regions yet</div>
+    </div>
+  </div>
+
+  <div class="quick-add-panel">
+    <h3>⚡ Quick Add Lead</h3>
+    <p class="desc">Add a test lead to see the cards update in real time.</p>
+    <div class="quick-form">
+      <label>
+        <span>Company</span>
+        <input id="qaCompany" placeholder="ABC Trading">
+      </label>
+      <label>
+        <span>Region</span>
+        <input id="qaRegion" placeholder="Kuala Lumpur">
+      </label>
+      <label>
+        <span>Source</span>
+        <select id="qaSource">
+          <option value="Google Maps">Google Maps</option>
+          <option value="Manual Entry">Manual Entry</option>
+          <option value="Referral">Referral</option>
+          <option value="LinkedIn">LinkedIn</option>
+        </select>
+      </label>
+      <button class="quick-add-btn" id="qaAddBtn">+ Add Lead</button>
+    </div>
+    <div class="quick-actions">
+      <button class="demo-btn" id="qaDemoBtn">Add 5 Demo Leads</button>
+      <button class="demo-btn" id="qaResetBtn">Reset All</button>
+    </div>
+  </div>
+
+  <div class="activity-panel">
+    <h3>Recent Activity</h3>
+    <p class="desc">Latest lead captures</p>
+    <div class="activity-list" id="activityList">
+      <div class="empty-state" id="activityEmpty">No activity yet — add some leads above!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+const leads = [];
+const activities = [];
+let currentDesign = 'glow';
+
+const demoCompanies = [
+  { company: 'Auto Parts HQ', region: 'Petaling Jaya', source: 'Google Maps' },
+  { company: 'Fresh Mart', region: 'Kuala Lumpur', source: 'Manual Entry' },
+  { company: 'Tech Solutions', region: 'Subang Jaya', source: 'Google Maps' },
+  { company: 'Green Cafe', region: 'Shah Alam', source: 'Referral' },
+  { company: 'Build Pro', region: 'Klang', source: 'Google Maps' },
+];
+
+// ===== STATS DATA =====
+function getStats() {
+  const total = leads.length;
+  const manual = leads.filter(l => l.source === 'Manual Entry').length;
+  const maps = leads.filter(l => l.source === 'Google Maps').length;
+  const regions = [...new Set(leads.map(l => l.region))].length;
+  return { total, manual, maps, regions };
+}
+
+// ===== DESIGN TEMPLATES =====
+function renderCards() {
+  const s = getStats();
+  const grid = document.getElementById('statsGrid');
+
+  const items = [
+    { icon: '', label: 'Total Leads', value: s.total, color: 'blue', trend: s.total > 0 ? `▲ +${s.total} added` : null },
+    { icon: '🎯', label: 'Manual Entry', value: s.manual, color: 'green', trend: s.manual > 0 ? `▲ ${s.manual} today` : '— none yet' },
+    { icon: '🗺️', label: 'From Maps', value: s.maps, color: 'amber', trend: s.maps > 0 ? `▲ ${s.maps} found` : '— none yet' },
+    { icon: '📍', label: 'Regions', value: s.regions, color: 'purple', trend: s.regions > 0 ? `▲ ${s.regions} covered` : '— none yet' },
+  ];
+
+  if (currentDesign === 'glow') {
+    grid.innerHTML = items.map((item, i) => `
+      <div class="glow-card g-${item.color}" onclick="bumpStat(this)">
+        <div class="icon-glow">${item.icon}</div>
+        <div class="card-text">
+          <div class="value" data-idx="${i}">${item.value}</div>
+          <div class="label">${item.label}</div>
+          ${item.trend ? `<div class="trend ${item.value > 0 ? 'trend-up' : 'trend-flat'}">${item.trend}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  } else if (currentDesign === 'glass') {
+    const maxVal = Math.max(s.total, 1);
+    grid.innerHTML = items.map((item, i) => `
+      <div class="glass-card gl-${item.color}" onclick="bumpStat(this)">
+        <div class="card-bg"></div>
+        <div class="inner">
+          <div class="icon-ring">${item.icon}</div>
+          <div style="flex:1">
+            <div class="value" data-idx="${i}">${item.value}</div>
+            <div class="label">${item.label}</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${(item.value / maxVal * 100)}%"></div></div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    const sparkData = {
+      blue: [2, 5, 3, 8, 4, s.total],
+      green: [0, 1, 0, 0, 0, s.manual],
+      amber: [2, 4, 3, 7, 4, s.maps],
+      purple: [1, 1, 1, 2, s.regions, s.regions]
+    };
+    grid.innerHTML = items.map((item, i) => {
+      const bars = (sparkData[item.color] || [0,0,0,0,0,0]).map(v =>
+        `<div class="spark-bar" style="height:${Math.max(v * 2.5, 3)}px"></div>`
+      ).join('');
+      return `
+        <div class="dark-card d-${item.color}" onclick="bumpStat(this)">
+          <div class="icon-dk">${item.icon}</div>
+          <div style="flex:1">
+            <div class="value" data-idx="${i}">${item.value}</div>
+            <div class="label">${item.label}</div>
+            <div class="sparkline">${bars}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// ===== BUMP ANIMATION =====
+function bumpStat(el) {
+  const valEl = el.querySelector('.value');
+  if (valEl) {
+    valEl.classList.remove('bump');
+    void valEl.offsetWidth;
+    valEl.classList.add('bump');
+  }
+}
+
+// ===== DONUT CHART =====
+function renderDonut() {
+  const s = getStats();
+  const svg = document.getElementById('donutSvg');
+  const legend = document.getElementById('donutLegend');
+
+  const segments = [
+    { label: 'Google Maps', value: s.maps, color: '#f59e0b' },
+    { label: 'Manual Entry', value: s.manual, color: '#10b981' },
+    { label: 'Other Sources', value: leads.filter(l => l.source !== 'Google Maps' && l.source !== 'Manual Entry').length, color: '#8b5cf6' },
+  ].filter(seg => seg.value > 0);
+
+  const total = segments.reduce((sum, seg) => sum + seg.value, 0);
+  const cx = 70, cy = 70, r = 52, strokeW = 18;
+  const circumference = 2 * Math.PI * r;
+
+  if (total === 0) {
+    svg.innerHTML = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="${strokeW}"/>
+      <text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em" fill="#94a3b8" font-size="14" font-weight="700">0</text>`;
+    legend.innerHTML = '<div style="color:var(--muted-soft);font-size:0.82rem">No data yet</div>';
+    return;
+  }
+
+  let offset = 0;
+  let circles = '';
+  segments.forEach(seg => {
+    const pct = seg.value / total;
+    const dashLen = pct * circumference;
+    const gap = circumference - dashLen;
+    circles += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="${strokeW}"
+      stroke-dasharray="${dashLen} ${gap}" stroke-dashoffset="${-offset}" stroke-linecap="round"
+      style="transition: stroke-dasharray 0.5s ease, stroke-dashoffset 0.5s ease"/>`;
+    offset += dashLen;
+  });
+
+  svg.innerHTML = circles + `<text x="${cx}" y="${cy}" text-anchor="middle" dy="0.35em" fill="var(--text)" font-size="20" font-weight="800">${total}</text>`;
+
+  legend.innerHTML = segments.map(seg => {
+    const pct = Math.round(seg.value / total * 100);
+    return `<div class="legend-item">
+      <span class="legend-dot" style="background:${seg.color}"></span>
+      <span>${seg.label}</span>
+      <span class="pct">${pct}%</span>
+      <span class="count">${seg.value}</span>
+    </div>`;
+  }).join('');
+}
+
+// ===== REGIONS =====
+function renderRegions() {
+  const container = document.getElementById('regionTags');
+  const empty = document.getElementById('regionEmpty');
+  const regionMap = {};
+  leads.forEach(l => { regionMap[l.region] = (regionMap[l.region] || 0) + 1; });
+  const entries = Object.entries(regionMap).sort((a, b) => b[1] - a[1]);
+
+  if (entries.length === 0) {
+    container.innerHTML = '';
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+  container.innerHTML = entries.map(([name, count]) =>
+    `<span class="region-tag">📍 ${name} <span class="count-badge">${count}</span></span>`
+  ).join('');
+}
+
+// ===== ACTIVITY =====
+function renderActivity() {
+  const list = document.getElementById('activityList');
+  const empty = document.getElementById('activityEmpty');
+
+  if (activities.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(empty);
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+  list.innerHTML = activities.slice(-10).reverse().map(a => `
+    <div class="activity-item">
+      <div class="activity-icon ${a.type === 'Manual Entry' ? 'manual' : 'maps'}">${a.type === 'Manual Entry' ? '' : '🗺️'}</div>
+      <div class="activity-text">
+        <strong>${a.company}</strong> added from ${a.source}
+        <span class="time">· ${a.time}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== ADD LEAD =====
+function addLead(company, region, source) {
+  const now = new Date();
+  const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  leads.push({ company, region, source, createdAt: now });
+  activities.push({ company, region, source, type: source, time });
+
+  renderAll();
+}
+
+function renderAll() {
+  renderCards();
+  renderDonut();
+  renderRegions();
+  renderActivity();
+}
+
+// ===== DESIGN SWITCHER =====
+document.querySelectorAll('.design-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.design-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDesign = btn.dataset.design;
+    renderCards();
+  });
+});
+
+// ===== QUICK ADD =====
+document.getElementById('qaAddBtn').addEventListener('click', () => {
+  const company = document.getElementById('qaCompany').value.trim();
+  const region = document.getElementById('qaRegion').value.trim();
+  const source = document.getElementById('qaSource').value;
+  if (!company || !region) return;
+  addLead(company, region, source);
+  document.getElementById('qaCompany').value = '';
+  document.getElementById('qaRegion').value = '';
+});
+
+document.getElementById('qaDemoBtn').addEventListener('click', () => {
+  demoCompanies.forEach(d => addLead(d.company, d.region, d.source));
+});
+
+document.getElementById('qaResetBtn').addEventListener('click', () => {
+  leads.length = 0;
+  activities.length = 0;
+  renderAll();
+});
+
+// Enter key to add
+document.getElementById('qaRegion').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('qaAddBtn').click();
+});
+
+// ===== INIT =====
+renderAll();
+</script>
+</body>
+</html>

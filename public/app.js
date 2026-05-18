@@ -98,9 +98,13 @@ const closeCrmErrorModal = document.getElementById("closeCrmErrorModal");
 const crmErrorMessage = document.getElementById("crmErrorMessage");
 
 const metricTotal = document.getElementById("metricTotal");
-const metricQualified = document.getElementById("metricQualified");
-const metricPriority = document.getElementById("metricPriority");
-const metricSent = document.getElementById("metricSent");
+const metricTotalTrend = document.getElementById("metricTotalTrend");
+const metricManual = document.getElementById("metricManual");
+const metricManualTrend = document.getElementById("metricManualTrend");
+const metricMaps = document.getElementById("metricMaps");
+const metricMapsTrend = document.getElementById("metricMapsTrend");
+const metricRegions = document.getElementById("metricRegions");
+const metricRegionsTrend = document.getElementById("metricRegionsTrend");
 
 const openSettingsDrawerButton = document.getElementById("openSettingsDrawer");
 const closeSettingsDrawerButton = document.getElementById("closeSettingsDrawer");
@@ -886,10 +890,20 @@ async function sendActiveEmailDraft() {
 }
 
 function renderMetrics(summary) {
+  const manualCount = state.leads.filter(l => l.source === "Manual Entry" || l.source === "Manual research").length;
+  const mapsCount = state.leads.filter(l => l.source === "Google Maps").length;
+  const uniqueRegions = [...new Set(state.leads.map(l => l.region).filter(Boolean))].length;
+
   metricTotal.textContent = String(summary.totalLeads);
-  metricQualified.textContent = String(summary.qualifiedLeads);
-  metricPriority.textContent = String(summary.priorityLeads);
-  metricSent.textContent = String(summary.sentLeads);
+  metricManual.textContent = String(manualCount);
+  metricMaps.textContent = String(mapsCount);
+  metricRegions.textContent = String(uniqueRegions);
+
+  metricTotalTrend.textContent = summary.totalLeads > 0 ? `▲ ${summary.totalLeads} total` : "— none yet";
+  metricManualTrend.textContent = manualCount > 0 ? `▲ ${manualCount} added` : "— none yet";
+  metricMapsTrend.textContent = mapsCount > 0 ? `▲ ${mapsCount} found` : "— none yet";
+  metricRegionsTrend.textContent = uniqueRegions > 0 ? `▲ ${uniqueRegions} covered` : "— none yet";
+
   overviewLeadCount.textContent = `${summary.totalLeads} active lead${summary.totalLeads === 1 ? "" : "s"}`;
   overviewPriorityCount.textContent = `${summary.priorityLeads} in priority market`;
 }

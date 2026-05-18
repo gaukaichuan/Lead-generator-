@@ -1721,12 +1721,13 @@ function readRequestBody(request) {
   });
 }
 
-function appendActivity(store, leadId, title, body) {
+function appendActivity(store, leadId, title, body, performedBy) {
   store.activities.unshift({
     id: `activity-${Date.now()}`,
     leadId,
     title,
     body,
+    performedBy: performedBy || "system",
     createdAt: new Date().toISOString()
   });
 }
