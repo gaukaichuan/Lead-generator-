@@ -358,6 +358,95 @@
 
     .placeholder-hint { margin-top: 8px; padding: 10px 14px; background: #f8fafc; border-radius: var(--radius-sm); font-size: 10px; color: var(--text-muted); line-height: 1.8; }
     .placeholder-hint code { padding: 1px 5px; background: var(--blue-50); color: var(--blue-600); border-radius: 3px; font-size: 10px; }
+
+    /* ===== OUTBOUND TOOLS ===== */
+    .ob-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .ob-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+    .ob-stat-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: grid; place-items: center; }
+    .ob-stat-icon svg { width: 20px; height: 20px; }
+    .ob-stat-icon.blue { background: var(--blue-50); } .ob-stat-icon.blue svg { fill: var(--blue-600); }
+    .ob-stat-icon.green { background: var(--green-50); } .ob-stat-icon.green svg { fill: var(--green); }
+    .ob-stat-icon.amber { background: var(--amber-50); } .ob-stat-icon.amber svg { fill: var(--amber); }
+    .ob-stat-icon.purple { background: var(--purple-50); } .ob-stat-icon.purple svg { fill: var(--purple); }
+    .ob-stat-info .ob-stat-value { font-size: 20px; font-weight: 800; line-height: 1.1; }
+    .ob-stat-info .ob-stat-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .ob-tabs { display: flex; gap: 2px; margin-bottom: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+    .ob-tab { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: transparent; font-family: inherit; }
+    .ob-tab:hover { color: var(--text-secondary); }
+    .ob-tab.active { background: var(--blue-600); color: #fff; }
+    .ob-tab .ob-tab-count { font-size: 11px; padding: 1px 6px; border-radius: 99px; background: rgba(255,255,255,0.25); margin-left: 4px; }
+    .ob-tab:not(.active) .ob-tab-count { background: var(--surface-hover); color: var(--text-muted); }
+    .ob-campaigns { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .ob-campaign { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; cursor: pointer; transition: all 150ms; }
+    .ob-campaign:hover { border-color: var(--blue-500); box-shadow: var(--shadow); }
+    .ob-campaign .oc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .ob-campaign .oc-name { font-size: 15px; font-weight: 700; }
+    .ob-campaign .oc-status { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; }
+    .oc-status.active { background: var(--green-50); color: var(--green); }
+    .oc-status.draft { background: var(--amber-50); color: var(--amber); }
+    .oc-status.done { background: var(--blue-50); color: var(--blue-600); }
+    .ob-campaign .oc-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+    .ob-campaign .oc-meta { display: flex; gap: 16px; }
+    .oc-meta-item { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+    .oc-meta-item svg { width: 14px; height: 14px; fill: var(--text-muted); }
+    .oc-meta-item strong { font-weight: 700; color: var(--text); }
+    .ob-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .ob-table-scroll { overflow-x: auto; }
+    .ob-table { width: 100%; border-collapse: collapse; }
+    .ob-table thead th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; background: var(--surface-hover); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .ob-table tbody td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--border-light); }
+    .ob-table tbody tr:last-child td { border-bottom: none; }
+    .ob-table tbody tr:hover { background: var(--surface-hover); }
+    .ob-company-cell { display: flex; align-items: center; gap: 10px; }
+    .ob-company-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--blue-50); color: var(--blue-600); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .ob-company-name { font-weight: 600; }
+    .ob-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; display: inline-block; }
+    .ob-badge-sent { background: var(--purple-50); color: var(--purple); }
+    .ob-badge-replied { background: var(--green-50); color: var(--green); }
+    .ob-badge-bounced { background: var(--amber-50); color: var(--amber); }
+    .ob-badge-qualified { background: var(--blue-50); color: var(--blue-600); }
+    .ob-action-btn { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--text-muted); font-size: 14px; }
+    .ob-action-btn:hover { background: var(--blue-50); color: var(--blue-600); border-color: var(--blue-500); }
+    .ob-pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-top: 1px solid var(--border-light); }
+    .ob-pagination .ob-page-info { font-size: 12px; color: var(--text-muted); }
+    .ob-pagination .ob-page-btns { display: flex; gap: 4px; }
+    .ob-pagination .ob-page-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 600; display: grid; place-items: center; color: var(--text-secondary); font-family: inherit; }
+    .ob-pagination .ob-page-btn:hover { background: var(--surface-hover); }
+    .ob-pagination .ob-page-btn.active { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+
+    /* Campaign detail modal */
+    .cd-stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
+    .cd-stat { padding: 16px; background: var(--surface); text-align: center; }
+    .cd-stat .cd-stat-value { font-size: 24px; font-weight: 800; }
+    .cd-stat .cd-stat-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .cd-progress { padding: 14px 24px; background: var(--surface-hover); border-bottom: 1px solid var(--border); }
+    .cd-progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .cd-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+    .cd-lead-list { flex: 1; overflow-y: auto; padding: 16px 24px; }
+    .cd-lead-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--surface-hover); border: 1px solid var(--border); margin-bottom: 8px; }
+    .cd-lead-icon { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .cd-lead-icon.replied { background: var(--green-50); color: var(--green); }
+    .cd-lead-icon.sent { background: var(--blue-50); color: var(--blue-600); }
+    .cd-lead-icon.bounced { background: var(--amber-50); color: var(--amber); }
+    .cd-lead-icon.pending { background: var(--surface-hover); color: var(--text-muted); }
+    .cd-lead-info { flex: 1; }
+    .cd-lead-name { font-size: 13px; font-weight: 600; }
+    .cd-lead-email { font-size: 11px; color: var(--text-muted); }
+
+    /* New campaign modal steps */
+    .nc-step-dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--surface-hover); color: var(--text-muted); border: 2px solid var(--border); transition: all 200ms; }
+    .nc-step-dot.active { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+    .nc-step-dot.done { background: var(--green); color: #fff; border-color: var(--green); }
+    .nc-step-line { width: 40px; height: 2px; background: var(--border); transition: all 200ms; }
+    .nc-step-line.done { background: var(--green); }
+    .nc-lead-group { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; transition: all 150ms; margin-bottom: 8px; }
+    .nc-lead-group:hover { border-color: var(--blue-500); background: var(--blue-50); }
+    .nc-lead-group input[type="checkbox"] { accent-color: var(--blue-600); }
+    .nc-template-card { padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: all 150ms; margin-bottom: 8px; }
+    .nc-template-card:hover { border-color: var(--blue-500); }
+    .nc-template-card.selected { border-color: var(--blue-500); background: var(--blue-50); }
+    .nc-review-box { background: var(--surface-hover); border-radius: var(--radius); padding: 14px; border: 1px solid var(--border); margin-bottom: 12px; }
+    .nc-preview-box { font-size: 12px; color: var(--text-muted); line-height: 1.6; background: var(--surface-hover); border-radius: var(--radius); padding: 14px; border: 1px solid var(--border); }
     .email-recipient { background: var(--surface-hover); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 18px; }
     .email-recipient-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
     .email-recipient-value { font-size: 14px; color: var(--text); font-weight: 500; }
@@ -659,15 +748,53 @@
 
       <!-- ===== OUTBOUND ===== -->
       <div class="workspace" id="w-outbound">
-        <div class="top-bar"><div><h2>Outbound Tools</h2><p>Review email campaigns, track outreach, and export your data.</p></div></div>
-        <div id="export-selector">
-          <div class="export-cards">
-            <div class="export-card" onclick="showExport('queue')"><div class="export-icon blue"><svg viewBox="0 0 24 24"><path d="M4 5h16v2H4V5Zm0 6h16v2H4v-2Zm0 6h10v2H4v-2Z"/></svg></div><h4>Lead Queue Export</h4><p>Export the full lead queue with all details including contact info, region, and recommended products.</p></div>
-            <div class="export-card" onclick="showExport('email')"><div class="export-icon green"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><h4>Email Activity Export</h4><p>Export sent and failed email records with delivery status for campaign reporting.</p></div>
+        <div class="top-bar"><div><h2>Outbound Tools</h2><p>Campaigns, email tracking, and outreach analytics.</p></div></div>
+
+        <!-- Stats row -->
+        <div class="ob-stats">
+          <div class="ob-stat"><div class="ob-stat-icon blue"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><div class="ob-stat-info"><div class="ob-stat-value" id="ob-total-sent">0</div><div class="ob-stat-label">Total Emails Sent</div></div></div>
+          <div class="ob-stat"><div class="ob-stat-icon green"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div><div class="ob-stat-info"><div class="ob-stat-value" id="ob-total-replies">0</div><div class="ob-stat-label">Replies Received</div></div></div>
+          <div class="ob-stat"><div class="ob-stat-icon amber"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="ob-stat-info"><div class="ob-stat-value" id="ob-total-qualified">0</div><div class="ob-stat-label">Qualified from Email</div></div></div>
+          <div class="ob-stat"><div class="ob-stat-icon purple"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div><div class="ob-stat-info"><div class="ob-stat-value" id="ob-reply-rate">0%</div><div class="ob-stat-label">Reply Rate</div></div></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="ob-tabs">
+          <button class="ob-tab active" onclick="switchObTab(this,'campaigns')">Campaigns <span class="ob-tab-count" id="ob-camp-count">3</span></button>
+          <button class="ob-tab" onclick="switchObTab(this,'sent')">Sent Emails <span class="ob-tab-count" id="ob-sent-count">0</span></button>
+          <button class="ob-tab" onclick="switchObTab(this,'replies')">Replies <span class="ob-tab-count" id="ob-reply-count">0</span></button>
+        </div>
+
+        <!-- Campaigns tab -->
+        <div id="ob-tab-campaigns">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:14px;gap:8px">
+            <button class="btn btn-primary" onclick="openNewCampaign()"><svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>New Campaign</button>
+            <button class="btn" onclick="renderOutbound()"><svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>Refresh</button>
+          </div>
+          <div class="ob-campaigns" id="ob-campaign-list"></div>
+        </div>
+
+        <!-- Sent Emails tab -->
+        <div id="ob-tab-sent" style="display:none">
+          <div style="display:flex;justify-content:space-between;margin-bottom:14px;align-items:center">
+            <input type="text" placeholder="Search leads..." style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--surface);outline:none;width:220px" id="ob-search-input" oninput="renderSentEmails()">
+            <button class="btn btn-green" onclick="exportSentCSV()"><svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Export CSV</button>
+          </div>
+          <div class="ob-table-wrap">
+            <div class="ob-table-scroll">
+              <table class="ob-table"><thead><tr><th>Company</th><th>Email</th><th>Region</th><th>Product</th><th>Status</th><th>Sent</th><th>Actions</th></tr></thead><tbody id="ob-sent-body"></tbody></table>
+            </div>
+            <div class="ob-pagination" id="ob-sent-pagination"></div>
           </div>
         </div>
-        <div id="export-preview" style="display:none;margin-top:20px">
-          <div class="panel"><div class="panel-header"><div><div style="display:flex;align-items:center;gap:10px"><button class="btn" style="font-size:12px;padding:5px 12px" onclick="hideExport()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div><div class="panel-title" id="ex-title">Export Preview</div><div class="panel-desc" id="ex-desc"></div></div></div><div style="display:flex;gap:8px;align-items:center"><select class="select-input" id="ex-filter" onchange="renderExport()" style="display:none"><option value="all">All</option><option value="sent">Sent</option></select><button class="btn btn-primary" style="font-size:12px;padding:5px 12px" onclick="doExport()"><svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/></svg>Export CSV</button></div></div><div class="table-wrap"><table><thead id="ex-head"></thead><tbody id="ex-body"></tbody></table></div></div>
+
+        <!-- Replies tab -->
+        <div id="ob-tab-replies" style="display:none">
+          <div class="ob-table-wrap" style="padding:60px;text-align:center;color:var(--text-muted)">
+            <div style="font-size:40px;margin-bottom:12px">📬</div>
+            <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">Replies</div>
+            <div style="font-size:13px">Replies will appear here as they come in. Track engagement and qualify leads directly.</div>
+          </div>
         </div>
       </div>
     </main>
@@ -1007,6 +1134,63 @@
         <button class="btn btn-primary" style="font-size:12px;padding:5px 12px" id="gmaps-import-btn" onclick="gmapsImportSelected()">Import Selected</button>
       </div>
       <div id="gmaps-results" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;max-height:50vh;"></div>
+    </div>
+  </div>
+
+  <!-- CAMPAIGN DETAIL MODAL -->
+  <div class="modal-backdrop" id="m-campaign-detail" hidden>
+    <div class="modal" style="max-width:700px;padding:0;overflow:hidden">
+      <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div><div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">Campaign</div><div style="font-size:18px;font-weight:800;margin-top:2px" id="cd-title">Campaign</div></div>
+        <button class="modal-close" style="position:static" onclick="closeM('m-campaign-detail')">&times;</button>
+      </div>
+      <div class="cd-stats-row" id="cd-stats-row"></div>
+      <div class="cd-progress" id="cd-progress"></div>
+      <div class="cd-lead-list" id="cd-lead-list"></div>
+      <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="closeM('m-campaign-detail')">Close</button>
+        <button class="btn btn-primary">View Full Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW CAMPAIGN MODAL (3-step flow) -->
+  <div class="modal-backdrop" id="m-new-campaign" hidden>
+    <div class="modal" style="max-width:520px;padding:0;overflow:hidden;max-height:85vh;display:flex;flex-direction:column">
+      <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">New Campaign</div>
+        <div style="font-size:18px;font-weight:800;margin-top:2px">Create Campaign</div>
+        <div style="display:flex;align-items:center;gap:0;margin-top:16px;justify-content:center">
+          <div class="nc-step-dot active" id="nc-dot-1">1</div>
+          <div class="nc-step-line" id="nc-line-1"></div>
+          <div class="nc-step-dot" id="nc-dot-2">2</div>
+          <div class="nc-step-line" id="nc-line-2"></div>
+          <div class="nc-step-dot" id="nc-dot-3">3</div>
+        </div>
+      </div>
+      <!-- Step 1 -->
+      <div id="nc-step-1" style="flex:1;overflow-y:auto;padding:20px 24px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px">Select Target Leads</div>
+        <div id="nc-lead-groups"></div>
+        <div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px" id="nc-lead-count">0 leads selected</div>
+      </div>
+      <!-- Step 2 -->
+      <div id="nc-step-2" style="display:none;flex:1;overflow-y:auto;padding:20px 24px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px">Choose Email Template</div>
+        <div id="nc-template-list"></div>
+      </div>
+      <!-- Step 3 -->
+      <div id="nc-step-3" style="display:none;flex:1;overflow-y:auto;padding:20px 24px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px">Review Campaign</div>
+        <div class="nc-review-box" id="nc-review-summary"></div>
+        <div class="nc-preview-box" id="nc-review-preview"></div>
+      </div>
+      <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="closeM('m-new-campaign')">Cancel</button>
+        <button class="btn" id="nc-back-btn" style="display:none" onclick="ncBack()">← Back</button>
+        <button class="btn btn-primary" id="nc-next-btn" onclick="ncNext()">Next →</button>
+        <button class="btn btn-green" id="nc-send-btn" style="display:none" onclick="launchCampaign()">🚀 Launch Campaign</button>
+      </div>
     </div>
   </div>
 
@@ -2580,6 +2764,285 @@
     initAdminPanel();
     loadProducts();
     loadTemplates();
+
+    // ===== OUTBOUND TOOLS =====
+    let obCampaigns = [];
+    let obSentPage = 1;
+    const OB_SENT_PER_PAGE = 10;
+
+    // Seed sample campaigns on first visit
+    function seedCampaigns() {
+      if (localStorage.getItem('ob_campaigns_seeded')) return;
+      const sampleCampaigns = [
+        { id: 'camp_1', name: '🏪 KL Retail Outreach', desc: 'Targeting retail shops in Kuala Lumpur with AutoCount POS pitch.', status: 'active', leads: 52, sent: 48, replies: 12, bounced: 3, region: 'Kuala Lumpur' },
+        { id: 'camp_2', name: '📦 Selangor F&B Blast', desc: 'Food & beverage businesses in Selangor — Presoft Mobile Stock campaign.', status: 'draft', leads: 32, sent: 0, replies: 0, bounced: 0, region: 'Selangor' },
+        { id: 'camp_3', name: '✅ Penang Auto Follow-up', desc: 'Automated follow-up to non-responders from Penang AutoCount campaign.', status: 'done', leads: 79, sent: 79, replies: 11, bounced: 5, region: 'Penang' }
+      ];
+      localStorage.setItem('ob_campaigns_seeded', '1');
+      // Store in session for demo
+      window._obCampaigns = sampleCampaigns;
+    }
+
+    function renderOutbound() {
+      seedCampaigns();
+      obCampaigns = window._obCampaigns || [];
+
+      // Stats
+      const totalSent = leads.filter(l => l.sent).length;
+      const totalReplies = leads.filter(l => l.sent && l.emailStatus === 'replied').length;
+      const totalQualified = leads.filter(l => l.sent && l.status === 'qualified').length;
+      const replyRate = totalSent > 0 ? Math.round(totalReplies / totalSent * 100) : 0;
+
+      document.getElementById('ob-total-sent').textContent = totalSent;
+      document.getElementById('ob-total-replies').textContent = totalReplies;
+      document.getElementById('ob-total-qualified').textContent = totalQualified;
+      document.getElementById('ob-reply-rate').textContent = replyRate + '%';
+
+      // Campaign count
+      document.getElementById('ob-camp-count').textContent = obCampaigns.length;
+      document.getElementById('ob-sent-count').textContent = totalSent;
+      document.getElementById('ob-reply-count').textContent = totalReplies;
+
+      // Render campaigns
+      document.getElementById('ob-campaign-list').innerHTML = obCampaigns.map(c => `
+        <div class="ob-campaign" onclick="openCampaignDetail('${c.id}')">
+          <div class="oc-header">
+            <span class="oc-name">${c.name}</span>
+            <span class="oc-status ${c.status}">${c.status.charAt(0).toUpperCase() + c.status.slice(1)}</span>
+          </div>
+          <div class="oc-desc">${c.desc}</div>
+          <div class="oc-meta">
+            <div class="oc-meta-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><strong>${c.sent}</strong> sent</div>
+            <div class="oc-meta-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><strong>${c.replies}</strong> replies</div>
+            <div class="oc-meta-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>${c.region}</div>
+          </div>
+        </div>
+      `).join('');
+
+      renderSentEmails();
+    }
+
+    function switchObTab(btn, tab) {
+      document.querySelectorAll('.ob-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('ob-tab-campaigns').style.display = tab === 'campaigns' ? '' : 'none';
+      document.getElementById('ob-tab-sent').style.display = tab === 'sent' ? '' : 'none';
+      document.getElementById('ob-tab-replies').style.display = tab === 'replies' ? '' : 'none';
+    }
+
+    function openCampaignDetail(id) {
+      const c = obCampaigns.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('cd-title').textContent = c.name.replace(/^..\s/, '');
+      const pct = c.leads > 0 ? Math.round(c.sent / c.leads * 100) : 0;
+      document.getElementById('cd-stats-row').innerHTML = `
+        <div class="cd-stat"><div class="cd-stat-value" style="color:var(--blue-600)">${c.sent}</div><div class="cd-stat-label">Sent</div></div>
+        <div class="cd-stat"><div class="cd-stat-value" style="color:var(--green)">${c.replies}</div><div class="cd-stat-label">Replies</div></div>
+        <div class="cd-stat"><div class="cd-stat-value" style="color:var(--amber)">${c.bounced}</div><div class="cd-stat-label">Bounced</div></div>
+        <div class="cd-stat"><div class="cd-stat-value" style="color:var(--purple)">${c.leads > 0 ? Math.round(c.replies / c.sent * 100) : 0}%</div><div class="cd-stat-label">Reply Rate</div></div>`;
+      document.getElementById('cd-progress').innerHTML = `
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:6px"><span style="color:var(--text-secondary)">Progress</span><span style="color:var(--green)">${c.sent} / ${c.leads} leads processed</span></div>
+        <div class="cd-progress-bar"><div class="cd-progress-fill" style="width:${pct}%;background:linear-gradient(90deg,var(--green),var(--blue-600))"></div></div>`;
+
+      // Sample lead list
+      const sampleLeads = [
+        { name: 'ABC Trading', email: 'ali@abctrading.com', status: 'replied' },
+        { name: 'BookXcess Amcorp Mall', email: 'support@bookxcess.com', status: 'sent' },
+        { name: 'Glad Sounds Bookstore', email: 'info@gladsounds.com.my', status: 'bounced' },
+        { name: 'Pustaka Tok Kenali', email: '— no email', status: 'pending' },
+        { name: 'Putra Bookstore', email: '— no email', status: 'pending' }
+      ];
+      const icons = { replied: '✓', sent: '✉', bounced: '!', pending: '⏳' };
+      document.getElementById('cd-lead-list').innerHTML = `
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Leads in Campaign</div>
+        ${sampleLeads.map(l => `
+          <div class="cd-lead-item">
+            <div class="cd-lead-icon ${l.status}">${icons[l.status]}</div>
+            <div class="cd-lead-info"><div class="cd-lead-name">${l.name}</div><div class="cd-lead-email">${l.email}</div></div>
+            <span class="ob-badge ob-badge-${l.status === 'replied' ? 'replied' : l.status === 'bounced' ? 'bounced' : l.status === 'sent' ? 'sent' : ''}" style="font-size:10px">${l.status.charAt(0).toUpperCase() + l.status.slice(1)}</span>
+          </div>
+        `).join('')}`;
+      openM('m-campaign-detail');
+    }
+
+    // New campaign flow
+    let ncStep = 1;
+    let ncSelectedGroups = new Set();
+    let ncSelectedTemplate = '';
+
+    function openNewCampaign() {
+      ncStep = 1;
+      ncSelectedGroups.clear();
+      ncSelectedTemplate = '';
+      updateNewCampaignUI();
+      openM('m-new-campaign');
+    }
+
+    function ncNext() {
+      if (ncStep < 3) { ncStep++; updateNewCampaignUI(); }
+    }
+    function ncBack() {
+      if (ncStep > 1) { ncStep--; updateNewCampaignUI(); }
+    }
+
+    function updateNewCampaignUI() {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById('nc-step-' + i).style.display = i === ncStep ? '' : 'none';
+        const dot = document.getElementById('nc-dot-' + i);
+        if (i < ncStep) { dot.className = 'nc-step-dot done'; dot.textContent = '✓'; }
+        else if (i === ncStep) { dot.className = 'nc-step-dot active'; dot.textContent = i; }
+        else { dot.className = 'nc-step-dot'; dot.textContent = i; }
+        if (i < 3) {
+          const line = document.getElementById('nc-line-' + i);
+          line.className = 'nc-step-line' + (i < ncStep ? ' done' : '');
+        }
+      }
+      document.getElementById('nc-back-btn').style.display = ncStep > 1 ? '' : 'none';
+      document.getElementById('nc-next-btn').style.display = ncStep < 3 ? '' : 'none';
+      document.getElementById('nc-send-btn').style.display = ncStep === 3 ? '' : 'none';
+
+      if (ncStep === 1) renderNcLeadGroups();
+      if (ncStep === 2) renderNcTemplates();
+      if (ncStep === 3) renderNcReview();
+    }
+
+    function renderNcLeadGroups() {
+      const groups = [
+        { key: 'kl_retail', name: 'KL Retail Shops', count: 24, product: 'AutoCount POS' },
+        { key: 'selangor_fb', name: 'Selangor F&B', count: 18, product: 'Presoft Mobile Stock' },
+        { key: 'penang_books', name: 'Penang Bookstores', count: 10, product: 'AutoCount Accounting' }
+      ];
+      document.getElementById('nc-lead-groups').innerHTML = groups.map(g => `
+        <label class="nc-lead-group" style="${ncSelectedGroups.has(g.key) ? 'border-color:var(--blue-500);background:var(--blue-50)' : ''}">
+          <input type="checkbox" ${ncSelectedGroups.has(g.key) ? 'checked' : ''} onchange="toggleNcGroup('${g.key}', this.checked)">
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">${g.name}</div><div style="font-size:11px;color:var(--text-muted)">${g.count} leads · ${g.product}</div></div>
+        </label>
+      `).join('');
+      let totalCount = 0;
+      if (ncSelectedGroups.has('kl_retail')) totalCount += 24;
+      if (ncSelectedGroups.has('selangor_fb')) totalCount += 18;
+      if (ncSelectedGroups.has('penang_books')) totalCount += 10;
+      document.getElementById('nc-lead-count').textContent = totalCount + ' leads selected';
+    }
+
+    function toggleNcGroup(key, checked) {
+      if (checked) ncSelectedGroups.add(key); else ncSelectedGroups.delete(key);
+      updateNewCampaignUI();
+    }
+
+    function renderNcTemplates() {
+      const templates = emailTemplates.length > 0 ? emailTemplates : [
+        { id: 't1', name: 'General Outreach', subject: '{{productName}} idea for {{company}}', body: 'Hi {{contactName}},...' },
+        { id: 't2', name: 'Follow-up', subject: 'Following up...', body: 'Hi {{contactName}},...' },
+        { id: 't3', name: 'Partnership Inquiry', subject: 'Partnership...', body: 'Dear {{contactName}},...' }
+      ];
+      document.getElementById('nc-template-list').innerHTML = templates.map(t => {
+        const selected = ncSelectedTemplate === t.id || (!ncSelectedTemplate && t.id === defaultTemplateId);
+        if (selected && !ncSelectedTemplate) ncSelectedTemplate = t.id;
+        return `
+          <div class="nc-template-card ${selected ? 'selected' : ''}" onclick="ncSelectedTemplate='${t.id}';renderNcTemplates()">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:14px;font-weight:700${selected ? ';color:var(--blue-600)' : ''}">${t.id === defaultTemplateId ? '⭐ ' : ''}${t.name}</div>
+              ${t.id === defaultTemplateId ? '<div style="font-size:10px;font-weight:700;color:var(--blue-600);background:var(--blue-100);padding:2px 8px;border-radius:99px">Default</div>' : ''}
+            </div>
+            <div style="font-size:11px;color:${selected ? 'var(--text-secondary)' : 'var(--text-muted)'};margin-top:4px">"${t.body.substring(0, 50)}..."</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderNcReview() {
+      let totalLeads = 0;
+      if (ncSelectedGroups.has('kl_retail')) totalLeads += 24;
+      if (ncSelectedGroups.has('selangor_fb')) totalLeads += 18;
+      if (ncSelectedGroups.has('penang_books')) totalLeads += 10;
+      const tmpl = (emailTemplates.length > 0 ? emailTemplates : [{ name: 'General Outreach', subject: '{{productName}} idea for {{company}}' }]).find(t => t.id === ncSelectedTemplate) || { name: 'General Outreach', subject: '{{productName}} idea for {{company}}' };
+      document.getElementById('nc-review-summary').innerHTML = `
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px">
+          <span style="font-weight:600;color:var(--text-muted)">Leads</span><span>${totalLeads} leads from ${ncSelectedGroups.size} groups</span>
+          <span style="font-weight:600;color:var(--text-muted)">Template</span><span>${esc(tmpl.name)}</span>
+          <span style="font-weight:600;color:var(--text-muted)">Subject</span><span>${esc(tmpl.subject)}</span>
+        </div>`;
+      document.getElementById('nc-review-preview').innerHTML = `
+        <div style="font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Email Preview</div>
+        Hi Business Contact,<br><br>
+        I came across <strong>ABC Trading</strong> while reviewing businesses from Google Maps in Kuala Lumpur.<br><br>
+        Based on your setup in Retail, I believe <strong>AutoCount POS</strong> could be a strong fit.<br><br>
+        Upgrade in-store sales handling, stock sync, and branch reporting.<br><br>
+        Best,<br>${sName}`;
+    }
+
+    function launchCampaign() {
+      closeM('m-new-campaign');
+      // Create new campaign entry
+      let totalLeads = 0;
+      if (ncSelectedGroups.has('kl_retail')) totalLeads += 24;
+      if (ncSelectedGroups.has('selangor_fb')) totalLeads += 18;
+      if (ncSelectedGroups.has('penang_books')) totalLeads += 10;
+      const newCamp = { id: 'camp_' + Date.now(), name: '🚀 New Campaign ' + (obCampaigns.length + 1), desc: 'Custom campaign from Outbound Tools.', status: 'active', leads: totalLeads, sent: 0, replies: 0, bounced: 0, region: 'Multiple' };
+      obCampaigns.unshift(newCamp);
+      window._obCampaigns = obCampaigns;
+      notify('Campaign Launched', `${newCamp.name} is now sending to ${totalLeads} leads.`);
+      renderOutbound();
+      // Simulate progress
+      setTimeout(() => {
+        newCamp.sent = Math.min(totalLeads, Math.floor(totalLeads * 0.6));
+        newCamp.replies = Math.floor(newCamp.sent * 0.25);
+        window._obCampaigns = obCampaigns;
+        renderOutbound();
+      }, 3000);
+    }
+
+    // Sent Emails table
+    function renderSentEmails() {
+      const sentLeads = leads.filter(l => l.sent);
+      const query = (document.getElementById('ob-search-input')?.value || '').toLowerCase();
+      const filtered = query ? sentLeads.filter(l => [l.company, l.email, l.region].join(' ').toLowerCase().includes(query)) : sentLeads;
+      const totalPages = Math.max(1, Math.ceil(filtered.length / OB_SENT_PER_PAGE));
+      if (obSentPage > totalPages) obSentPage = totalPages;
+      const start = (obSentPage - 1) * OB_SENT_PER_PAGE;
+      const page = filtered.slice(start, start + OB_SENT_PER_PAGE);
+
+      document.getElementById('ob-sent-body').innerHTML = page.length ? page.map(l => {
+        const init = (l.company || '?')[0].toUpperCase();
+        const statusBadge = l.emailStatus === 'replied' ? 'replied' : l.emailStatus === 'failed' ? 'bounced' : 'sent';
+        const statusLabel = statusBadge.charAt(0).toUpperCase() + statusBadge.slice(1);
+        const agoStr = l.sentAt ? timeAgo(l.sentAt) : '—';
+        return `<tr>
+          <td><div class="ob-company-cell"><div class="ob-company-avatar">${init}</div><div><div class="ob-company-name">${esc(l.company)}</div><div style="font-size:11px;color:var(--text-muted)">${esc(l.contactName || 'Business Contact')}</div></div></div></td>
+          <td>${l.email || '<span style="color:var(--text-muted)">—</span>'}</td>
+          <td>${esc(l.region || '—')}</td>
+          <td>${l.recommendation?.productName || '—'}</td>
+          <td><span class="ob-badge ob-badge-${statusBadge}">${statusLabel}</span></td>
+          <td style="font-size:12px;color:var(--text-muted)">${agoStr}</td>
+          <td><div style="display:flex;gap:4px"><button class="ob-action-btn" title="View" onclick="openDetail('${l.id}');closeM('m-campaign-detail')">👁</button>${l.emailStatus === 'failed' ? '<button class="ob-action-btn" title="Re-send">🔄</button>' : ''}</div></td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">No sent emails yet.</td></tr>';
+
+      // Pagination
+      document.getElementById('ob-sent-pagination').innerHTML = `
+        <div class="ob-page-info">Showing ${filtered.length ? start + 1 : 0}–${Math.min(start + OB_SENT_PER_PAGE, filtered.length)} of ${filtered.length}</div>
+        <div class="ob-page-btns">
+          <button class="ob-page-btn" onclick="obSentPage=Math.max(1,obSentPage-1);renderSentEmails()" ${obSentPage <= 1 ? 'disabled style="opacity:0.4"' : ''}>‹</button>
+          ${Array.from({ length: totalPages }, (_, i) => `<button class="ob-page-btn ${i + 1 === obSentPage ? 'active' : ''}" onclick="obSentPage=${i + 1};renderSentEmails()">${i + 1}</button>`).join('')}
+          <button class="ob-page-btn" onclick="obSentPage=Math.min(${totalPages},obSentPage+1);renderSentEmails()" ${obSentPage >= totalPages ? 'disabled style="opacity:0.4"' : ''}>›</button>
+        </div>`;
+    }
+
+    function exportSentCSV() {
+      const sentLeads = leads.filter(l => l.sent);
+      const rows = [['Company', 'Email', 'Region', 'Product', 'Status', 'Sent At']];
+      sentLeads.forEach(l => {
+        rows.push([l.company, l.email || '', l.region, l.recommendation?.productName || '', l.emailStatus || 'sent', l.sentAt || '']);
+      });
+      const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'sent_emails_' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+      notify('Exported', rows.length - 1 + ' sent email records downloaded.');
+    }
   </script>
 </body>
 </html>
