@@ -1823,7 +1823,7 @@ function importExternalLeads(store, incomingLeads, assignedTo) {
       lead.id,
       "Lead imported",
       `${lead.company} was imported from ${lead.source} and added as a new lead.`,
-      session.username
+      assignedTo
     );
   });
 
