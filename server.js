@@ -2095,6 +2095,18 @@ async function handleApi(request, response, pathname, options = {}) {
   } catch (err) {
     console.error('Data file error, using fallback:', err.message);
     store = defaultStore();
+    // Seed default users into fallback so session lookups don't fail
+    try {
+      await ensureDefaultUsers(store);
+    } catch (_) {
+      // bcrypt may not be available in all contexts; push plain users as last resort
+      if (!store.users.some(u => u.username === 'admin')) {
+        store.users.push({ username: 'admin', role: 'admin', bigin: {} });
+      }
+      if (!store.users.some(u => u.username === 'user')) {
+        store.users.push({ username: 'user', role: 'user', bigin: {} });
+      }
+    }
   }
   const googlePlacesFetch = options.googlePlacesFetch || fetch;
   const websiteFetch = options.websiteFetch || googlePlacesFetch;
