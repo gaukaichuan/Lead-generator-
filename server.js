@@ -1979,6 +1979,8 @@ async function handleApi(request, response, pathname, options = {}) {
   const biginFetch = options.biginFetch || fetch;
   const emailDebugLogger = options.emailDebugLogger;
 
+  try {
+
   // ===== AUTH ENDPOINTS (no auth required) =====
 
   if (request.method === "POST" && pathname === "/api/auth/login") {
@@ -2751,6 +2753,11 @@ async function handleApi(request, response, pathname, options = {}) {
   }
 
   sendJson(response, 404, { error: "Not found" });
+  } catch (err) {
+    console.error('handleApi error:', err.message);
+    console.error(err.stack);
+    sendJson(response, 500, { error: err.message || "Server error" });
+  }
 }
 
 function createAppServer(options = {}) {
