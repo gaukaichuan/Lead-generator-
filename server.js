@@ -1710,15 +1710,29 @@ async function searchGoogleMapsViaApify(
     return [];
   }
 
+  // Debug: log first item's keys to see what fields Apify returns
+  if (items.length > 0) {
+    console.log("[Apify] First result keys:", Object.keys(items[0]));
+    console.log("[Apify] First result sample:", JSON.stringify(items[0], null, 2).slice(0, 500));
+  }
+
   // Map Apify results to internal lead format
   return items.map((item) => {
     const website = String(item.website || "").trim();
     const email = String(item.email || "").trim() || guessEmailFromWebsite(website);
-    const address = String(item.address || "").trim();
-    const placeId = String(item.placeId || item.place_id || "");
+    // Apify returns address under multiple possible field names depending on actor
+    const address = String(
+      item.address || item.formattedAddress || item.streetAddress ||
+      item.fullAddress || item.street || ""
+    ).trim();
+    const placeId = String(item.placeId || item.place_id || item.id || "");
+    // Extract lat/lng if available
+    const lat = item.lat || item.latitude;
+    const lng = item.lng || item.longitude;
+    const location = (lat && lng) ? { lat: Number(lat), lng: Number(lng) } : null;
 
     return {
-      company: item.name || "Unknown business",
+      company: item.name || item.title || "Unknown business",
       contactName: "Business Contact",
       email,
       phone: String(item.phone || "").trim(),
@@ -1737,7 +1751,7 @@ async function searchGoogleMapsViaApify(
       ].filter(Boolean).join(" "),
       externalRef: placeId || `apify_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       distanceKm: null,
-      location: null
+      location
     };
   });
 }
