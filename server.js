@@ -1822,7 +1822,8 @@ function importExternalLeads(store, incomingLeads, assignedTo) {
       store,
       lead.id,
       "Lead imported",
-      `${lead.company} was imported from ${lead.source} and added as a new lead.`
+      `${lead.company} was imported from ${lead.source} and added as a new lead.`,
+      session.username
     );
   });
 
@@ -2265,10 +2266,15 @@ async function handleApi(request, response, pathname, options = {}) {
   }
 
   if (request.method === "GET" && pathname === "/api/leads") {
+    // Admin sees all activities; regular users see only their own
+    const activities = session.role === "admin"
+      ? store.activities.slice(0, 20)
+      : store.activities.filter(a => a.performedBy === session.username).slice(0, 20);
+
     sendJson(response, 200, {
       leads: sortLeads(store, store.leads),
       summary: buildSummary(store, store.leads),
-      activities: store.activities.slice(0, 20)
+      activities
     });
     return;
   }
@@ -2574,7 +2580,8 @@ async function handleApi(request, response, pathname, options = {}) {
       store,
       lead.id,
       "Lead added",
-      `${lead.company} was added from ${lead.source} and automatically checked for KL / Selangor priority.`
+      `${lead.company} was added from ${lead.source} and automatically checked for KL / Selangor priority.`,
+      session.username
     );
     writeStore(store);
     sendJson(response, 201, { lead: enrichLead(store, lead) });
@@ -2625,7 +2632,8 @@ async function handleApi(request, response, pathname, options = {}) {
         store,
         lead.id,
         "Outreach email sent",
-        `${lead.company} received a live email send to ${lead.email}.`
+        `${lead.company} received a live email send to ${lead.email}.`,
+        session.username
       );
       writeStore(store);
       sendJson(response, 200, {
@@ -2642,7 +2650,8 @@ async function handleApi(request, response, pathname, options = {}) {
         store,
         lead.id,
         "Outreach email failed",
-        `${lead.company} email send failed: ${failureMessage}`
+        `${lead.company} email send failed: ${failureMessage}`,
+        session.username
       );
       writeStore(store);
       const debug = buildEmailDebugContext({ lead, senderName, senderEmail, subject });
@@ -2668,7 +2677,7 @@ async function handleApi(request, response, pathname, options = {}) {
     if (action === "status" && request.method === "PATCH") {
       const body = await readRequestBody(request);
       lead.status = body.status || lead.status;
-      appendActivity(store, lead.id, "Lead status updated", `${lead.company} is now marked as ${lead.status}.`);
+      appendActivity(store, lead.id, "Lead status updated", `${lead.company} is now marked as ${lead.status}.`, session.username);
       autoSendQualifiedLead(store, lead);
     }
 
@@ -2683,7 +2692,7 @@ async function handleApi(request, response, pathname, options = {}) {
         }
       }
       if (changed) {
-        appendActivity(store, lead.id, "Lead updated", `${lead.company} details were edited manually.`);
+        appendActivity(store, lead.id, "Lead updated", `${lead.company} details were edited manually.`, session.username);
       }
     }
 
@@ -2694,16 +2703,16 @@ async function handleApi(request, response, pathname, options = {}) {
         lead.emailStatus = "sent";
         lead.emailLastError = "";
         lead.emailLastAttemptAt = lead.sentAt;
-        appendActivity(store, lead.id, "Outreach marked as sent", `${lead.company} was added to the sent email list.`);
+        appendActivity(store, lead.id, "Outreach marked as sent", `${lead.company} was added to the sent email list.`, session.username);
       }
     }
 
     if (action === "crm" && request.method === "PATCH") {
       if (!lead.crmLogged) {
         await pushLeadToBigin(store, session.username, lead, biginFetch);
-        appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`);
+        appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`, session.username);
       } else if (lead.bigin && lead.bigin.dealId) {
-        appendActivity(store, lead.id, "CRM sync skipped", `${lead.company} already has an existing Bigin deal.`);
+        appendActivity(store, lead.id, "CRM sync skipped", `${lead.company} already has an existing Bigin deal.`, session.username);
       }
     }
 
@@ -2727,7 +2736,8 @@ async function handleApi(request, response, pathname, options = {}) {
       store,
       removedLead.id,
       "Lead removed",
-      `${removedLead.company} was removed from the queue.`
+      `${removedLead.company} was removed from the queue.`,
+      session.username
     );
     writeStore(store);
     sendJson(response, 200, { success: true });
