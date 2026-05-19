@@ -1756,7 +1756,7 @@ async function searchGoogleMapsViaApify(
   });
 }
 
-function sanitizePreviewLead(lead) {
+function sanitizePreviewLead(store, lead) {
   const enrichedLead = enrichLead(store, lead);
   return {
     externalRef: lead.externalRef || "",
@@ -2467,7 +2467,7 @@ async function handleApi(request, response, pathname, options = {}) {
     });
 
     sendJson(response, 200, {
-      leads: deduplicated.map(sanitizePreviewLead),
+      leads: deduplicated.map((lead) => sanitizePreviewLead(store, lead)),
       filteredCount: candidates.length - deduplicated.length
     });
     return;
@@ -2517,7 +2517,7 @@ async function handleApi(request, response, pathname, options = {}) {
     });
 
     sendJson(response, 200, {
-      leads: deduplicated.map(sanitizePreviewLead),
+      leads: deduplicated.map((lead) => sanitizePreviewLead(store, lead)),
       filteredCount: candidates.length - deduplicated.length
     });
     return;
