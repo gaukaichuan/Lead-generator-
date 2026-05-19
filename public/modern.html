@@ -832,7 +832,7 @@
         <div class="bulk-tone-badge" id="b-tone-badge"></div>
         <div><label class="form-label">Subject Template</label><input class="form-input" id="b-subject2"></div>
         <div style="margin-top:10px"><label class="form-label">Message Template</label><textarea class="form-textarea" id="b-body2" rows="7"></textarea></div>
-        <div class="placeholder-hint">Available: <code>{{company}}</code> <code>{{contactName}}</code> <code>{{region}}</code> <code>{{source}}</code> <code>{{senderName}}</code> <code>{{senderEmail}}</code> <code>{{productName1}}</code> <code>{{pitch1}}</code> <code>{{productName2}}</code> <code>{{pitch2}}</code></div>
+        <div class="placeholder-hint">Available: <code>{{company}}</code> <code>{{contactName}}</code> <code>{{region}}</code> <code>{{source}}</code> <code>{{senderName}}</code> <code>{{senderEmail}}</code> <code>{{productBlocks}}</code> <code>{{productName1}}</code> <code>{{pitch1}}</code> <code>{{productName2}}</code> <code>{{pitch2}}</code> <code>{{productName3}}</code> <code>{{pitch3}}</code></div>
       </div>
       <div style="display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--border-light)">
         <button class="btn" onclick="bulkBackToStep1()">← Back</button>
@@ -981,7 +981,10 @@
         <div><label class="form-label">Subject</label><input class="form-input" id="tmpl-subject" placeholder="{{productName}} idea for {{company}}"></div>
         <div><label class="form-label">Body</label><textarea class="form-textarea" id="tmpl-body" rows="6" placeholder="Hi {{contactName}}, ..."></textarea></div>
         <div class="placeholder-hint" style="font-size:10px;color:var(--text-muted);line-height:1.5">
-          Available: <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{company}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{contactName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{region}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{source}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{senderName}}</code>
+          Available: <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{company}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{contactName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productBlocks}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{region}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{source}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{senderName}}</code>
+        </div>
+        <div class="placeholder-hint" id="tmpl-multi-hint" style="font-size:10px;color:var(--text-muted);line-height:1.5;margin-top:-6px" hidden>
+          Multi-product: <code style="background:var(--amber-50);color:var(--amber);padding:1px 4px;border-radius:3px;font-size:10px">{{productName1}}</code> <code style="background:var(--amber-50);color:var(--amber);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch1}}</code>
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
@@ -2477,6 +2480,20 @@
         document.getElementById('tmpl-name').value = '';
         document.getElementById('tmpl-subject').value = '';
         document.getElementById('tmpl-body').value = '';
+      }
+      // Update multi-product hint based on active product count
+      const activeProducts = (pmProducts || []).filter(p => p.active !== false);
+      const multiHint = document.getElementById('tmpl-multi-hint');
+      if (multiHint) {
+        if (activeProducts.length > 1) {
+          const vars = activeProducts.map((_, i) =>
+            `<code style="background:var(--amber-50);color:var(--amber);padding:1px 4px;border-radius:3px;font-size:10px">{{productName${i + 1}}}</code> <code style="background:var(--amber-50);color:var(--amber);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch${i + 1}}}</code>`
+          ).join(' ');
+          multiHint.innerHTML = `Multi-product: ${vars}`;
+          multiHint.hidden = false;
+        } else {
+          multiHint.hidden = true;
+        }
       }
       document.getElementById('m-tmpl-form').hidden = false;
       document.getElementById('tmpl-name').focus();
