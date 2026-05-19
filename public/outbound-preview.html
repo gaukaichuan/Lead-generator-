@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outbound Tools — Redesign Preview</title>
+<style>
+  :root {
+    --surface: #fff; --surface-hover: #f8f9fc; --border: #e2e5ed;
+    --border-light: #f0f1f5; --text: #1a1d2e; --text-secondary: #4a4f68;
+    --text-muted: #8b8fa3; --blue-50: #eff6ff; --blue-100: #dbeafe;
+    --blue-500: #3b82f6; --blue-600: #2563eb; --green: #059669;
+    --green-50: #ecfdf5; --green-100: #d1fae5; --amber: #d97706;
+    --amber-50: #fffbeb; --amber-100: #fef3c7; --purple: #7c3aed;
+    --purple-50: #f5f3ff; --purple-100: #e9d5ff; --pink: #ec4899;
+    --pink-50: #fdf2f8; --red: #ef4444; --red-50: #fef2f2;
+    --radius: 10px; --radius-sm: 6px; --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f3f9; color: var(--text); padding: 32px 16px; }
+  .wrapper { max-width: 1100px; margin: 0 auto; }
+
+  /* Header */
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 { font-size: 22px; font-weight: 800; }
+  .page-header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Quick stats row */
+  .quick-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+  .stat-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: grid; place-items: center; }
+  .stat-icon svg { width: 20px; height: 20px; }
+  .stat-icon.blue { background: var(--blue-50); } .stat-icon.blue svg { fill: var(--blue-600); }
+  .stat-icon.green { background: var(--green-50); } .stat-icon.green svg { fill: var(--green); }
+  .stat-icon.amber { background: var(--amber-50); } .stat-icon.amber svg { fill: var(--amber); }
+  .stat-icon.purple { background: var(--purple-50); } .stat-icon.purple svg { fill: var(--purple); }
+  .stat-info .stat-value { font-size: 20px; font-weight: 800; line-height: 1.1; }
+  .stat-info .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+  /* Toolbar */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  .toolbar-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .toolbar-right { display: flex; align-items: center; gap: 8px; }
+  .search-box { position: relative; }
+  .search-box input { padding: 8px 12px 8px 34px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; background: var(--surface); outline: none; width: 220px; }
+  .search-box input:focus { border-color: var(--blue-500); }
+  .search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: var(--text-muted); }
+  .filter-btn { padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-size: 12px; font-weight: 600; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .filter-btn:hover { border-color: var(--blue-500); color: var(--blue-600); }
+  .filter-btn.active { background: var(--blue-50); border-color: var(--blue-500); color: var(--blue-600); }
+  .btn { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { background: var(--surface-hover); }
+  .btn-primary { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+  .btn-primary:hover { background: var(--blue-500); }
+  .btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn-green:hover { background: #047857; }
+  .btn svg { width: 15px; height: 15px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 2px; margin-bottom: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+  .tab { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: transparent; }
+  .tab:hover { color: var(--text-secondary); }
+  .tab.active { background: var(--blue-600); color: #fff; }
+  .tab .tab-count { font-size: 11px; padding: 1px 6px; border-radius: 99px; background: rgba(255,255,255,0.25); margin-left: 4px; }
+  .tab:not(.active) .tab-count { background: var(--surface-hover); color: var(--text-muted); }
+
+  /* Campaign cards */
+  .campaign-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .campaign-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; cursor: pointer; transition: all 150ms; }
+  .campaign-card:hover { border-color: var(--blue-500); box-shadow: var(--shadow); }
+  .campaign-card .cc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .campaign-card .cc-name { font-size: 15px; font-weight: 700; }
+  .campaign-card .cc-status { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; }
+  .cc-status.active { background: var(--green-50); color: var(--green); }
+  .cc-status.draft { background: var(--amber-50); color: var(--amber); }
+  .cc-status.done { background: var(--blue-50); color: var(--blue-600); }
+  .campaign-card .cc-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+  .campaign-card .cc-meta { display: flex; gap: 16px; }
+  .cc-meta-item { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+  .cc-meta-item svg { width: 14px; height: 14px; fill: var(--text-muted); }
+  .cc-meta-item strong { font-weight: 700; color: var(--text); }
+
+  /* Lead table */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; background: var(--surface-hover); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--border-light); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-hover); }
+  .company-cell { display: flex; align-items: center; gap: 10px; }
+  .company-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--blue-50); color: var(--blue-600); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .company-name { font-weight: 600; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; display: inline-block; }
+  .badge-new { background: var(--green-50); color: var(--green); }
+  .badge-qualified { background: var(--blue-50); color: var(--blue-600); }
+  .badge-unqualified { background: var(--red-50); color: var(--red); }
+  .badge-sent { background: var(--purple-50); color: var(--purple); }
+  .badge-failed { background: var(--amber-50); color: var(--amber); }
+  .priority-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .priority-dot.high { background: var(--amber); }
+  .priority-dot.std { background: var(--border); }
+  .action-cell { display: flex; gap: 4px; }
+  .action-cell button { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--text-muted); font-size: 14px; }
+  .action-cell button:hover { background: var(--blue-50); color: var(--blue-600); border-color: var(--blue-500); }
+
+  /* Pagination */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-top: 1px solid var(--border-light); }
+  .pagination .page-info { font-size: 12px; color: var(--text-muted); }
+  .pagination .page-btns { display: flex; gap: 4px; }
+  .pagination .page-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 600; display: grid; place-items: center; color: var(--text-secondary); }
+  .pagination .page-btn:hover { background: var(--surface-hover); }
+  .pagination .page-btn.active { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="page-header">
+    <h1>🚀 Outbound Tools</h1>
+    <p>Campaigns, email tracking, and outreach analytics</p>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="quick-stats">
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+      <div class="stat-info"><div class="stat-value">127</div><div class="stat-label">Total Emails Sent</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+      <div class="stat-info"><div class="stat-value">23</div><div class="stat-label">Replies Received</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon amber"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+      <div class="stat-info"><div class="stat-value">8</div><div class="stat-label">Qualified from Email</div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+      <div class="stat-info"><div class="stat-value">18%</div><div class="stat-label">Reply Rate</div></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(this, 'campaigns')">Campaigns <span class="tab-count">3</span></button>
+    <button class="tab" onclick="switchTab(this, 'sent')">Sent Emails <span class="tab-count">127</span></button>
+    <button class="tab" onclick="switchTab(this, 'replies')">Replies <span class="tab-count">23</span></button>
+  </div>
+
+  <!-- Campaign cards (visible by default) -->
+  <div id="tab-campaigns">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="btn btn-primary"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>New Campaign</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>Refresh</button>
+      </div>
+    </div>
+    <div class="campaign-grid">
+      <div class="campaign-card">
+        <div class="cc-header">
+          <span class="cc-name"> KL Retail Outreach</span>
+          <span class="cc-status active">Active</span>
+        </div>
+        <div class="cc-desc">Targeting retail shops in Kuala Lumpur with AutoCount POS pitch.</div>
+        <div class="cc-meta">
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><strong>48</strong> sent</div>
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><strong>12</strong> replies</div>
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Kuala Lumpur</div>
+        </div>
+      </div>
+      <div class="campaign-card">
+        <div class="cc-header">
+          <span class="cc-name">📦 Selangor F&B Blast</span>
+          <span class="cc-status draft">Draft</span>
+        </div>
+        <div class="cc-desc">Food & beverage businesses in Selangor — Presoft Mobile Stock campaign.</div>
+        <div class="cc-meta">
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><strong>0</strong> sent</div>
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><strong>0</strong> replies</div>
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Selangor</div>
+        </div>
+      </div>
+      <div class="campaign-card">
+        <div class="cc-header">
+          <span class="cc-name">✅ Penang Auto Follow-up</span>
+          <span class="cc-status done">Done</span>
+        </div>
+        <div class="cc-desc">Automated follow-up to non-responders from Penang AutoCount campaign.</div>
+        <div class="cc-meta">
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><strong>79</strong> sent</div>
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><strong>11</strong> replies</div>
+          <div class="cc-meta-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Penang</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sent emails table (hidden by default) -->
+  <div id="tab-sent" style="display:none">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" placeholder="Search leads...">
+        </div>
+        <button class="filter-btn active">All Status</button>
+        <button class="filter-btn">Priority</button>
+        <button class="filter-btn">Product</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-green"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Export CSV</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Email</th>
+              <th>Region</th>
+              <th>Product</th>
+              <th>Status</th>
+              <th>Sent</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="company-cell"><div class="company-avatar">S</div><div><div class="company-name">Seri Setia Construction</div><div style="font-size:11px;color:var(--text-muted)">Business Contact</div></div></div></td>
+              <td style="color:var(--text-muted)">—</td>
+              <td>Other</td>
+              <td>AutoCount Accounting</td>
+              <td><span class="badge badge-sent">Sent</span></td>
+              <td style="font-size:12px;color:var(--text-muted)">2h ago</td>
+              <td><div class="action-cell"><button title="View">👁</button><button title="Re-send"></button></div></td>
+            </tr>
+            <tr>
+              <td><div class="company-cell"><div class="company-avatar">D</div><div><div class="company-name">Dakwah Corner Bookstore</div><div style="font-size:11px;color:var(--text-muted)">Business Contact</div></div></div></td>
+              <td>info@dakwahbookstore.com</td>
+              <td>Other</td>
+              <td>AutoCount POS</td>
+              <td><span class="badge badge-new">Replied</span></td>
+              <td style="font-size:12px;color:var(--text-muted)">1d ago</td>
+              <td><div class="action-cell"><button title="View">👁</button><button title="Qualify">✓</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="company-cell"><div class="company-avatar">G</div><div><div class="company-name">Glad Sounds Christian Bookstore</div><div style="font-size:11px;color:var(--text-muted)">Business Contact</div></div></div></td>
+              <td>info@gladsounds.com.my</td>
+              <td>Other</td>
+              <td>AutoCount POS</td>
+              <td><span class="badge badge-failed">Bounced</span></td>
+              <td style="font-size:12px;color:var(--text-muted)">3d ago</td>
+              <td><div class="action-cell"><button title="View"></button><button title="Re-send"></button></div></td>
+            </tr>
+            <tr>
+              <td><div class="company-cell"><div class="company-avatar">P</div><div><div class="company-name">POPULAR Bookstore 大众书局</div><div style="font-size:11px;color:var(--text-muted)">Business Contact</div></div></div></td>
+              <td>info@popular.com.my</td>
+              <td>Other</td>
+              <td>AutoCount Accounting</td>
+              <td><span class="badge badge-sent">Sent</span></td>
+              <td style="font-size:12px;color:var(--text-muted)">5d ago</td>
+              <td><div class="action-cell"><button title="View">👁</button><button title="Re-send">🔄</button></div></td>
+            </tr>
+            <tr>
+              <td><div class="company-cell"><div class="company-avatar">M</div><div><div class="company-name">MRKB Bookstores @ Saujana</div><div style="font-size:11px;color:var(--text-muted)">Business Contact</div></div></div></td>
+              <td>mrkbonline@gmail.com</td>
+              <td>Other</td>
+              <td>Presoft Mobile Stock</td>
+              <td><span class="badge badge-qualified">Qualified</span></td>
+              <td style="font-size:12px;color:var(--text-muted)">1w ago</td>
+              <td><div class="action-cell"><button title="View">👁</button><button title="CRM">📋</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div class="page-info">Showing 1–5 of 127 emails</div>
+        <div class="page-btns">
+          <button class="page-btn">‹</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <button class="page-btn">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Replies tab (hidden) -->
+  <div id="tab-replies" style="display:none">
+    <div class="table-wrap" style="padding:60px;text-align:center;color:var(--text-muted)">
+      <div style="font-size:40px;margin-bottom:12px">📬</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">23 Replies</div>
+      <div style="font-size:13px">Replies will appear here as they come in. Track engagement and qualify leads directly.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(btn, tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-campaigns').style.display = tab === 'campaigns' ? '' : 'none';
+    document.getElementById('tab-sent').style.display = tab === 'sent' ? '' : 'none';
+    document.getElementById('tab-replies').style.display = tab === 'replies' ? '' : 'none';
+  }
+</script>
+</body>
+</html>
