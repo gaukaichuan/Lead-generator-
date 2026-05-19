@@ -1278,6 +1278,7 @@
       document.getElementById('w-' + ws).classList.add('active');
       if (ws === 'dashboard') renderDash();
       if (ws === 'crm') renderQueue();
+      if (ws === 'outbound') renderOutbound();
     }
 
     // ===== RENDER =====
@@ -3007,7 +3008,7 @@
         const init = (l.company || '?')[0].toUpperCase();
         const statusBadge = l.emailStatus === 'replied' ? 'replied' : l.emailStatus === 'failed' ? 'bounced' : 'sent';
         const statusLabel = statusBadge.charAt(0).toUpperCase() + statusBadge.slice(1);
-        const agoStr = l.sentAt ? timeAgo(l.sentAt) : '—';
+        const agoStr = l.sentAt ? ago(l.sentAt) : '—';
         return `<tr>
           <td><div class="ob-company-cell"><div class="ob-company-avatar">${init}</div><div><div class="ob-company-name">${esc(l.company)}</div><div style="font-size:11px;color:var(--text-muted)">${esc(l.contactName || 'Business Contact')}</div></div></div></td>
           <td>${l.email || '<span style="color:var(--text-muted)">—</span>'}</td>
