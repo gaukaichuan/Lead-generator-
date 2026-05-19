@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Variables — Settings Preview</title>
+<style>
+  :root {
+    --surface: #fff; --surface-hover: #f8f9fc; --border: #e2e5ed;
+    --border-light: #f0f1f5; --text: #1a1d2e; --text-secondary: #4a4f68;
+    --text-muted: #8b8fa3; --blue-50: #eff6ff; --blue-100: #dbeafe;
+    --blue-500: #3b82f6; --blue-600: #2563eb; --green: #059669;
+    --green-50: #ecfdf5; --green-100: #d1fae5; --amber: #d97706;
+    --amber-50: #fffbeb; --amber-100: #fef3c7; --purple: #7c3aed;
+    --purple-50: #f5f3ff; --purple-100: #e9d5ff; --pink: #ec4899;
+    --pink-50: #fdf2f8; --radius: 10px; --radius-sm: 6px;
+    --radius-xl: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--surface-hover); color: var(--text); display: flex; justify-content: center; padding: 40px 16px; }
+  .preview-wrapper { width: 100%; max-width: 440px; }
+  .preview-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+
+  /* Settings drawer mock */
+  .settings-drawer { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 28px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); overflow: hidden; }
+  .settings-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .settings-header .eyebrow { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .settings-header h3 { font-size: 18px; font-weight: 800; margin-top: 2px; }
+  .settings-header .close-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); cursor: pointer; display: grid; place-items: center; font-size: 16px; color: var(--text-muted); transition: all 150ms; }
+  .settings-header .close-btn:hover { background: var(--surface-hover); color: var(--text); }
+  .settings-body { display: flex; flex-direction: column; gap: 20px; max-height: 700px; overflow-y: auto; }
+
+  /* Section */
+  .settings-section h4 { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .settings-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-hover); cursor: pointer; transition: all 150ms; width: 100%; text-align: left; font: inherit; }
+  .settings-item:hover { background: var(--surface); border-color: var(--blue-100); }
+  .settings-item-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); display: grid; place-items: center; flex-shrink: 0; }
+  .settings-item-icon svg { width: 18px; height: 18px; }
+  .settings-item-icon.blue { background: var(--blue-50); } .settings-item-icon.blue svg { fill: var(--blue-600); }
+  .settings-item-icon.green { background: var(--green-50); } .settings-item-icon.green svg { fill: var(--green); }
+  .settings-item-icon.purple { background: var(--purple-50); } .settings-item-icon.purple svg { fill: var(--purple); }
+  .settings-item-icon.amber { background: var(--amber-50); } .settings-item-icon.amber svg { fill: var(--amber); }
+  .settings-item-text strong { display: block; font-size: 14px; font-weight: 600; }
+  .settings-item-text span { font-size: 12px; color: var(--text-muted); }
+
+  /* Email Variables Panel (new) */
+  .var-panel { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+  .var-panel-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--border-light); background: var(--surface-hover); }
+  .var-panel-header .icon { width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--amber-50); display: grid; place-items: center; }
+  .var-panel-header .icon svg { width: 16px; height: 16px; fill: var(--amber); }
+  .var-panel-header .info strong { font-size: 14px; font-weight: 700; }
+  .var-panel-header .info span { font-size: 11px; color: var(--text-muted); display: block; }
+
+  /* Sender defaults */
+  .sender-defaults { padding: 14px 16px; border-bottom: 1px solid var(--border-light); }
+  .sender-defaults label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px; }
+  .sender-defaults input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; background: var(--surface-hover); transition: border-color 150ms; outline: none; }
+  .sender-defaults input:focus { border-color: var(--blue-500); background: var(--surface); }
+  .sender-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sender-row > div + div { margin-top: 0; }
+
+  /* Product pitches */
+  .product-pitches { padding: 14px 16px; }
+  .product-pitches .section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .product-pitches .section-label svg { width: 14px; height: 14px; fill: var(--amber); }
+  .pitch-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--surface-hover); margin-bottom: 6px; border: 1px solid transparent; }
+  .pitch-row:hover { border-color: var(--border); background: var(--surface); }
+  .pitch-row .badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+  .pitch-row .badge.var { background: var(--blue-50); color: var(--blue-600); }
+  .pitch-row .badge.prod { background: var(--green-50); color: var(--green); }
+  .pitch-row .name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pitch-row .value { font-size: 11px; color: var(--text-muted); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Variable cheatsheet */
+  .cheatsheet { padding: 14px 16px; border-top: 1px solid var(--border-light); }
+  .cheatsheet .section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .cheat-group { margin-bottom: 8px; }
+  .cheat-group-label { font-size: 10px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+  .cheat-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+  .cheat-badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .cheat-badge.blue { background: var(--blue-50); color: var(--blue-600); }
+  .cheat-badge.amber { background: var(--amber-50); color: var(--amber); }
+  .cheat-badge.green { background: var(--green-50); color: var(--green); }
+  .cheat-badge.purple { background: var(--purple-50); color: var(--purple); }
+  .cheat-badge.pink { background: var(--pink-50); color: var(--pink); }
+
+  /* Save button */
+  .var-save { padding: 12px 16px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 8px; }
+  .btn { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); transition: all 150ms; }
+  .btn:hover { background: var(--surface-hover); }
+  .btn-primary { background: var(--blue-600); color: #fff; border-color: var(--blue-600); }
+  .btn-primary:hover { background: var(--blue-500); }
+</style>
+</head>
+<body>
+<div class="preview-wrapper">
+  <div class="preview-label">Settings Drawer — Email Variables Panel (NEW)</div>
+
+  <div class="settings-drawer">
+    <div class="settings-header">
+      <div><div class="eyebrow">Settings</div><h3>Configuration</h3></div>
+      <button class="close-btn">&times;</button>
+    </div>
+
+    <div class="settings-body">
+      <!-- Existing: Quick Access -->
+      <div class="settings-section"><h4>Quick Access</h4>
+        <button class="settings-item">
+          <div class="settings-item-icon blue"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+          <div class="settings-item-text"><strong>Email Configuration</strong><span>Sender details and email templates</span></div>
+        </button>
+        <div style="height:8px"></div>
+        <button class="settings-item">
+          <div class="settings-item-icon green"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM12 18l-4-4h3V8h2v6h3l-4 4z"/></svg></div>
+          <div class="settings-item-text"><strong>Product Manager</strong><span>Manage products for bulk email campaigns</span></div>
+        </button>
+      </div>
+
+      <!-- NEW: Email Variables Panel (expanded inline) -->
+      <div class="var-panel">
+        <div class="var-panel-header">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h5v7h7v9H6z"/><path d="M8 12h8v2H8zm0 4h5v2H8z"/></svg></div>
+          <div class="info"><strong>Email Variables</strong><span>Defaults for template substitution</span></div>
+        </div>
+
+        <!-- Sender defaults -->
+        <div class="sender-defaults">
+          <label>Default Sender</label>
+          <div class="sender-row">
+            <div><input type="text" value="Your Name" placeholder="Your Name" id="prev-sname"></div>
+            <div><input type="email" value="sales@example.com" placeholder="sales@example.com" id="prev-semail"></div>
+          </div>
+        </div>
+
+        <!-- Product pitches -->
+        <div class="product-pitches">
+          <div class="section-label">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM12 18l-4-4h3V8h2v6h3l-4 4z"/></svg>
+            Product Variables (from Product Manager)
+          </div>
+          <div class="pitch-row">
+            <span class="badge prod">1</span>
+            <span class="name">AutoCount POS</span>
+            <span class="value">Upgrade in-store sales…</span>
+          </div>
+          <div class="pitch-row">
+            <span class="badge prod">2</span>
+            <span class="name">AutoCount Accounting</span>
+            <span class="value">Automate bookkeeping…</span>
+          </div>
+          <div class="pitch-row">
+            <span class="badge prod">3</span>
+            <span class="name">Presoft Mobile Stock</span>
+            <span class="value">Track inventory on the go…</span>
+          </div>
+        </div>
+
+        <!-- Variable cheatsheet -->
+        <div class="cheatsheet">
+          <div class="section-label">Template Variables Reference</div>
+
+          <div class="cheat-group">
+            <div class="cheat-group-label">Lead Info</div>
+            <div class="cheat-badges">
+              <span class="cheat-badge blue">{{company}}</span>
+              <span class="cheat-badge blue">{{contactName}}</span>
+              <span class="cheat-badge blue">{{region}}</span>
+              <span class="cheat-badge blue">{{source}}</span>
+              <span class="cheat-badge blue">{{industry}}</span>
+            </div>
+          </div>
+
+          <div class="cheat-group">
+            <div class="cheat-group-label">Sender</div>
+            <div class="cheat-badges">
+              <span class="cheat-badge green">{{senderName}}</span>
+              <span class="cheat-badge green">{{senderEmail}}</span>
+            </div>
+          </div>
+
+          <div class="cheat-group">
+            <div class="cheat-group-label">Multi-Product (numbered)</div>
+            <div class="cheat-badges">
+              <span class="cheat-badge amber">{{productName1}}</span>
+              <span class="cheat-badge amber">{{pitch1}}</span>
+              <span class="cheat-badge amber">{{productName2}}</span>
+              <span class="cheat-badge amber">{{pitch2}}</span>
+              <span class="cheat-badge amber">{{productName3}}</span>
+              <span class="cheat-badge amber">{{pitch3}}</span>
+            </div>
+          </div>
+
+          <div class="cheat-group">
+            <div class="cheat-group-label">Auto-Inject</div>
+            <div class="cheat-badges">
+              <span class="cheat-badge purple">{{productBlocks}}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Save button -->
+        <div class="var-save">
+          <button class="btn" onclick="resetSender()">Reset</button>
+          <button class="btn btn-primary" onclick="saveSender()">Save Defaults</button>
+        </div>
+      </div>
+
+      <!-- More quick access items below -->
+      <div class="settings-section">
+        <button class="settings-item">
+          <div class="settings-item-icon purple"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6zm3.5-6c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11 10.07 7.5 12 7.5s3.5 1.57 3.5 3.5z"/></svg></div>
+          <div class="settings-item-text"><strong>Bigin Admin</strong><span>Manage users' CRM connections</span></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function saveSender() {
+    const name = document.getElementById('prev-sname').value;
+    const email = document.getElementById('prev-semail').value;
+    alert('Saved:\n  Name: ' + name + '\n  Email: ' + email);
+  }
+  function resetSender() {
+    document.getElementById('prev-sname').value = 'Your Name';
+    document.getElementById('prev-semail').value = 'sales@example.com';
+  }
+</script>
+</body>
+</html>

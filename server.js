@@ -249,19 +249,19 @@ function seedDefaultEmailTemplates(store) {
       id: "tmpl_default_1",
       name: "General Outreach",
       subject: "{{productName}} idea for {{company}}",
-      body: "Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\nBased on your setup in {{industry}}, I believe {{productName}} could be a strong fit.\n\n{{pitch}}\n\nThe main opportunity I see is around the areas you're currently working to improve.\n\nBest,\n{{senderName}}\n{{senderEmail}}"
+      body: "Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\nBased on your setup in {{industry}}, I believe {{productName}} could be a strong fit.\n\n{{pitch}}\n\nThe main opportunity I see is around the areas you're currently working to improve.\n\n{{productBlocks}}\n\nBest,\n{{senderName}}\n{{senderEmail}}"
     },
     {
       id: "tmpl_default_2",
       name: "Follow-up",
       subject: "Following up — {{productName}} for {{company}}",
-      body: "Hi {{contactName}},\n\nI wanted to follow up on my previous message about {{productName}} for {{company}}.\n\nI understand you're busy, but I truly believe this could help with:\n\n{{pitch}}\n\nWould you be open to a quick 10-minute call this week?\n\nBest regards,\n{{senderName}}"
+      body: "Hi {{contactName}},\n\nI wanted to follow up on my previous message about {{productName}} for {{company}}.\n\nI understand you're busy, but I truly believe this could help with:\n\n{{pitch}}\n\n{{productBlocks}}\n\nWould you be open to a quick 10-minute call this week?\n\nBest regards,\n{{senderName}}"
     },
     {
       id: "tmpl_default_3",
       name: "Partnership Inquiry",
       subject: "Partnership opportunity — {{company}} x {{productName}}",
-      body: "Dear {{contactName}},\n\nI'm reaching out from LeadGen AI. We've identified {{company}} as a potential partner for our {{productName}} solution.\n\n{{pitch}}\n\nWe'd love to explore how we can work together to benefit businesses in {{region}}.\n\nLooking forward to your response.\n\nSincerely,\n{{senderName}}\n{{senderEmail}}"
+      body: "Dear {{contactName}},\n\nI'm reaching out from LeadGen AI. We've identified {{company}} as a potential partner for our {{productName}} solution.\n\n{{pitch}}\n\n{{productBlocks}}\n\nWe'd love to explore how we can work together to benefit businesses in {{region}}.\n\nLooking forward to your response.\n\nSincerely,\n{{senderName}}\n{{senderEmail}}"
     }
   ];
   store.defaultTemplateId = "tmpl_default_1";
