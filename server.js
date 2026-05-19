@@ -1,3 +1,4 @@
+// Bigin rate limiting v2 — token cache + exponential backoff
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
