@@ -2709,8 +2709,14 @@ async function handleApi(request, response, pathname, options = {}) {
 
     if (action === "crm" && request.method === "PATCH") {
       if (!lead.crmLogged) {
-        await pushLeadToBigin(store, session.username, lead, biginFetch);
-        appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`, session.username);
+        try {
+          await pushLeadToBigin(store, session.username, lead, biginFetch);
+          appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`, session.username);
+        } catch (crmError) {
+          writeStore(store);
+          sendJson(response, 500, { error: crmError.message || "CRM sync failed" });
+          return;
+        }
       } else if (lead.bigin && lead.bigin.dealId) {
         appendActivity(store, lead.id, "CRM sync skipped", `${lead.company} already has an existing Bigin deal.`, session.username);
       }
