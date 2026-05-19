@@ -1001,6 +1001,124 @@ async function readJsonErrorAware(response) {
   return payload || {};
 }
 
+// ===== BIGIN RATE LIMITING & TOKEN CACHING =====
+
+// In-memory token cache: username -> { accessToken, apiDomain, expiresAt }
+// Zoho access tokens typically expire in ~1 hour; we cache with a 5-minute buffer.
+const biginTokenCache = new Map();
+const BIGIN_TOKEN_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
+
+// In-memory lock per user to serialize token refreshes (prevents parallel refresh races)
+const biginTokenRefreshLocks = new Map(); // username -> Promise
+
+// Sleep helper for exponential backoff
+function biginSleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Retry wrapper with exponential backoff — retries on rate-limit ("too many requests") errors.
+// maxRetries=3, baseDelay=1000ms → delays: 1s, 2s, 4s
+async function biginWithRetry(fn, { maxRetries = 3, baseDelay = 1000 } = {}) {
+  let lastError;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      const message = String(error.message || error);
+      // Detect rate-limit errors from Bigin/Zoho
+      if (
+        message.includes("too many requests") ||
+        message.includes("Too many requests") ||
+        message.includes("rate.limit") ||
+        message.includes("rate_limit") ||
+        message.includes("RATELIMIT")
+      ) {
+        if (attempt < maxRetries) {
+          const delay = baseDelay * Math.pow(2, attempt); // 1s, 2s, 4s ...
+          await biginSleep(delay);
+          continue;
+        }
+      }
+      // Non-rate-limit error, or all retries exhausted — re-throw
+      throw error;
+    }
+  }
+  throw lastError;
+}
+
+// Get a valid access token for a user, using cache when possible and serializing refreshes.
+async function getCachedBiginAccessToken(store, username, fetchImpl = fetch) {
+  ensureBiginClientConfig();
+  const refreshToken = getUserBiginRefreshToken(store, username);
+
+  if (!refreshToken) {
+    throw new Error("Bigin is not connected yet. Open /api/integrations/bigin/connect once to authorize it first.");
+  }
+
+  // Check cache first
+  const cached = biginTokenCache.get(username);
+  if (cached && cached.expiresAt > Date.now() + BIGIN_TOKEN_BUFFER_MS) {
+    return { accessToken: cached.accessToken, apiDomain: cached.apiDomain };
+  }
+
+  // Serialize token refresh per user to prevent parallel races
+  if (biginTokenRefreshLocks.has(username)) {
+    // Another refresh is in progress — wait for it
+    await biginTokenRefreshLocks.get(username);
+    // After waiting, re-check cache (the other request may have populated it)
+    const cachedAfter = biginTokenCache.get(username);
+    if (cachedAfter && cachedAfter.expiresAt > Date.now() + BIGIN_TOKEN_BUFFER_MS) {
+      return { accessToken: cachedAfter.accessToken, apiDomain: cachedAfter.apiDomain };
+    }
+  }
+
+  // Perform the refresh (locked per user)
+  const refreshPromise = (async () => {
+    const tokenResponse = await fetchImpl(`${getBiginAccountsServer()}/oauth/v2/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        client_id: getBiginClientId(),
+        client_secret: getBiginClientSecret(),
+        refresh_token: refreshToken
+      })
+    });
+
+    const payload = await readJsonErrorAware(tokenResponse);
+    const connection = getUserBigin(store, username);
+    connection.refreshToken = payload.refresh_token || connection.refreshToken || "";
+    connection.apiDomain = payload.api_domain || connection.apiDomain || "https://www.zohoapis.com";
+    connection.connectedAt = new Date().toISOString();
+    connection.accountsServer = getBiginAccountsServer();
+    writeStore(store);
+
+    // Cache the token (Zoho expires in ~1h; use payload.expires_in if available, fallback to 1h)
+    const expiresIn = (payload.expires_in || 3600) * 1000;
+    biginTokenCache.set(username, {
+      accessToken: payload.access_token,
+      apiDomain: connection.apiDomain,
+      expiresAt: Date.now() + expiresIn
+    });
+
+    return {
+      accessToken: payload.access_token,
+      apiDomain: connection.apiDomain
+    };
+  })();
+
+  biginTokenRefreshLocks.set(username, refreshPromise);
+
+  try {
+    return await refreshPromise;
+  } finally {
+    biginTokenRefreshLocks.delete(username);
+  }
+}
+
 async function exchangeBiginAuthorizationCode(request, store, username, code, fetchImpl = fetch) {
   ensureBiginClientConfig();
 
@@ -1061,44 +1179,48 @@ async function getUserBiginAccessToken(store, username, fetchImpl = fetch) {
 }
 
 async function createBiginRecord(store, username, moduleApiName, data, fetchImpl = fetch) {
-  const { accessToken, apiDomain } = await getUserBiginAccessToken(store, username, fetchImpl);
-  const endpoint = `${apiDomain}/bigin/v2/${moduleApiName}`;
-  const response = await fetchImpl(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Zoho-oauthtoken ${accessToken}`
-    },
-    body: JSON.stringify({
-      data: [data],
-      trigger: []
-    })
+  return biginWithRetry(async () => {
+    const { accessToken, apiDomain } = await getCachedBiginAccessToken(store, username, fetchImpl);
+    const endpoint = `${apiDomain}/bigin/v2/${moduleApiName}`;
+    const response = await fetchImpl(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Zoho-oauthtoken ${accessToken}`
+      },
+      body: JSON.stringify({
+        data: [data],
+        trigger: []
+      })
+    });
+
+    const payload = await readJsonErrorAware(response);
+    const item = Array.isArray(payload.data) ? payload.data[0] : null;
+
+    if (!item || item.status !== "success") {
+      throw new Error(
+        (item && (item.message || item.code)) || payload.message || "Bigin rejected the record creation request."
+      );
+    }
+
+    return item.details || {};
   });
-
-  const payload = await readJsonErrorAware(response);
-  const item = Array.isArray(payload.data) ? payload.data[0] : null;
-
-  if (!item || item.status !== "success") {
-    throw new Error(
-      (item && (item.message || item.code)) || payload.message || "Bigin rejected the record creation request."
-    );
-  }
-
-  return item.details || {};
 }
 
 async function getUserBiginJson(store, username, path, fetchImpl = fetch) {
-  const { accessToken, apiDomain } = await getUserBiginAccessToken(store, username, fetchImpl);
-  const normalizedPath = String(path || "").startsWith("/") ? path : `/${path}`;
-  const endpoint = `${apiDomain}${normalizedPath}`;
-  const response = await fetchImpl(endpoint, {
-    method: "GET",
-    headers: {
-      Authorization: `Zoho-oauthtoken ${accessToken}`
-    }
-  });
+  return biginWithRetry(async () => {
+    const { accessToken, apiDomain } = await getCachedBiginAccessToken(store, username, fetchImpl);
+    const normalizedPath = String(path || "").startsWith("/") ? path : `/${path}`;
+    const endpoint = `${apiDomain}${normalizedPath}`;
+    const response = await fetchImpl(endpoint, {
+      method: "GET",
+      headers: {
+        Authorization: `Zoho-oauthtoken ${accessToken}`
+      }
+    });
 
-  return readJsonErrorAware(response);
+    return readJsonErrorAware(response);
+  });
 }
 
 async function getUserBiginPipelineMetadata(store, username, fetchImpl = fetch) {
