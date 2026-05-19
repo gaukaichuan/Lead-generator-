@@ -1979,8 +1979,6 @@ async function handleApi(request, response, pathname, options = {}) {
   const biginFetch = options.biginFetch || fetch;
   const emailDebugLogger = options.emailDebugLogger;
 
-  try {
-
   // ===== AUTH ENDPOINTS (no auth required) =====
 
   if (request.method === "POST" && pathname === "/api/auth/login") {
@@ -2711,14 +2709,8 @@ async function handleApi(request, response, pathname, options = {}) {
 
     if (action === "crm" && request.method === "PATCH") {
       if (!lead.crmLogged) {
-        try {
-          await pushLeadToBigin(store, session.username, lead, biginFetch);
-          appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`, session.username);
-        } catch (crmError) {
-          writeStore(store);
-          sendJson(response, 500, { error: crmError.message || "CRM sync failed" });
-          return;
-        }
+        await pushLeadToBigin(store, session.username, lead, biginFetch);
+        appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`, session.username);
       } else if (lead.bigin && lead.bigin.dealId) {
         appendActivity(store, lead.id, "CRM sync skipped", `${lead.company} already has an existing Bigin deal.`, session.username);
       }
@@ -2753,11 +2745,6 @@ async function handleApi(request, response, pathname, options = {}) {
   }
 
   sendJson(response, 404, { error: "Not found" });
-  } catch (err) {
-    console.error('handleApi error:', err.message);
-    console.error(err.stack);
-    sendJson(response, 500, { error: err.message || "Server error" });
-  }
 }
 
 function createAppServer(options = {}) {
