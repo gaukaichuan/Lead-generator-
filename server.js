@@ -2379,6 +2379,23 @@ async function handleApi(request, response, pathname, options = {}) {
       sendJson(response, 200, { total, connected, disconnected: total - connected });
       return;
     }
+
+    // GET /api/admin/bigin-fields - debug: list Bigin field API names for Accounts module
+    if (request.method === "GET" && pathname === "/api/admin/bigin-fields") {
+      try {
+        const { apiDomain, accessToken } = await getCachedBiginAccessToken(store, session.username, fetch);
+        const layoutUrl = `${apiDomain}/bigin/v2/settings/fields?module=Accounts`;
+        const layoutRes = await fetch(layoutUrl, {
+          headers: { Authorization: `Zoho-oauthtoken ${accessToken}` }
+        });
+        const layoutData = await layoutRes.json();
+        console.log("BIGIN FIELDS RESPONSE:", JSON.stringify(layoutData, null, 2));
+        sendJson(response, 200, layoutData);
+      } catch (err) {
+        sendJson(response, 500, { error: err.message });
+      }
+      return;
+    }
   }
 
   // ===== BIGIN ENDPOINTS =====
