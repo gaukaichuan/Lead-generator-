@@ -1356,6 +1356,8 @@ function buildBiginCompanyPayload(lead) {
     Phone: lead.phone || undefined,
     Website: website || undefined,
     Industry: lead.industry || undefined,
+    Business_Nature: lead.companyType || undefined,
+    Business_Nature_Description: lead.industry || undefined,
     Description: [
       lead.source ? `Source: ${lead.source}` : "",
       lead.region ? `Region: ${lead.region}` : "",
