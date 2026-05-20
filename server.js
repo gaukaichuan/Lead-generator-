@@ -1381,7 +1381,7 @@ function buildBiginContactPayload(lead, companyId) {
   };
 }
 
-function buildBiginDealPayload(lead, companyId, contactId, pipelineDefaults) {
+function buildBiginDealPayload(store, lead, companyId, contactId, pipelineDefaults) {
   const enrichedLead = enrichLead(store, lead);
   const closeDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const payload = {
@@ -1443,7 +1443,7 @@ async function pushLeadToBigin(store, username, lead, fetchImpl = fetch) {
 
   if (!lead.bigin.dealId) {
     const pipelineDefaults = await resolveBiginPipelineDefaults(store, username, fetchImpl);
-    const dealPayload = buildBiginDealPayload(lead, lead.bigin.companyId, lead.bigin.contactId, pipelineDefaults);
+    const dealPayload = buildBiginDealPayload(store, lead, lead.bigin.companyId, lead.bigin.contactId, pipelineDefaults);
     try {
       const dealDetails = await createBiginRecord(store, username, "Pipelines", dealPayload, fetchImpl);
       lead.bigin.dealId = dealDetails.id;
