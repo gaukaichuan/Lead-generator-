@@ -308,6 +308,266 @@
     document.getElementById('tab-sent').style.display = tab === 'sent' ? '' : 'none';
     document.getElementById('tab-replies').style.display = tab === 'replies' ? '' : 'none';
   }
+
+  // Campaign detail modal
+  function openCampaign(name) {
+    document.getElementById('campaign-detail-modal').hidden = false;
+    document.getElementById('cd-title').textContent = name;
+  }
+  function closeCampaign() {
+    document.getElementById('campaign-detail-modal').hidden = true;
+  }
+
+  // New campaign modal
+  function openNewCampaign() {
+    document.getElementById('new-campaign-modal').hidden = false;
+  }
+  function closeNewCampaign() {
+    document.getElementById('new-campaign-modal').hidden = true;
+  }
+
+  // Toggle steps in new campaign flow
+  let newCampaignStep = 1;
+  function ncNext() {
+    if (newCampaignStep < 3) {
+      newCampaignStep++;
+      updateNewCampaignUI();
+    }
+  }
+  function ncBack() {
+    if (newCampaignStep > 1) {
+      newCampaignStep--;
+      updateNewCampaignUI();
+    }
+  }
+  function updateNewCampaignUI() {
+    for (let i = 1; i <= 3; i++) {
+      document.getElementById('nc-step-' + i).style.display = i === newCampaignStep ? '' : 'none';
+      const dot = document.getElementById('nc-dot-' + i);
+      if (i < newCampaignStep) { dot.className = 'nc-step-dot done'; dot.textContent = '✓'; }
+      else if (i === newCampaignStep) { dot.className = 'nc-step-dot active'; dot.textContent = i; }
+      else { dot.className = 'nc-step-dot'; dot.textContent = i; }
+      if (i < 3) {
+        const line = document.getElementById('nc-line-' + i);
+        line.className = 'nc-step-line' + (i < newCampaignStep ? ' done' : '');
+      }
+    }
+  }
+
+  // Select products in new campaign
+  function toggleProduct(key) {
+    const chip = document.querySelector('[data-product="' + key + '"]');
+    chip.classList.toggle('selected');
+    const count = document.querySelectorAll('.product-chip.selected').length;
+    document.getElementById('nc-prod-count').textContent = count + ' selected';
+  }
+
+  // Simulate sending campaign
+  let sendProgress = 0;
+  let sendInterval = null;
+  function simulateSend() {
+    closeNewCampaign();
+    switchTab(document.querySelector('.tab'), 'campaigns');
+    // Show progress on the draft campaign card
+    const card = document.getElementById('campaign-fb-blast');
+    if (card) {
+      card.querySelector('.cc-status').textContent = 'Sending...';
+      card.querySelector('.cc-status').className = 'cc-status active';
+      card.querySelector('.cc-meta .cc-meta-item:nth-child(1) strong').textContent = '0';
+      const bar = document.createElement('div');
+      bar.style.cssText = 'height:4px;background:var(--surface-hover);border-radius:2px;margin-top:10px;overflow:hidden;';
+      bar.innerHTML = '<div id="send-bar" style="height:100%;width:0%;background:var(--green);border-radius:2px;transition:width 0.3s"></div>';
+      card.appendChild(bar);
+      sendProgress = 0;
+      sendInterval = setInterval(() => {
+        sendProgress += Math.floor(Math.random() * 8) + 2;
+        if (sendProgress >= 32) {
+          sendProgress = 32;
+          clearInterval(sendInterval);
+          card.querySelector('.cc-status').textContent = 'Active';
+          card.querySelector('.cc-meta .cc-meta-item:nth-child(1) strong').textContent = sendProgress;
+          const sendBar = document.getElementById('send-bar');
+          if (sendBar) sendBar.parentElement.remove();
+          setTimeout(() => {
+            card.querySelector('.cc-meta .cc-meta-item:nth-child(2) strong').textContent = '4';
+          }, 2000);
+        }
+        if (sendBar) sendBar.style.width = (sendProgress / 32 * 100) + '%';
+      }, 600);
+    }
+  }
 </script>
+
+<!-- CAMPAIGN DETAIL MODAL -->
+<div id="campaign-detail-modal" style="position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);display:grid;place-items:center;padding:24px" hidden>
+  <div style="background:var(--surface);border-radius:var(--radius-lg);width:100%;max-width:700px;max-height:85vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.15);display:flex;flex-direction:column">
+    <!-- Header -->
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">Campaign</div>
+        <div style="font-size:18px;font-weight:800;margin-top:2px" id="cd-title">KL Retail Outreach</div>
+      </div>
+      <button onclick="closeCampaign()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;color:var(--text-muted);display:grid;place-items:center">&times;</button>
+    </div>
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
+      <div style="padding:16px;background:var(--surface);text-align:center">
+        <div style="font-size:24px;font-weight:800;color:var(--blue-600)">48</div>
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600">Sent</div>
+      </div>
+      <div style="padding:16px;background:var(--surface);text-align:center">
+        <div style="font-size:24px;font-weight:800;color:var(--green)">12</div>
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600">Replies</div>
+      </div>
+      <div style="padding:16px;background:var(--surface);text-align:center">
+        <div style="font-size:24px;font-weight:800;color:var(--amber)">3</div>
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600">Bounced</div>
+      </div>
+      <div style="padding:16px;background:var(--surface);text-align:center">
+        <div style="font-size:24px;font-weight:800;color:var(--purple)">25%</div>
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600">Reply Rate</div>
+      </div>
+    </div>
+    <!-- Progress bar -->
+    <div style="padding:14px 24px;background:var(--surface-hover);border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:6px">
+        <span style="color:var(--text-secondary)">Progress</span>
+        <span style="color:var(--green)">48 / 52 leads processed</span>
+      </div>
+      <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:92%;background:linear-gradient(90deg,var(--green),var(--blue-600));border-radius:3px;transition:width 0.5s"></div>
+      </div>
+    </div>
+    <!-- Lead list -->
+    <div style="flex:1;overflow-y:auto;padding:16px 24px">
+      <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Leads in Campaign</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface-hover);border:1px solid var(--border)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--green-50);color:var(--green);display:grid;place-items:center;font-size:11px;font-weight:700">✓</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">ABC Trading</div><div style="font-size:11px;color:var(--text-muted)">ali@abctrading.com</div></div>
+          <span class="badge badge-new" style="font-size:10px">Replied</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface-hover);border:1px solid var(--border)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--green-50);color:var(--green);display:grid;place-items:center;font-size:11px;font-weight:700">✓</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">BookXcess Amcorp Mall</div><div style="font-size:11px;color:var(--text-muted)">support@bookxcess.com</div></div>
+          <span class="badge badge-sent" style="font-size:10px">Sent</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface-hover);border:1px solid var(--border)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--amber-50);color:var(--amber);display:grid;place-items:center;font-size:11px;font-weight:700">!</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">Glad Sounds Bookstore</div><div style="font-size:11px;color:var(--text-muted)">info@gladsounds.com.my</div></div>
+          <span class="badge badge-failed" style="font-size:10px">Bounced</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface-hover);border:1px solid var(--border)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-50);color:var(--blue-600);display:grid;place-items:center;font-size:11px;font-weight:700">⏳</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">Pustaka Tok Kenali</div><div style="font-size:11px;color:var(--text-muted)">— no email</div></div>
+          <span style="font-size:10px;color:var(--text-muted);font-weight:600">Pending</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface-hover);border:1px solid var(--border)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-50);color:var(--blue-600);display:grid;place-items:center;font-size:11px;font-weight:700"></div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">Putra Bookstore</div><div style="font-size:11px;color:var(--text-muted)">— no email</div></div>
+          <span style="font-size:10px;color:var(--text-muted);font-weight:600">Pending</span>
+        </div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeCampaign()">Close</button>
+      <button class="btn btn-primary">View Full Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW CAMPAIGN MODAL (3-step flow) -->
+<div id="new-campaign-modal" style="position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);display:grid;place-items:center;padding:24px" hidden>
+  <div style="background:var(--surface);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:85vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.15);display:flex;flex-direction:column">
+    <!-- Header -->
+    <div style="padding:20px 24px 16px;border-bottom:1px solid var(--border)">
+      <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.1em">New Campaign</div>
+      <div style="font-size:18px;font-weight:800;margin-top:2px">Create Campaign</div>
+      <!-- Step indicator -->
+      <div style="display:flex;align-items:center;gap:0;margin-top:16px;justify-content:center">
+        <div class="nc-step-dot active" id="nc-dot-1">1</div>
+        <div class="nc-step-line" id="nc-line-1"></div>
+        <div class="nc-step-dot" id="nc-dot-2">2</div>
+        <div class="nc-step-line" id="nc-line-2"></div>
+        <div class="nc-step-dot" id="nc-dot-3">3</div>
+      </div>
+    </div>
+    <!-- Step 1: Select leads -->
+    <div id="nc-step-1" style="flex:1;overflow-y:auto;padding:20px 24px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">Select Target Leads</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:all 150ms" onclick="this.querySelector('input').checked=!this.querySelector('input').checked;this.style.borderColor=this.querySelector('input').checked?'var(--blue-500)':'var(--border)'">
+          <input type="checkbox" style="accent-color:var(--blue-600)">
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">KL Retail Shops</div><div style="font-size:11px;color:var(--text-muted)">24 leads · AutoCount POS</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:all 150ms" onclick="this.querySelector('input').checked=!this.querySelector('input').checked;this.style.borderColor=this.querySelector('input').checked?'var(--blue-500)':'var(--border)'">
+          <input type="checkbox" style="accent-color:var(--blue-600)">
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">Selangor F&B</div><div style="font-size:11px;color:var(--text-muted)">18 leads · Presoft Mobile Stock</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);cursor:pointer;transition:all 150ms" onclick="this.querySelector('input').checked=!this.querySelector('input').checked;this.style.borderColor=this.querySelector('input').checked?'var(--blue-500)':'var(--border)'">
+          <input type="checkbox" style="accent-color:var(--blue-600)">
+          <div style="flex:1"><div style="font-size:13px;font-weight:600">Penang Bookstores</div><div style="font-size:11px;color:var(--text-muted)">10 leads · AutoCount Accounting</div></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);text-align:center" id="nc-lead-count">0 groups selected</div>
+    </div>
+    <!-- Step 2: Select template -->
+    <div id="nc-step-2" style="display:none;flex:1;overflow-y:auto;padding:20px 24px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">Choose Email Template</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="padding:14px;border-radius:var(--radius-sm);border:2px solid var(--blue-500);background:var(--blue-50);cursor:pointer">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:14px;font-weight:700;color:var(--blue-600)">⭐ General Outreach</div>
+            <div style="font-size:10px;font-weight:700;color:var(--blue-600);background:var(--blue-100);padding:2px 8px;border-radius:99px">Default</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">"I came across {{company}} while reviewing businesses..."</div>
+        </div>
+        <div style="padding:14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all 150ms" onclick="this.style.borderColor='var(--blue-500)';this.style.background='var(--blue-50)'">
+          <div style="font-size:14px;font-weight:700">Follow-up Reminder</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">"I wanted to follow up on my previous message..."</div>
+        </div>
+        <div style="padding:14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all 150ms">
+          <div style="font-size:14px;font-weight:700">Partnership Inquiry</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">"I'm reaching out from LeadGen AI. We've identified..."</div>
+        </div>
+      </div>
+    </div>
+    <!-- Step 3: Review & Send -->
+    <div id="nc-step-3" style="display:none;flex:1;overflow-y:auto;padding:20px 24px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:12px">Review Campaign</div>
+      <div style="background:var(--surface-hover);border-radius:var(--radius);padding:14px;border:1px solid var(--border);margin-bottom:12px">
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px">
+          <span style="font-weight:600;color:var(--text-muted)">Leads</span><span>52 leads from 3 groups</span>
+          <span style="font-weight:600;color:var(--text-muted)">Template</span><span>General Outreach</span>
+          <span style="font-weight:600;color:var(--text-muted)">Subject</span><span>{{productName}} idea for {{company}}</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:1.6;background:var(--surface-hover);border-radius:var(--radius);padding:14px;border:1px solid var(--border)">
+        <div style="font-weight:600;margin-bottom:6px;color:var(--text-secondary)">Email Preview</div>
+        Hi Business Contact,<br><br>
+        I came across <strong>ABC Trading</strong> while reviewing businesses from Google Maps in Kuala Lumpur.<br><br>
+        Based on your setup in Retail, I believe <strong>AutoCount POS</strong> could be a strong fit.<br><br>
+        Upgrade in-store sales handling, stock sync, and branch reporting.<br><br>
+        Best,<br>Your Name
+      </div>
+    </div>
+    <!-- Footer -->
+    <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeNewCampaign()">Cancel</button>
+      <button class="btn" id="nc-back-btn" style="display:none" onclick="ncBack()">← Back</button>
+      <button class="btn btn-primary" id="nc-next-btn" onclick="ncNext()">Next →</button>
+      <button class="btn btn-green" id="nc-send-btn" style="display:none" onclick="simulateSend()">🚀 Launch Campaign</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .nc-step-dot { width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--surface-hover);color:var(--text-muted);border:2px solid var(--border);transition:all 200ms }
+  .nc-step-dot.active { background:var(--blue-600);color:#fff;border-color:var(--blue-600) }
+  .nc-step-dot.done { background:var(--green);color:#fff;border-color:var(--green) }
+  .nc-step-line { width:40px;height:2px;background:var(--border);transition:all 200ms }
+  .nc-step-line.done { background:var(--green) }
+</style>
 </body>
 </html>

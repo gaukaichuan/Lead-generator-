@@ -191,7 +191,6 @@
     .ld-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--blue-50), var(--purple-50)); display: grid; place-items: center; font-weight: 800; font-size: 16px; color: var(--blue-600); border: 1px solid var(--blue-100); flex-shrink: 0; }
     .ld-company { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .ld-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-    .ld-badges { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
     /* Compact lead detail */
     .ld-section { padding: 8px 20px; }
@@ -687,7 +686,6 @@
             <div class="ld-subtitle" id="ld-subtitle">Contact · Region</div>
           </div>
         </div>
-        <div class="ld-badges" id="ld-badges"></div>
       </div>
 
       <!-- View Mode -->
@@ -705,6 +703,7 @@
             Lead Profile
           </div>
           <div class="ld-grid" id="ld-profile"></div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap" id="ld-profile-badges"></div>
         </div>
         <div class="ld-section" id="ld-pitch-section">
           <div class="ld-section-title">
@@ -1300,10 +1299,10 @@
       document.getElementById('ld-company').textContent = l.company;
       document.getElementById('ld-subtitle').textContent = `${l.contactName || 'No contact'} · ${l.region}`;
 
-      // Badges (removed status & priority badges from header)
+      // Badges — moved into Lead Profile section (below grid)
       let badges = '';
       if (l.crmLogged) badges += `<span class="tag tag-crm" style="font-size:10px">CRM ✓</span>`;
-      document.getElementById('ld-badges').innerHTML = badges;
+      document.getElementById('ld-profile-badges').innerHTML = badges;
 
       // CRM button state
       const crmBtn = document.getElementById('ld-crm-btn');
@@ -1442,10 +1441,10 @@
         btn.disabled = true;
         btn.style.opacity = '0.5';
         btn.innerHTML = '✓ CRM Synced';
-        // Add CRM badge
-        let badges = document.getElementById('ld-badges').innerHTML;
+        // Add CRM badge to profile badges area
+        let badges = document.getElementById('ld-profile-badges').innerHTML;
         if (!badges.includes('CRM')) badges += '<span class="tag tag-crm" style="font-size:10px">CRM ✓</span>';
-        document.getElementById('ld-badges').innerHTML = badges;
+        document.getElementById('ld-profile-badges').innerHTML = badges;
         notify('CRM', `${l.company} was logged to Bigin.`);
       } catch (err) {
         btn.disabled = false;
