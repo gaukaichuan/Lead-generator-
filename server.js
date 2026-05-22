@@ -1408,6 +1408,51 @@ function buildBiginDealPayload(store, lead, companyId, contactId, pipelineDefaul
   return payload;
 }
 
+// ===== SALESPILOT CRM INTEGRATION =====
+const SALESPILOT_API_URL = process.env.SALESPILOT_API_URL || "https://salespilot.agilectechnology.com";
+const SALESPILOT_API_KEY = process.env.SALESPILOT_API_KEY || "";
+
+async function pushLeadToSalesPilot(store, username, lead) {
+  if (!SALESPILOT_API_KEY) {
+    throw new Error("SALESPILOT_API_KEY is not configured. Add it in Render Environment variables.");
+  }
+
+  // Map lead fields to SalesPilot format
+  const payload = {
+    company: lead.company,
+    contactName: lead.contactName || "",
+    email: lead.email || "",
+    phone: lead.phone || "",
+    website: lead.website || "",
+    role: lead.role || "",
+    industry: lead.industry || "",
+    region: lead.region || "",
+    source: lead.source || "",
+    notes: lead.notes || "",
+    recommendedProduct: lead.recommendation?.productName || "",
+    pipelineStage: lead.status || "New",
+    loggedBy: username,
+    loggedAt: new Date().toISOString()
+  };
+
+  const res = await fetch(`${SALESPILOT_API_URL}/api/leads`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${SALESPILOT_API_KEY}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const errBody = await res.text().catch(() => "");
+    throw new Error(`SalesPilot API error ${res.status}: ${errBody}`);
+  }
+
+  const result = await res.json();
+  return result;
+}
+
 async function pushLeadToBigin(store, username, lead, fetchImpl = fetch) {
   if (!lead.bigin || typeof lead.bigin !== "object") {
     lead.bigin = {};
@@ -2862,11 +2907,38 @@ async function handleApi(request, response, pathname, options = {}) {
     }
 
     if (action === "crm" && request.method === "PATCH") {
-      if (!lead.crmLogged) {
-        await pushLeadToBigin(store, session.username, lead, biginFetch);
-        appendActivity(store, lead.id, "Logged to CRM", `${lead.company} was marked as logged in the CRM.`, session.username);
-      } else if (lead.bigin && lead.bigin.dealId) {
-        appendActivity(store, lead.id, "CRM sync skipped", `${lead.company} already has an existing Bigin deal.`, session.username);
+      const body = await readRequestBody(request).catch(() => ({}));
+      const targetCrm = body.target || "both"; // "bigin", "salespilot", or "both"
+
+      // --- SalesPilot sync ---
+      if ((targetCrm === "both" || targetCrm === "salespilot") && SALESPILOT_API_KEY && !lead.salespilotLogged) {
+        try {
+          await pushLeadToSalesPilot(store, session.username, lead);
+          lead.salespilotLogged = true;
+          lead.salespilotSyncedAt = new Date().toISOString();
+          appendActivity(store, lead.id, "Logged to SalesPilot", `${lead.company} was synced to SalesPilot CRM.`, session.username);
+        } catch (err) {
+          lead.salespilotSyncError = err.message;
+          appendActivity(store, lead.id, "SalesPilot sync failed", `Error: ${err.message}`, session.username);
+        }
+      }
+
+      // --- Bigin sync ---
+      if ((targetCrm === "both" || targetCrm === "bigin") && !lead.crmLogged) {
+        try {
+          await pushLeadToBigin(store, session.username, lead, biginFetch);
+          lead.crmLogged = true;
+          lead.bigin.lastSyncedAt = new Date().toISOString();
+          appendActivity(store, lead.id, "Logged to Bigin", `${lead.company} was synced to Bigin CRM.`, session.username);
+        } catch (err) {
+          lead.bigin.lastSyncError = err.message;
+          appendActivity(store, lead.id, "Bigin sync failed", `Error: ${err.message}`, session.username);
+        }
+      }
+
+      // If neither CRM was synced, note it
+      if (!lead.salespilotLogged && !lead.crmLogged) {
+        appendActivity(store, lead.id, "CRM sync skipped", `${lead.company} has already been logged to both CRMs.`, session.username);
       }
     }
 
