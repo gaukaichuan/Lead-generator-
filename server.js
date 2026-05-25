@@ -554,6 +554,53 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
     return { messageId: payload.id ? String(payload.id) : "" };
   }
 
+  if (provider === "plunk") {
+    const apiKey = process.env.PLUNK_API_KEY || "";
+    const plunkFromEmail = process.env.PLUNK_FROM_EMAIL || "";
+    const plunkFromName = String(fromName || process.env.PLUNK_FROM_NAME || "LeadGen AI").replace(/"/g, "");
+    const replyTo = String(fromEmail || "").trim();
+
+    if (!apiKey) {
+      throw new Error("Plunk is not configured. Set PLUNK_API_KEY on the server.");
+    }
+
+    if (!plunkFromEmail) {
+      throw new Error("Plunk is not configured. Set PLUNK_FROM_EMAIL on the server.");
+    }
+
+    const response = await fetch("https://api.useplunk.com/v1/send", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        to: [recipient],
+        from: {
+          name: plunkFromName,
+          email: plunkFromEmail
+        },
+        subject: messageSubject,
+        body: messageBody,
+        ...(replyTo ? { replyTo } : {})
+      })
+    });
+
+    const rawPayload = await response.text();
+    let payload = {};
+    try {
+      payload = rawPayload ? JSON.parse(rawPayload) : {};
+    } catch (parseError) {
+      payload = {};
+    }
+
+    if (!response.ok) {
+      throw new Error(`Plunk send failed: ${payload.message || payload.error || rawPayload || `HTTP ${response.status}`}`);
+    }
+
+    return { messageId: payload.id ? String(payload.id) : "" };
+  }
+
   const user = process.env.GMAIL_SMTP_EMAIL || "";
   const pass = process.env.GMAIL_APP_PASSWORD || "";
 
