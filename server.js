@@ -395,7 +395,6 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
   const recipient = String(to || "").trim();
   const messageSubject = String(subject || "");
   const messageBody = String(body || "");
-  const replyTo = String(fromEmail || "").trim();
 
   if (!apiKey) {
     throw new Error("EngineMailer is not configured. Set ENGINEMAILER_API_KEY on the server.");
@@ -405,21 +404,18 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
     throw new Error("EngineMailer is not configured. Set ENGINEMAILER_FROM_EMAIL on the server.");
   }
 
-  const response = await fetch("https://www.enginemailer.com/api/v1/transactional/send", {
+  const response = await fetch("https://api.enginemailer.com/RESTAPI/V2/Submission/SendEmail", {
     method: "POST",
     headers: {
-      "X-API-Key": apiKey,
+      "APIKey": apiKey,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      to: [recipient],
-      from: {
-        name: emFromName,
-        email: emFromEmail
-      },
-      subject: messageSubject,
-      body: messageBody,
-      ...(replyTo ? { replyTo } : {})
+      CampaignName: emFromName,
+      FromEmail: emFromEmail,
+      ToEmail: recipient,
+      Subject: messageSubject,
+      HTMLBody: `<p>${messageBody.replace(/\n/g, "</p><p>")}</p>`
     })
   });
 
@@ -435,7 +431,7 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
     throw new Error(`EngineMailer send failed: ${payload.message || payload.error || rawPayload || `HTTP ${response.status}`}`);
   }
 
-  return { messageId: payload.id ? String(payload.id) : "" };
+  return { messageId: payload.MessageId ? String(payload.MessageId) : "" };
 }
 
 function normalizeLeadIdentityPart(value) {
