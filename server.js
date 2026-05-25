@@ -405,7 +405,7 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
     throw new Error("EngineMailer is not configured. Set ENGINEMAILER_FROM_EMAIL on the server.");
   }
 
-  const response = await fetch("https://api.enginemailer.com/v1/transactional/send", {
+  const response = await fetch("https://www.enginemailer.com/api/v1/transactional/send", {
     method: "POST",
     headers: {
       "X-API-Key": apiKey,
