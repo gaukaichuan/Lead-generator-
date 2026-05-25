@@ -4,7 +4,6 @@ const fs = require("fs");
 const path = require("path");
 const tls = require("tls");
 const { URL } = require("url");
-const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
 const cookie = require("cookie");
 
@@ -389,271 +388,54 @@ function ensureStoreShape(store) {
   return store;
 }
 
-function createSmtpClient(socket) {
-  let buffer = "";
-  let pending = null;
-
-  function consumeLines() {
-    if (!pending) {
-      return;
-    }
-
-    const lines = buffer.split("\r\n");
-    buffer = lines.pop();
-    for (const line of lines) {
-      if (!line) {
-        continue;
-      }
-      pending.lines.push(line);
-      if (/^\d{3} /.test(line)) {
-        const resolver = pending.resolve;
-        const response = pending.lines.join("\n");
-        pending = null;
-        resolver(response);
-      }
-    }
-  }
-
-  socket.on("data", (chunk) => {
-    buffer += chunk.toString("utf8");
-    consumeLines();
-  });
-
-  function readResponse() {
-    return new Promise((resolve) => {
-      pending = { resolve, lines: [] };
-      consumeLines();
-    });
-  }
-
-  async function expectCode(expectedCode) {
-    const response = await readResponse();
-    if (!response.startsWith(String(expectedCode))) {
-      throw new Error(`SMTP error: ${response}`);
-    }
-    return response;
-  }
-
-  async function sendCommand(command, expectedCode) {
-    socket.write(`${command}\r\n`);
-    return expectCode(expectedCode);
-  }
-
-  return { expectCode, sendCommand };
-}
-
-function smtpSafeLine(line) {
-  return line.startsWith(".") ? `.${line}` : line;
-}
-
-function formatMailbox(name, email) {
-  if (!name) {
-    return email;
-  }
-
-  const safeName = String(name).replace(/"/g, "");
-  return `"${safeName}" <${email}>`;
-}
-
 async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
-  const provider = String(process.env.EMAIL_PROVIDER || "smtp").trim().toLowerCase();
+  const apiKey = process.env.PLUNK_API_KEY || "";
+  const plunkFromEmail = process.env.PLUNK_FROM_EMAIL || "";
+  const plunkFromName = String(fromName || process.env.PLUNK_FROM_NAME || "LeadGen AI").replace(/"/g, "");
   const recipient = String(to || "").trim();
   const messageSubject = String(subject || "");
   const messageBody = String(body || "");
+  const replyTo = String(fromEmail || "").trim();
 
-  if (provider === "brevo") {
-    const apiKey = process.env.BREVO_API_KEY || "";
-    const brevoFromEmail = String(process.env.BREVO_FROM_EMAIL || fromEmail || "").trim();
-    const brevoFromName = String(fromName || process.env.BREVO_FROM_NAME || "LeadGen AI").replace(/"/g, "");
-    const replyTo = String(fromEmail || "").trim();
+  if (!apiKey) {
+    throw new Error("Plunk is not configured. Set PLUNK_API_KEY on the server.");
+  }
 
-    if (!apiKey) {
-      throw new Error("Brevo is not configured. Set BREVO_API_KEY on the server.");
-    }
+  if (!plunkFromEmail) {
+    throw new Error("Plunk is not configured. Set PLUNK_FROM_EMAIL on the server.");
+  }
 
-    if (!brevoFromEmail) {
-      throw new Error("Brevo is not configured. Set BREVO_FROM_EMAIL on the server.");
-    }
-
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "api-key": apiKey
+  const response = await fetch("https://api.useplunk.com/v1/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      to: [recipient],
+      from: {
+        name: plunkFromName,
+        email: plunkFromEmail
       },
-      body: JSON.stringify({
-        sender: {
-          name: brevoFromName,
-          email: brevoFromEmail
-        },
-        to: [{ email: recipient }],
-        subject: messageSubject,
-        textContent: messageBody,
-        ...(replyTo ? { replyTo: { email: replyTo, name: brevoFromName } } : {})
-      })
-    });
-
-    const rawPayload = await response.text();
-    let payload = {};
-    try {
-      payload = rawPayload ? JSON.parse(rawPayload) : {};
-    } catch (parseError) {
-      payload = {};
-    }
-
-    if (!response.ok) {
-      throw new Error(`Brevo send failed: ${payload.message || rawPayload || `HTTP ${response.status}`}`);
-    }
-
-    const messageId = payload.messageId || payload.messageIds?.[0] || "";
-    return { messageId: messageId ? String(messageId) : "" };
-  }
-
-  if (provider === "resend") {
-    const apiKey = process.env.RESEND_API_KEY || "";
-    const resendFromEmail = process.env.RESEND_FROM_EMAIL || "";
-    const resendFromName = String(fromName || process.env.RESEND_FROM_NAME || "LeadGen AI").replace(/"/g, "");
-    const replyTo = String(fromEmail || "").trim();
-
-    if (!apiKey) {
-      throw new Error("Resend is not configured. Set RESEND_API_KEY on the server.");
-    }
-
-    if (!resendFromEmail) {
-      throw new Error("Resend is not configured. Set RESEND_FROM_EMAIL on the server.");
-    }
-
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        from: `"${resendFromName}" <${resendFromEmail}>`,
-        to: [recipient],
-        subject: messageSubject,
-        text: messageBody,
-        ...(replyTo ? { reply_to: replyTo } : {})
-      })
-    });
-
-    const rawPayload = await response.text();
-    let payload = {};
-    try {
-      payload = rawPayload ? JSON.parse(rawPayload) : {};
-    } catch (parseError) {
-      payload = {};
-    }
-
-    if (!response.ok) {
-      throw new Error(`Resend send failed: ${payload.message || rawPayload || `HTTP ${response.status}`}`);
-    }
-
-    return { messageId: payload.id ? String(payload.id) : "" };
-  }
-
-  if (provider === "plunk") {
-    const apiKey = process.env.PLUNK_API_KEY || "";
-    const plunkFromEmail = process.env.PLUNK_FROM_EMAIL || "";
-    const plunkFromName = String(fromName || process.env.PLUNK_FROM_NAME || "LeadGen AI").replace(/"/g, "");
-    const replyTo = String(fromEmail || "").trim();
-
-    if (!apiKey) {
-      throw new Error("Plunk is not configured. Set PLUNK_API_KEY on the server.");
-    }
-
-    if (!plunkFromEmail) {
-      throw new Error("Plunk is not configured. Set PLUNK_FROM_EMAIL on the server.");
-    }
-
-    const response = await fetch("https://api.useplunk.com/v1/send", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        to: [recipient],
-        from: {
-          name: plunkFromName,
-          email: plunkFromEmail
-        },
-        subject: messageSubject,
-        body: messageBody,
-        ...(replyTo ? { replyTo } : {})
-      })
-    });
-
-    const rawPayload = await response.text();
-    let payload = {};
-    try {
-      payload = rawPayload ? JSON.parse(rawPayload) : {};
-    } catch (parseError) {
-      payload = {};
-    }
-
-    if (!response.ok) {
-      throw new Error(`Plunk send failed: ${payload.message || payload.error || rawPayload || `HTTP ${response.status}`}`);
-    }
-
-    return { messageId: payload.id ? String(payload.id) : "" };
-  }
-
-  const user = process.env.GMAIL_SMTP_EMAIL || "";
-  const pass = process.env.GMAIL_APP_PASSWORD || "";
-
-  if (!user || !pass) {
-    throw new Error("Gmail SMTP is not configured. Set GMAIL_SMTP_EMAIL and GMAIL_APP_PASSWORD on the server.");
-  }
-
-  const smtpHost = process.env.GMAIL_SMTP_HOST || "smtp.gmail.com";
-  const smtpPort = Number(process.env.GMAIL_SMTP_PORT || 587);
-  const timeoutMs = Number(process.env.GMAIL_SMTP_TIMEOUT_MS || 20000);
-  const socketTimeoutMs = Number(process.env.GMAIL_SMTP_SOCKET_TIMEOUT_MS || 20000);
-
-  const secure =
-    typeof process.env.GMAIL_SMTP_SECURE === "string"
-      ? process.env.GMAIL_SMTP_SECURE.trim().toLowerCase() === "true"
-      : smtpPort === 465;
-
-  const replyTo = fromEmail && fromEmail !== user ? fromEmail : "";
-
-  const transporter = nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure,
-    auth: { user, pass },
-    requireTLS: !secure,
-    connectionTimeout: timeoutMs,
-    greetingTimeout: timeoutMs,
-    socketTimeout: socketTimeoutMs,
-    tls: {
-      servername: smtpHost
-    }
+      subject: messageSubject,
+      body: messageBody,
+      ...(replyTo ? { replyTo } : {})
+    })
   });
 
+  const rawPayload = await response.text();
+  let payload = {};
   try {
-    const result = await transporter.sendMail({
-      from: formatMailbox(fromName, user),
-      to: recipient,
-      ...(replyTo ? { replyTo } : {}),
-      subject: messageSubject,
-      text: messageBody
-    });
-
-    return { messageId: result && result.messageId ? String(result.messageId) : "" };
-  } catch (error) {
-    const hostLabel = `${smtpHost}:${smtpPort}`;
-    const hint = smtpPort === 465
-      ? "Hint: many cloud hosts block outbound port 465; try GMAIL_SMTP_PORT=587 and GMAIL_SMTP_SECURE=false."
-      : smtpPort === 587
-        ? "Hint: use STARTTLS on 587 (GMAIL_SMTP_SECURE=false)."
-        : "";
-    const message = error && error.message ? error.message : String(error || "Unknown SMTP error");
-    throw new Error(`SMTP send failed via ${hostLabel}: ${message}${hint ? ` ${hint}` : ""}`);
+    payload = rawPayload ? JSON.parse(rawPayload) : {};
+  } catch (parseError) {
+    payload = {};
   }
+
+  if (!response.ok) {
+    throw new Error(`Plunk send failed: ${payload.message || payload.error || rawPayload || `HTTP ${response.status}`}`);
+  }
+
+  return { messageId: payload.id ? String(payload.id) : "" };
 }
 
 function normalizeLeadIdentityPart(value) {
