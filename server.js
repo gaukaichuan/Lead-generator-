@@ -389,33 +389,33 @@ function ensureStoreShape(store) {
 }
 
 async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
-  const apiKey = process.env.PLUNK_API_KEY || "";
-  const plunkFromEmail = process.env.PLUNK_FROM_EMAIL || "";
-  const plunkFromName = String(fromName || process.env.PLUNK_FROM_NAME || "LeadGen AI").replace(/"/g, "");
+  const apiKey = process.env.ENGINEMAILER_API_KEY || "";
+  const emFromEmail = process.env.ENGINEMAILER_FROM_EMAIL || "";
+  const emFromName = String(fromName || process.env.ENGINEMAILER_FROM_NAME || "LeadGen AI").replace(/"/g, "");
   const recipient = String(to || "").trim();
   const messageSubject = String(subject || "");
   const messageBody = String(body || "");
   const replyTo = String(fromEmail || "").trim();
 
   if (!apiKey) {
-    throw new Error("Plunk is not configured. Set PLUNK_API_KEY on the server.");
+    throw new Error("EngineMailer is not configured. Set ENGINEMAILER_API_KEY on the server.");
   }
 
-  if (!plunkFromEmail) {
-    throw new Error("Plunk is not configured. Set PLUNK_FROM_EMAIL on the server.");
+  if (!emFromEmail) {
+    throw new Error("EngineMailer is not configured. Set ENGINEMAILER_FROM_EMAIL on the server.");
   }
 
-  const response = await fetch("https://api.useplunk.com/v1/send", {
+  const response = await fetch("https://api.enginemailer.com/v1/transactional/send", {
     method: "POST",
     headers: {
-      "x-api-key": apiKey,
+      "X-API-Key": apiKey,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
       to: [recipient],
       from: {
-        name: plunkFromName,
-        email: plunkFromEmail
+        name: emFromName,
+        email: emFromEmail
       },
       subject: messageSubject,
       body: messageBody,
@@ -432,7 +432,7 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
   }
 
   if (!response.ok) {
-    throw new Error(`Plunk send failed: ${payload.message || payload.error || rawPayload || `HTTP ${response.status}`}`);
+    throw new Error(`EngineMailer send failed: ${payload.message || payload.error || rawPayload || `HTTP ${response.status}`}`);
   }
 
   return { messageId: payload.id ? String(payload.id) : "" };
