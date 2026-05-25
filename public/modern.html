@@ -1766,47 +1766,27 @@
       document.getElementById('gmaps-modal').hidden = true;
     }
 
-    // ===== SINGLE-LEAD EMAIL (reuses 3-step bulk flow) =====
+    // ===== EMAIL =====
     function openEmail() {
       const l = leads.find(x => x.id === selId);
       if (!l) return;
-      if (!l.email) { notify('No Email', 'This lead has no email address.', 'error'); return; }
       closeM('m-lead');
-      // Reuse bulk flow state with just one lead
-      singleEmailLeads = [l];
-      bulkSelProducts = [];
-      bulkSelTemplateId = defaultTemplateId || (emailTemplates[0]?.id || '');
-      bulkPreviewIdx = 0;
-      renderBulkTemplates();
-      renderBulkProducts();
-      updateBulkNextBtn();
-      setBulkStep1Title(true, l.company);
-      document.getElementById('m-bulk-step1').hidden = false;
+      document.getElementById('e-company').textContent = l.company;
+      document.getElementById('e-recipient').textContent = l.email || 'No email stored';
+      const tmpl = getDefaultTemplate();
+      document.getElementById('e-subject').value = tmpl ? tpl(tmpl.subject, l) : tpl(eSubj, l);
+      document.getElementById('e-body').value = tmpl ? tpl(tmpl.body, l) : tpl(eBody, l);
+      document.getElementById('m-email').dataset.lid = l.id;
+      document.getElementById('m-email').hidden = false;
     }
 
-    // Track whether we're in single-lead or multi-lead bulk mode
-    let singleEmailLeads = [];
-
-    function isSingleEmailMode() {
-      return singleEmailLeads.length === 1 && !leads.filter(l => sel.has(l.id) && l.email).length;
-    }
-
-    function getEmailLeads() {
-      if (isSingleEmailMode()) return singleEmailLeads;
-      return leads.filter(l => sel.has(l.id) && l.email);
-    }
-
-    function getSelectedLeads() {
-      return leads.filter(l => sel.has(l.id) && l.email);
-    }
-
-    function setBulkStep1Title(single, companyName) {
-      document.getElementById('b-step1-sub').textContent = single
-        ? `Sending email to ${companyName}`
-        : 'Choose what to promote and which template to use.';
-      document.querySelector('#m-bulk-step1 .modal-title').textContent = single
-        ? 'Select Template & Products'
-        : 'Select Products & Template';
+    function resetEmail() {
+      const l = leads.find(x => x.id === document.getElementById('m-email').dataset.lid);
+      if (!l) return;
+      const tmpl = getDefaultTemplate();
+      document.getElementById('e-subject').value = tmpl ? tpl(tmpl.subject, l) : tpl(eSubj, l);
+      document.getElementById('e-body').value = tmpl ? tpl(tmpl.body, l) : tpl(eBody, l);
+      notify('Reset', 'Draft reset to default template.');
     }
 
     async function sendEmail() {
@@ -1861,8 +1841,7 @@
     }
 
     function bulkEmail() {
-      singleEmailLeads = []; // reset single mode
-      const s = getSelectedLeads();
+      const s = leads.filter(l => sel.has(l.id) && l.email);
       if (!s.length) { notify('No Recipients', 'Select leads with emails first.', 'error'); return; }
       bulkSelProducts = [];
       bulkSelTemplateId = defaultTemplateId || (emailTemplates[0]?.id || '');
@@ -1870,7 +1849,6 @@
       renderBulkTemplates();
       renderBulkProducts();
       updateBulkNextBtn();
-      setBulkStep1Title(false, '');
       document.getElementById('m-bulk-step1').hidden = false;
     }
 
@@ -1931,7 +1909,7 @@
 
     function bulkStep2() {
       document.getElementById('m-bulk-step1').hidden = true;
-      const selLeads = getEmailLeads();
+      const selLeads = leads.filter(l => sel.has(l.id) && l.email);
       const allProds = getActiveProducts();
       const selProds = bulkSelProducts.map(key => allProds.find(p => p.key === key)).filter(Boolean);
       const tmpl = emailTemplates.find(t => t.id === bulkSelTemplateId) || emailTemplates[0];
@@ -1951,22 +1929,10 @@
         subject = subject.replace(/\{\{productName1\}\}/g, selProds[0].name);
       }
 
-      // Per-lead variable substitution
-      if (selLeads.length === 1) {
-        subject = tpl(subject, selLeads[0]);
-        body = tpl(body, selLeads[0]);
-      }
-
       // Recipients
-      const isSingle = isSingleEmailMode();
-      if (isSingle) {
-        document.getElementById('b-recipient-pills').innerHTML =
-          `<span class="bulk-pill">${selLeads[0].email}</span>`;
-      } else {
-        document.getElementById('b-recipient-pills').innerHTML =
-          `<span class="bulk-pill">${selLeads.length} recipients</span>` +
-          selLeads.map(l => `<span class="bulk-pill">${l.email}</span>`).join('');
-      }
+      document.getElementById('b-recipient-pills').innerHTML =
+        `<span class="bulk-pill">${selLeads.length} recipients</span>` +
+        selLeads.map(l => `<span class="bulk-pill">${l.email}</span>`).join('');
 
       // Product chips
       document.getElementById('b-selected-chips').innerHTML =
@@ -1978,10 +1944,6 @@
       document.getElementById('b-subject2').value = subject;
       document.getElementById('b-body2').value = body;
 
-      // Step 2 title
-      const isSingle = isSingleEmailMode();
-      document.querySelector('#m-bulk-step2 .modal-title').textContent = isSingle ? 'Preview & Send' : 'Preview & Edit';
-
       document.getElementById('m-bulk-step2').hidden = false;
     }
 
@@ -1992,7 +1954,7 @@
 
     function bulkStep3() {
       document.getElementById('m-bulk-step2').hidden = true;
-      const selLeads = getEmailLeads();
+      const selLeads = leads.filter(l => sel.has(l.id) && l.email);
       const allProds = getActiveProducts();
       const selProds = bulkSelProducts.map(key => allProds.find(p => p.key === key)).filter(Boolean);
 
@@ -2052,7 +2014,7 @@
     }
 
     async function sendBulkFromStep3() {
-      const selLeads = getEmailLeads();
+      const selLeads = leads.filter(l => sel.has(l.id) && l.email);
       const allProds = getActiveProducts();
       const selProds = bulkSelProducts.map(key => allProds.find(p => p.key === key)).filter(Boolean);
       const subjectTpl = document.getElementById('b-subject2').value.trim();
@@ -2081,12 +2043,8 @@
       btn.disabled = false;
       btn.innerHTML = '🚀 Send All Emails';
       closeBulkFlow();
-      if (!isSingleEmailMode()) {
-        sel.clear();
-        updateToolbar();
-      }
+      sel.clear();
       await loadLeads();
-      singleEmailLeads = []; // reset
       notify('Bulk Sent', `${success} sent, ${failed} failed.`);
     }
 
