@@ -408,7 +408,7 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
   const response = await fetch("https://api.useplunk.com/v1/send", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      "x-api-key": apiKey,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
