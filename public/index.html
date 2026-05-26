@@ -647,187 +647,106 @@
         </section>
 
         <section class="workspace-panel" id="workspaceExport" hidden>
-          <div class="panel outbound-panel">
-            <div class="ob-page-header">
-              <h1>🚀 Outbound Tools</h1>
-              <p>Campaigns, email tracking, and outreach analytics</p>
+          <div class="panel et-panel">
+            <div class="et-page-header">
+              <h1>Email Tracking</h1>
+              <p>Monitor delivery rates, opens, replies, and follow-ups across all campaigns.</p>
             </div>
-
-            <!-- Quick stats -->
-            <div class="ob-quick-stats">
-              <div class="ob-stat-card">
-                <div class="ob-stat-icon blue"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
-                <div class="ob-stat-info"><div class="ob-stat-value">127</div><div class="ob-stat-label">Total Emails Sent</div></div>
+            <div class="et-metrics-grid">
+              <div class="et-metric-card et-active" id="et-metric-all" onclick="etFilterStatus('all')">
+                <div class="et-metric-icon icon-blue">📨</div>
+                <div class="et-metric-value" id="et-val-sent">0</div>
+                <div class="et-metric-label">Total Sent</div>
+                <div class="et-metric-change" id="et-trend-sent">—</div>
+                <div class="et-metric-bar bar-blue" style="width:100%"></div>
               </div>
-              <div class="ob-stat-card">
-                <div class="ob-stat-icon green"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
-                <div class="ob-stat-info"><div class="ob-stat-value">23</div><div class="ob-stat-label">Replies Received</div></div>
+              <div class="et-metric-card" id="et-metric-delivered" onclick="etFilterStatus('delivered')">
+                <div class="et-metric-icon icon-green">✅</div>
+                <div class="et-metric-value" id="et-val-delivered">0</div>
+                <div class="et-metric-label">Delivered</div>
+                <div class="et-metric-change" id="et-rate-delivered">0% rate</div>
+                <div class="et-metric-bar bar-green" style="width:0%"></div>
               </div>
-              <div class="ob-stat-card">
-                <div class="ob-stat-icon amber"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-                <div class="ob-stat-info"><div class="ob-stat-value">8</div><div class="ob-stat-label">Qualified from Email</div></div>
+              <div class="et-metric-card" id="et-metric-opened" onclick="etFilterStatus('opened')">
+                <div class="et-metric-icon icon-purple">👁️</div>
+                <div class="et-metric-value" id="et-val-opened">0</div>
+                <div class="et-metric-label">Opened</div>
+                <div class="et-metric-change" id="et-rate-opened">0% rate</div>
+                <div class="et-metric-bar bar-purple" style="width:0%"></div>
               </div>
-              <div class="ob-stat-card">
-                <div class="ob-stat-icon purple"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
-                <div class="ob-stat-info"><div class="ob-stat-value">18%</div><div class="ob-stat-label">Reply Rate</div></div>
+              <div class="et-metric-card" id="et-metric-clicked" onclick="etFilterStatus('clicked')">
+                <div class="et-metric-icon icon-amber">🔗</div>
+                <div class="et-metric-value" id="et-val-clicked">0</div>
+                <div class="et-metric-label">Link Clicked</div>
+                <div class="et-metric-change" id="et-rate-clicked">0% rate</div>
+                <div class="et-metric-bar bar-amber" style="width:0%"></div>
+              </div>
+              <div class="et-metric-card" id="et-metric-replied" onclick="etFilterStatus('replied')">
+                <div class="et-metric-icon icon-cyan">💬</div>
+                <div class="et-metric-value" id="et-val-replied">0</div>
+                <div class="et-metric-label">Replied</div>
+                <div class="et-metric-change" id="et-rate-replied">0% rate</div>
+                <div class="et-metric-bar bar-cyan" style="width:0%"></div>
+              </div>
+              <div class="et-metric-card" id="et-metric-bounced" onclick="etFilterStatus('bounced')">
+                <div class="et-metric-icon icon-red">❌</div>
+                <div class="et-metric-value" id="et-val-bounced">0</div>
+                <div class="et-metric-label">Bounced</div>
+                <div class="et-metric-change" id="et-rate-bounced">0% rate</div>
+                <div class="et-metric-bar bar-red" style="width:0%"></div>
               </div>
             </div>
-
-            <!-- Tabs -->
-            <div class="ob-tabs">
-              <button class="ob-tab ob-tab-active" data-ob-tab="campaigns" type="button">Campaigns <span class="ob-tab-count">3</span></button>
-              <button class="ob-tab" data-ob-tab="sent" type="button">Sent Emails <span class="ob-tab-count">127</span></button>
-              <button class="ob-tab" data-ob-tab="replies" type="button">Replies <span class="ob-tab-count">23</span></button>
-            </div>
-
-            <!-- Campaign tab -->
-            <div class="ob-tab-content" id="obTabCampaigns">
-              <div class="ob-toolbar">
-                <div class="ob-toolbar-left">
-                  <button class="ob-btn ob-btn-primary" type="button"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>New Campaign</button>
-                </div>
-                <div class="ob-toolbar-right">
-                  <button class="ob-btn" type="button"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>Refresh</button>
+            <div class="et-chart-row">
+              <div class="et-chart-card">
+                <h3>📈 Daily Send Volume (Last 7 Days)</h3>
+                <div class="et-bar-chart-wrapper">
+                  <div class="et-bar-chart-grid" id="etBarGrid"></div>
+                  <div class="et-bar-chart" id="etBarChart"></div>
                 </div>
               </div>
-              <div class="ob-campaign-grid">
-                <div class="ob-campaign-card">
-                  <div class="ob-cc-header">
-                    <span class="ob-cc-name">KL Retail Outreach</span>
-                    <span class="ob-cc-status active">Active</span>
+              <div class="et-chart-card">
+                <h3>🎯 Status Breakdown</h3>
+                <div class="et-donut-container">
+                  <div class="et-donut" id="etDonutChart">
+                    <div class="et-donut-center">
+                      <div class="et-donut-value" id="etDonutTotal">0</div>
+                      <div class="et-donut-label">Total</div>
+                    </div>
                   </div>
-                  <div class="ob-cc-desc">Targeting retail shops in Kuala Lumpur with AutoCount POS pitch.</div>
-                  <div class="ob-cc-meta">
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><strong>48</strong> sent</div>
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><strong>12</strong> replies</div>
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Kuala Lumpur</div>
-                  </div>
-                </div>
-                <div class="ob-campaign-card">
-                  <div class="ob-cc-header">
-                    <span class="ob-cc-name">Selangor F&B Blast</span>
-                    <span class="ob-cc-status draft">Draft</span>
-                  </div>
-                  <div class="ob-cc-desc">Food & beverage businesses in Selangor — Presoft Mobile Stock campaign.</div>
-                  <div class="ob-cc-meta">
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><strong>0</strong> sent</div>
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><strong>0</strong> replies</div>
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Selangor</div>
-                  </div>
-                </div>
-                <div class="ob-campaign-card">
-                  <div class="ob-cc-header">
-                    <span class="ob-cc-name">Penang Auto Follow-up</span>
-                    <span class="ob-cc-status done">Done</span>
-                  </div>
-                  <div class="ob-cc-desc">Automated follow-up to non-responders from Penang AutoCount campaign.</div>
-                  <div class="ob-cc-meta">
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg><strong>79</strong> sent</div>
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg><strong>11</strong> replies</div>
-                    <div class="ob-cc-meta-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Penang</div>
-                  </div>
+                  <div class="et-donut-legend" id="etDonutLegend"></div>
                 </div>
               </div>
             </div>
-
-            <!-- Sent Emails tab -->
-            <div class="ob-tab-content" id="obTabSent" hidden>
-              <div class="ob-toolbar">
-                <div class="ob-toolbar-left">
-                  <div class="ob-search-box">
-                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                    <input type="text" placeholder="Search leads...">
-                  </div>
-                  <button class="ob-filter-btn active" type="button">All Status</button>
-                  <button class="ob-filter-btn" type="button">Priority</button>
-                  <button class="ob-filter-btn" type="button">Product</button>
-                </div>
-                <div class="ob-toolbar-right">
-                  <button class="ob-btn ob-btn-green" type="button"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Export CSV</button>
-                </div>
+            <div class="et-toolbar">
+              <div class="et-search-box">
+                <span class="et-search-icon">🔍</span>
+                <input type="text" placeholder="Search by company, email, or product..." id="etSearchInput">
               </div>
-              <div class="ob-table-wrap">
-                <div class="ob-table-scroll">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Company</th>
-                        <th>Email</th>
-                        <th>Region</th>
-                        <th>Product</th>
-                        <th>Status</th>
-                        <th>Sent</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td><div class="ob-company-cell"><div class="ob-company-avatar">S</div><div><div class="ob-company-name">Seri Setia Construction</div><div style="font-size:11px;color:var(--muted-soft)">Business Contact</div></div></div></td>
-                        <td style="color:var(--muted-soft)">—</td>
-                        <td>Other</td>
-                        <td>AutoCount Accounting</td>
-                        <td><span class="ob-badge ob-badge-sent">Sent</span></td>
-                        <td style="font-size:12px;color:var(--muted-soft)">2h ago</td>
-                        <td><div class="ob-action-cell"><button title="View">👁</button><button title="Re-send">🔄</button></div></td>
-                      </tr>
-                      <tr>
-                        <td><div class="ob-company-cell"><div class="ob-company-avatar">D</div><div><div class="ob-company-name">Dakwah Corner Bookstore</div><div style="font-size:11px;color:var(--muted-soft)">Business Contact</div></div></div></td>
-                        <td>info@dakwahbookstore.com</td>
-                        <td>Other</td>
-                        <td>AutoCount POS</td>
-                        <td><span class="ob-badge ob-badge-new">Replied</span></td>
-                        <td style="font-size:12px;color:var(--muted-soft)">1d ago</td>
-                        <td><div class="ob-action-cell"><button title="View">👁</button><button title="Qualify">✓</button></div></td>
-                      </tr>
-                      <tr>
-                        <td><div class="ob-company-cell"><div class="ob-company-avatar">G</div><div><div class="ob-company-name">Glad Sounds Christian Bookstore</div><div style="font-size:11px;color:var(--muted-soft)">Business Contact</div></div></div></td>
-                        <td>info@gladsounds.com.my</td>
-                        <td>Other</td>
-                        <td>AutoCount POS</td>
-                        <td><span class="ob-badge ob-badge-failed">Bounced</span></td>
-                        <td style="font-size:12px;color:var(--muted-soft)">3d ago</td>
-                        <td><div class="ob-action-cell"><button title="View">👁</button><button title="Re-send">🔄</button></div></td>
-                      </tr>
-                      <tr>
-                        <td><div class="ob-company-cell"><div class="ob-company-avatar">P</div><div><div class="ob-company-name">POPULAR Bookstore 大众书局</div><div style="font-size:11px;color:var(--muted-soft)">Business Contact</div></div></div></td>
-                        <td>info@popular.com.my</td>
-                        <td>Other</td>
-                        <td>AutoCount Accounting</td>
-                        <td><span class="ob-badge ob-badge-sent">Sent</span></td>
-                        <td style="font-size:12px;color:var(--muted-soft)">5d ago</td>
-                        <td><div class="ob-action-cell"><button title="View">👁</button><button title="Re-send">🔄</button></div></td>
-                      </tr>
-                      <tr>
-                        <td><div class="ob-company-cell"><div class="ob-company-avatar">M</div><div><div class="ob-company-name">MRKB Bookstores @ Saujana</div><div style="font-size:11px;color:var(--muted-soft)">Business Contact</div></div></div></td>
-                        <td>mrkbonline@gmail.com</td>
-                        <td>Other</td>
-                        <td>Presoft Mobile Stock</td>
-                        <td><span class="ob-badge ob-badge-qualified">Qualified</span></td>
-                        <td style="font-size:12px;color:var(--muted-soft)">1w ago</td>
-                        <td><div class="ob-action-cell"><button title="View">👁</button><button title="CRM">📋</button></div></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="ob-pagination">
-                  <div class="ob-page-info">Showing 1–5 of 127 emails</div>
-                  <div class="ob-page-btns">
-                    <button class="ob-page-btn">‹</button>
-                    <button class="ob-page-btn active">1</button>
-                    <button class="ob-page-btn">2</button>
-                    <button class="ob-page-btn">3</button>
-                    <button class="ob-page-btn">›</button>
-                  </div>
-                </div>
-              </div>
+              <select id="etStatusFilter">
+                <option value="all">All Statuses</option>
+                <option value="sent">📨 Sent</option>
+                <option value="delivered">✅ Delivered</option>
+                <option value="opened">👁️ Opened</option>
+                <option value="clicked"> Clicked</option>
+                <option value="replied">💬 Replied</option>
+                <option value="bounced">❌ Bounced</option>
+              </select>
+              <select id="etProductFilter"><option value="all">All Products</option></select>
+              <button class="et-btn et-btn-outline" id="etExportCsv">Export CSV</button>
+              <button class="et-btn et-btn-primary" id="etSendCampaign"> Send Campaign</button>
             </div>
-
-            <!-- Replies tab -->
-            <div class="ob-tab-content" id="obTabReplies" hidden>
-              <div class="ob-empty">
-                <div class="ob-empty-icon">📬</div>
-                <div class="ob-empty-title">23 Replies</div>
-                <div class="ob-empty-desc">Replies will appear here as they come in. Track engagement and qualify leads directly.</div>
+            <div class="et-table-card">
+              <div class="et-table-header">
+                <h3>Email Activity Log</h3>
+                <span class="et-count" id="etTableCount">No records</span>
+              </div>
+              <table>
+                <thead><tr><th>Company</th><th>Email</th><th>Product</th><th>Status</th><th>Sent At</th><th>Opened</th><th>Replied</th><th>Actions</th></tr></thead>
+                <tbody id="etTableBody"></tbody>
+              </table>
+              <div class="et-pagination">
+                <div class="et-pagination-info" id="etPaginationInfo">No records</div>
+                <div class="et-pagination-pages" id="etPaginationPages"></div>
               </div>
             </div>
           </div>

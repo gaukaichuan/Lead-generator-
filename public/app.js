@@ -736,6 +736,11 @@ function renderWorkspace() {
   });
 
   renderPageHeader();
+
+  // Initialize email tracking when switching to export panel
+  if (state.activeWorkspace === "export") {
+    etInit();
+  }
 }
 
 function getSentLeads() {
@@ -1849,26 +1854,334 @@ retryBiginStatusButton.addEventListener("click", async () => {
   }
 });
 
-// ===== OUTBOUND TABS =====
-const obTabs = document.querySelectorAll('.ob-tab');
-const obTabContents = {
-  campaigns: document.getElementById('obTabCampaigns'),
-  sent: document.getElementById('obTabSent'),
-  replies: document.getElementById('obTabReplies')
-};
+// ===== EMAIL TRACKING =====
+var etSummary = { sent: 0, delivered: 0, opened: 0, clicked: 0, replied: 0, bounced: 0 };
+var etDailyData = [];
+var etPage = 1;
+var etFilter = 'all';
+var etSortField = 'sentAt';
+var etSortDir = -1;
+var etProducts = [];
+var etAvatarColors = ['#2563eb','#16a34a','#d97706','#7c3aed','#dc2626','#0891b2','#ec4899','#f97316'];
 
-obTabs.forEach(function(tab) {
-  tab.addEventListener('click', function() {
-    obTabs.forEach(function(t) { t.classList.remove('active'); });
-    tab.classList.add('active');
-    var target = tab.getAttribute('data-ob-tab');
-    Object.keys(obTabContents).forEach(function(key) {
-      obTabContents[key].hidden = key !== target;
+function etGetColor(name) {
+  var h = 0;
+  for (var i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return etAvatarColors[Math.abs(h) % etAvatarColors.length];
+}
+
+function etFmtDate(d) {
+  if (!d) return '—';
+  var dt = new Date(d);
+  return dt.toLocaleString('en-MY', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function etFmtLong(d) {
+  if (!d) return '';
+  var dt = new Date(d);
+  return dt.toLocaleString('en-MY', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+async function etLoadSummary() {
+  try {
+    var res = await fetch('/api/email/tracking/summary');
+    if (!res.ok) return;
+    etSummary = await res.json();
+    var els = ['sent','delivered','opened','clicked','replied','bounced'];
+    els.forEach(function(k) {
+      var el = document.getElementById('et-val-' + k);
+      if (el) el.textContent = etSummary[k] || 0;
     });
-  });
-});
+    var total = etSummary.sent || 1;
+    ['delivered','opened','clicked','replied','bounced'].forEach(function(k) {
+      var bar = document.querySelector('#et-metric-' + k + ' .et-metric-bar');
+      var rate = document.getElementById('et-rate-' + k);
+      if (bar) bar.style.width = ((etSummary[k] || 0) / total * 100) + '%';
+      if (rate) rate.textContent = (total > 1 ? Math.round((etSummary[k] || 0) / total * 1000) / 10 : 0) + '% rate';
+    });
+    etRenderDonut();
+    etUpdateTrend();
+  } catch (e) { console.error('etLoadSummary', e); }
+}
 
-// Old export buttons removed — outbound is now tab-based UI (functionality pending)
+async function etLoadDaily() {
+  try {
+    var res = await fetch('/api/email/tracking/daily');
+    if (!res.ok) return;
+    etDailyData = await res.json();
+    etRenderBarChart();
+  } catch (e) { console.error('etLoadDaily', e); }
+}
+
+function etRenderBarChart() {
+  var data = etDailyData.length > 0 ? etDailyData : [
+    { label: 'Mon', count: 0 }, { label: 'Tue', count: 0 }, { label: 'Wed', count: 0 },
+    { label: 'Thu', count: 0 }, { label: 'Fri', count: 0 }, { label: 'Sat', count: 0 },
+    { label: 'Sun', count: 0 }
+  ];
+  var values = data.map(function(d) { return d.count; });
+  var max = Math.max.apply(null, values.concat([1]));
+  var colors = ['#2563eb','#3b82f6','#2563eb','#3b82f6','#2563eb','#93c5fd','#cbd5e1'];
+  var grid = document.getElementById('etBarGrid');
+  if (!grid) return;
+  var steps = [max, Math.round(max * 0.75), Math.round(max * 0.5), Math.round(max * 0.25), 0];
+  grid.innerHTML = steps.map(function(v) { return '<div class="et-grid-line"><span>' + v + '</span></div>'; }).join('');
+  var chart = document.getElementById('etBarChart');
+  if (!chart) return;
+  chart.innerHTML = data.map(function(d, i) {
+    return '<div class="et-bar-group"><div class="et-bar-value">' + values[i] + '</div><div class="et-bar" style="height:' + (values[i] / max * 100) + '%;background:' + colors[i] + '"></div><div class="et-bar-label">' + d.label + '</div></div>';
+  }).join('');
+}
+
+function etRenderDonut() {
+  var total = etSummary.sent || 0;
+  var segments = [
+    { value: Math.max(0, etSummary.sent - etSummary.delivered - etSummary.bounced), color: '#2563eb', label: 'Sent' },
+    { value: etSummary.delivered - etSummary.opened, color: '#16a34a', label: 'Delivered' },
+    { value: etSummary.opened - etSummary.clicked - etSummary.replied, color: '#7c3aed', label: 'Opened' },
+    { value: etSummary.clicked, color: '#d97706', label: 'Clicked' },
+    { value: etSummary.replied, color: '#0891b2', label: 'Replied' },
+    { value: etSummary.bounced, color: '#dc2626', label: 'Bounced' }
+  ];
+  var sum = 0;
+  segments.forEach(function(s) { sum += Math.max(0, s.value); });
+  if (sum === 0) sum = 1;
+  var donut = document.getElementById('etDonutChart');
+  if (!donut) return;
+  var gradient = 'conic-gradient(';
+  var acc = 0;
+  segments.forEach(function(s, i) {
+    var v = Math.max(0, s.value);
+    var start = (acc / sum) * 360;
+    acc += v;
+    var end = (acc / sum) * 360;
+    gradient += s.color + ' ' + start + 'deg ' + end + 'deg';
+    if (i < segments.length - 1) gradient += ', ';
+  });
+  gradient += ')';
+  donut.style.background = gradient;
+  var totalEl = document.getElementById('etDonutTotal');
+  if (totalEl) totalEl.textContent = total;
+  var legend = document.getElementById('etDonutLegend');
+  if (!legend) return;
+  legend.innerHTML = segments.map(function(s) {
+    return '<div class="et-legend-item"><div class="et-legend-dot" style="background:' + s.color + '"></div>' + s.label + ' (' + Math.max(0, s.value) + ')</div>';
+  }).join('');
+}
+
+function etUpdateTrend() {
+  if (etDailyData.length === 0) return;
+  var recent = etDailyData.slice(-3).reduce(function(s, d) { return s + d.count; }, 0);
+  var prev = etDailyData.slice(0, 3).reduce(function(s, d) { return s + d.count; }, 0);
+  var el = document.getElementById('et-trend-sent');
+  if (el && prev > 0) {
+    var pct = Math.round(((recent - prev) / prev) * 100);
+    if (pct >= 0) el.textContent = '↑ ' + pct + '% this week';
+    else el.textContent = '↓ ' + Math.abs(pct) + '% this week';
+    el.className = 'et-metric-change ' + (pct >= 0 ? 'up' : 'down');
+  } else if (el) {
+    el.textContent = recent > 0 ? recent + ' this week' : 'No sends yet';
+  }
+}
+
+async function etLoadActivity() {
+  try {
+    var statusF = document.getElementById('etStatusFilter');
+    var productF = document.getElementById('etProductFilter');
+    var searchEl = document.getElementById('etSearchInput');
+    var params = new URLSearchParams({
+      page: etPage,
+      pageSize: 12,
+      status: etFilter !== 'all' ? etFilter : (statusF ? statusF.value : 'all'),
+      product: productF ? productF.value : 'all',
+      search: searchEl ? searchEl.value : ''
+    });
+    var res = await fetch('/api/email/tracking/activity?' + params);
+    if (!res.ok) return;
+    var data = await res.json();
+    var records = data.records || [];
+    var countEl = document.getElementById('etTableCount');
+    var pagInfo = document.getElementById('etPaginationInfo');
+    if (countEl) countEl.textContent = records.length + ' of ' + (data.total || 0) + ' records';
+    if (pagInfo) pagInfo.textContent = 'Showing ' + ((etPage - 1) * 12 + 1) + '-' + Math.min(etPage * 12, data.total || 0) + ' of ' + (data.total || 0);
+    etRenderTable(records, data.total || 0);
+    etRenderPagination(data.total || 0);
+  } catch (e) { console.error('etLoadActivity', e); }
+}
+
+function etRenderTable(records, totalCount) {
+  var tbody = document.getElementById('etTableBody');
+  if (!tbody) return;
+  if (records.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted-soft);">No email activity found. Send your first campaign to see tracking data here.</td></tr>';
+    return;
+  }
+  var statusMap = { sent: 'Sent', delivered: 'Delivered', opened: 'Opened', clicked: 'Clicked', replied: 'Replied', bounced: 'Bounced' };
+  var statusClasses = { sent: 'et-status-sent', delivered: 'et-status-delivered', opened: 'et-status-opened', clicked: 'et-status-clicked', replied: 'et-status-replied', bounced: 'et-status-bounced' };
+  var dotClasses = { sent: 'et-dot-sent', delivered: 'et-dot-delivered', opened: 'et-dot-opened', clicked: 'et-dot-clicked', replied: 'et-dot-replied', bounced: 'et-dot-bounced' };
+  tbody.innerHTML = records.map(function(r) {
+    var color = etGetColor(r.company);
+    var initial = r.company.charAt(0);
+    var sc = statusClasses[r.status] || 'et-status-sent';
+    var dc = dotClasses[r.status] || 'et-dot-sent';
+    return '<tr onclick="etOpenDetail(\'' + r.id + '\')">' +
+      '<td><div class="et-company-cell"><div class="et-company-avatar" style="background:' + color + '">' + initial + '</div><div><div class="et-company-name">' + r.company + '</div><div class="et-company-email">' + (r.contactName || '') + '</div></div></div></td>' +
+      '<td style="color:var(--muted-soft);font-size:12px">' + (r.email || '—') + '</td>' +
+      '<td><span class="et-product-tag">' + r.product + '</span></td>' +
+      '<td><span class="et-status-badge ' + sc + '"><span class="et-status-dot ' + dc + '"></span>' + (statusMap[r.status] || r.status) + '</span></td>' +
+      '<td>' + etFmtDate(r.sentAt) + '</td>' +
+      '<td>' + (r.openedAt ? etFmtDate(r.openedAt) : '<span style="color:var(--muted-soft)">—</span>') + '</td>' +
+      '<td>' + (r.repliedAt ? etFmtDate(r.repliedAt) : '<span style="color:var(--muted-soft)">—</span>') + '</td>' +
+      '<td><div class="et-action-btns">' +
+        '<button title="View" onclick="event.stopPropagation();etOpenDetail(\'' + r.id + '\')">👁️</button>' +
+        (r.status !== 'replied' ? '<button title="Mark Replied" onclick="event.stopPropagation();etMarkReplied(\'' + r.id + '\')"></button>' : '') +
+      '</div></td></tr>';
+  }).join('');
+}
+
+function etRenderPagination(total) {
+  var container = document.getElementById('etPaginationPages');
+  if (!container) return;
+  var pages = Math.ceil(total / 12) || 1;
+  var html = '';
+  for (var i = 1; i <= Math.min(pages, 5); i++) {
+    html += '<button class="' + (i === etPage ? 'et-active' : '') + '" onclick="etGoPage(' + i + ')">' + i + '</button>';
+  }
+  container.innerHTML = html;
+}
+
+function etGoPage(p) {
+  etPage = p;
+  etLoadActivity();
+}
+
+function etFilterStatus(status) {
+  etFilter = status;
+  etPage = 1;
+  var cards = document.querySelectorAll('.et-metric-card');
+  cards.forEach(function(c) { c.classList.remove('et-active'); });
+  var active = document.getElementById('et-metric-' + status);
+  if (active) active.classList.add('et-active');
+  var sel = document.getElementById('etStatusFilter');
+  if (sel) sel.value = status;
+  etLoadActivity();
+}
+
+function etLoadProducts() {
+  fetch('/api/templates')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var sel = document.getElementById('etProductFilter');
+      if (!sel || !data.products) return;
+      sel.innerHTML = '<option value="all">All Products</option>';
+      data.products.forEach(function(p) {
+        sel.innerHTML += '<option value="' + p.name + '">' + p.name + '</option>';
+      });
+    })
+    .catch(function() {});
+}
+
+async function etOpenDetail(id) {
+  var r = null;
+  try {
+    var res = await fetch('/api/email/tracking/' + id);
+    if (res.ok) r = await res.json();
+  } catch (e) { console.error('etOpenDetail', e); }
+  if (!r) return;
+  var modal = document.getElementById('etDetailModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'etDetailModal';
+    modal.className = 'et-modal-backdrop';
+    modal.innerHTML = '<div class="et-modal"><div class="et-modal-header"><h2 id="etModalTitle"></h2><button class="et-modal-close" onclick="etCloseModal()">✕</button></div><div class="et-modal-body" id="etModalBody"></div></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', function(e) { if (e.target === modal) etCloseModal(); });
+  }
+  var statusMap = { sent: '📨 Sent', delivered: '✅ Delivered', opened: '️ Opened', clicked: '🔗 Clicked', replied: '💬 Replied', bounced: '❌ Bounced' };
+  var timeline = '';
+  timeline += '<div class="et-timeline-item"><div class="et-tl-dot et-tl-sent">📨</div><div class="et-tl-content"><div class="et-tl-title">Email Sent</div><div class="et-tl-time">' + etFmtLong(r.sentAt) + '</div><div class="et-tl-desc">Sent to ' + (r.email || '') + (r.messageId ? '<br>ID: ' + r.messageId : '') + '</div></div></div>';
+  if (r.openedAt) {
+    timeline += '<div class="et-timeline-item"><div class="et-tl-dot et-tl-opened">👁️</div><div class="et-tl-content"><div class="et-tl-title">Email Opened</div><div class="et-tl-time">' + etFmtLong(r.openedAt) + '</div></div></div>';
+  }
+  if (r.clicked) {
+    timeline += '<div class="et-timeline-item"><div class="et-tl-dot et-tl-clicked">🔗</div><div class="et-tl-content"><div class="et-tl-title">Link Clicked</div><div class="et-tl-time">' + etFmtLong(r.openedAt || r.sentAt) + '</div><div class="et-tl-desc">' + (r.clickedUrl || 'Link in email') + '</div></div></div>';
+  }
+  if (r.repliedAt) {
+    timeline += '<div class="et-timeline-item"><div class="et-tl-dot et-tl-replied">💬</div><div class="et-tl-content"><div class="et-tl-title">Reply Received</div><div class="et-tl-time">' + etFmtLong(r.repliedAt) + '</div></div></div>';
+  }
+  if (r.status === 'bounced') {
+    timeline += '<div class="et-timeline-item"><div class="et-tl-dot et-tl-bounced">❌</div><div class="et-tl-content"><div class="et-tl-title">Bounced</div><div class="et-tl-desc">Reason: ' + (r.bounceReason || 'Unknown') + '</div></div></div>';
+  }
+  document.getElementById('etModalTitle').textContent = r.company + ' — Email Detail';
+  document.getElementById('etModalBody').innerHTML =
+    '<div class="et-detail-row"><div class="et-detail-label">Company</div><div class="et-detail-value"><strong>' + r.company + '</strong></div></div>' +
+    '<div class="et-detail-row"><div class="et-detail-label">Contact</div><div class="et-detail-value">' + (r.contactName || '—') + '</div></div>' +
+    '<div class="et-detail-row"><div class="et-detail-label">Email</div><div class="et-detail-value">' + (r.email || '—') + '</div></div>' +
+    '<div class="et-detail-row"><div class="et-detail-label">Product</div><div class="et-detail-value"><span class="et-product-tag">' + r.product + '</span></div></div>' +
+    '<div class="et-detail-row"><div class="et-detail-label">Status</div><div class="et-detail-value">' + (statusMap[r.status] || r.status) + '</div></div>' +
+    (r.bounceReason ? '<div class="et-detail-row"><div class="et-detail-label">Bounce Reason</div><div class="et-detail-value" style="color:var(--danger)">' + r.bounceReason + '</div></div>' : '') +
+    (r.emailLastError ? '<div class="et-detail-row"><div class="et-detail-label">Last Error</div><div class="et-detail-value" style="color:var(--danger)">' + r.emailLastError + '</div></div>' : '') +
+    '<div class="et-timeline"><h4>📋 Activity Timeline</h4>' + timeline + '</div>' +
+    '<div style="margin-top:16px;display:flex;gap:10px">' +
+    '<button class="et-btn et-btn-primary" onclick="etCloseModal()">Close</button>' +
+    (r.status !== 'replied' ? '<button class="et-btn et-btn-outline" onclick="etMarkReplied(\'' + r.id + '\')">💬 Mark Replied</button>' : '') +
+    '</div>';
+  modal.classList.add('et-show');
+}
+
+function etCloseModal() {
+  var modal = document.getElementById('etDetailModal');
+  if (modal) modal.classList.remove('et-show');
+}
+
+async function etMarkReplied(id) {
+  try {
+    var res = await fetch('/api/email/tracking/' + id + '/reply', { method: 'POST' });
+    if (res.ok) { etCloseModal(); await etLoadSummary(); await etLoadActivity(); }
+  } catch (e) { console.error('etMarkReplied', e); }
+}
+
+function etInit() {
+  var searchEl = document.getElementById('etSearchInput');
+  var statusEl = document.getElementById('etStatusFilter');
+  var productEl = document.getElementById('etProductFilter');
+  var exportBtn = document.getElementById('etExportCsv');
+  var campaignBtn = document.getElementById('etSendCampaign');
+
+  if (!etInit._done) {
+    etInit._done = true;
+    var searchTimer = null;
+    if (searchEl) {
+      searchEl.addEventListener('input', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() { etPage = 1; etLoadActivity(); }, 300);
+      });
+    }
+    if (statusEl) {
+      statusEl.addEventListener('change', function() {
+        etPage = 1;
+        etFilter = statusEl.value;
+        var cards = document.querySelectorAll('.et-metric-card');
+        cards.forEach(function(c) { c.classList.remove('et-active'); });
+        var active = document.getElementById('et-metric-' + statusEl.value);
+        if (active) active.classList.add('et-active');
+        etLoadActivity();
+      });
+    }
+    if (productEl) productEl.addEventListener('change', function() { etPage = 1; etLoadActivity(); });
+    if (exportBtn) exportBtn.addEventListener('click', function() { window.location.href = '/api/export/sent.csv'; });
+    if (campaignBtn) campaignBtn.addEventListener('click', function() {
+      showNotification('Send Campaign', 'Campaign composer coming soon.');
+    });
+    etLoadProducts();
+  }
+
+  etLoadSummary();
+  etLoadDaily();
+  etLoadActivity();
+}
+
+// Old outbound tab JS removed — replaced by email tracking panel
 
 loadSenderSettings();
 loadThemeMode();
