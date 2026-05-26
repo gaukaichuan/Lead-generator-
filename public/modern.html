@@ -526,6 +526,106 @@
     .bulk-tmpl-card .btm-info { flex: 1; min-width: 0; }
     .bulk-tmpl-card .btm-name { font-size: 12px; font-weight: 700; }
     .bulk-tmpl-card .btm-subject { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Email Tracking */
+    .et-metrics-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 18px; }
+    .et-metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .et-metric-card:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-1px); }
+    .et-metric-card.et-active { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+    .et-metric-card .et-metric-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 10px; }
+    .et-metric-card .et-metric-value { font-size: 24px; font-weight: 700; line-height: 1; }
+    .et-metric-card .et-metric-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
+    .et-metric-card .et-metric-change { font-size: 10px; margin-top: 6px; font-weight: 600; }
+    .et-metric-card .et-metric-change.up { color: var(--green); }
+    .et-metric-card .et-metric-change.down { color: var(--red); }
+    .et-metric-card .et-metric-bar { position: absolute; bottom: 0; left: 0; height: 3px; border-radius: 0 3px 0 0; transition: width 0.5s ease; }
+    .bar-blue { background: var(--blue); } .bar-green { background: var(--green); } .bar-amber { background: var(--amber); }
+    .bar-purple { background: var(--indigo); } .bar-red { background: var(--red); } .bar-cyan { background: #06b6d4; }
+    .et-chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 18px; }
+    .et-chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+    .et-chart-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+    .et-bar-chart-wrapper { position: relative; height: 140px; }
+    .et-bar-chart-grid { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+    .et-bar-chart-grid .et-grid-line { border-top: 1px dashed var(--border); position: relative; }
+    .et-bar-chart-grid .et-grid-line span { position: absolute; left: -28px; top: -6px; font-size: 10px; color: var(--text-muted); }
+    .et-bar-chart { display: flex; align-items: flex-end; gap: 10px; height: 100%; padding-left: 32px; padding-bottom: 20px; position: relative; z-index: 1; }
+    .et-bar-chart .et-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; }
+    .et-bar-chart .et-bar { width: 28px; border-radius: 5px 5px 0 0; transition: height 0.5s ease; min-height: 3px; }
+    .et-bar-chart .et-bar-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+    .et-bar-chart .et-bar-value { font-size: 11px; font-weight: 700; }
+    .et-donut-container { display: flex; align-items: center; justify-content: center; gap: 16px; }
+    .et-donut { width: 100px; height: 100px; border-radius: 50%; position: relative; }
+    .et-donut-center { position: absolute; inset: 16px; background: var(--surface); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .et-donut-center .et-donut-value { font-size: 20px; font-weight: 700; }
+    .et-donut-center .et-donut-label { font-size: 9px; color: var(--text-muted); }
+    .et-donut-legend { display: flex; flex-direction: column; gap: 6px; }
+    .et-donut-legend .et-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+    .et-donut-legend .et-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .et-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .et-search-box { position: relative; flex: 1; min-width: 180px; }
+    .et-search-box input { width: 100%; padding: 8px 12px 8px 34px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; color: var(--text); background: var(--surface); }
+    .et-search-box input:focus { border-color: var(--blue); }
+    .et-search-box .et-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; }
+    .et-toolbar select { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; background: var(--surface); color: var(--text); outline: none; cursor: pointer; }
+    .et-toolbar select:focus { border-color: var(--blue); }
+    .et-btn { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; }
+    .et-btn:hover { background: var(--surface-hover); }
+    .et-btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .et-btn-primary:hover { background: #2563eb; }
+    .et-btn-outline { background: var(--surface); }
+    .et-table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    .et-table-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+    .et-table-header h3 { font-size: 14px; font-weight: 600; }
+    .et-table-header .et-count { font-size: 12px; color: var(--text-muted); }
+    .et-table-card table { width: 100%; border-collapse: collapse; }
+    .et-table-card thead th { text-align: left; padding: 10px 18px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); background: var(--surface-hover); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .et-table-card tbody td { padding: 12px 18px; font-size: 13px; border-bottom: 1px solid var(--border-light); color: var(--text); }
+    .et-table-card tbody tr:last-child td { border-bottom: none; }
+    .et-table-card tbody tr:hover { background: var(--surface-hover); }
+    .et-company-cell { display: flex; align-items: center; gap: 8px; }
+    .et-company-avatar { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .et-company-name { font-weight: 600; }
+    .et-company-email { font-size: 11px; color: var(--text-muted); }
+    .et-status-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .et-status-sent { background: #eff6ff; color: #2563eb; } .et-status-delivered { background: #f0fdf4; color: #16a34a; }
+    .et-status-opened { background: #f5f3ff; color: #7c3aed; } .et-status-clicked { background: #fffbeb; color: #d97706; }
+    .et-status-replied { background: #ecfeff; color: #0891b2; } .et-status-bounced { background: #fef2f2; color: #dc2626; }
+    .et-status-dot { width: 5px; height: 5px; border-radius: 50%; }
+    .et-dot-sent { background: #2563eb; } .et-dot-delivered { background: #16a34a; } .et-dot-opened { background: #7c3aed; }
+    .et-dot-clicked { background: #d97706; } .et-dot-replied { background: #0891b2; } .et-dot-bounced { background: #dc2626; }
+    .et-product-tag { font-size: 11px; background: var(--surface-hover); padding: 2px 7px; border-radius: 3px; font-weight: 500; }
+    .et-action-btns { display: flex; gap: 4px; }
+    .et-action-btns button { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+    .et-action-btns button:hover { background: #eff6ff; border-color: #93c5fd; }
+    .et-pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-top: 1px solid var(--border); }
+    .et-pagination-info { font-size: 12px; color: var(--text-muted); }
+    .et-pagination-pages { display: flex; gap: 4px; }
+    .et-pagination-pages button { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+    .et-pagination-pages button:hover { background: var(--surface-hover); }
+    .et-pagination-pages button.et-active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .et-modal-backdrop { position: fixed; inset: 0; background: rgba(17,24,39,0.35); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; display: none; }
+    .et-modal-backdrop.et-show { display: flex; }
+    .et-modal { background: var(--surface); border-radius: 16px; width: 600px; max-width: 95vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .et-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+    .et-modal-header h2 { font-size: 16px; font-weight: 700; }
+    .et-modal-close { width: 30px; height: 30px; border: none; background: var(--surface-hover); border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--text); }
+    .et-modal-body { padding: 20px 22px; }
+    .et-detail-row { display: flex; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+    .et-detail-row:last-child { border-bottom: none; }
+    .et-detail-label { width: 130px; font-size: 12px; color: var(--text-muted); font-weight: 500; flex-shrink: 0; }
+    .et-detail-value { flex: 1; font-size: 13px; }
+    .et-timeline { margin-top: 16px; }
+    .et-timeline h4 { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+    .et-timeline-item { display: flex; gap: 10px; padding-bottom: 14px; position: relative; }
+    .et-timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 14px; top: 28px; bottom: 0; width: 2px; background: var(--border); }
+    .et-tl-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+    .et-tl-content { flex: 1; }
+    .et-tl-content .et-tl-title { font-size: 12px; font-weight: 600; }
+    .et-tl-content .et-tl-time { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+    .et-tl-content .et-tl-desc { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .et-tl-sent { background: #eff6ff; color: #2563eb; } .et-tl-delivered { background: #f0fdf4; color: #16a34a; }
+    .et-tl-opened { background: #f5f3ff; color: #7c3aed; } .et-tl-clicked { background: #fffbeb; color: #d97706; }
+    .et-tl-replied { background: #ecfeff; color: #0891b2; } .et-tl-bounced { background: #fef2f2; color: #dc2626; }
   </style>
 </head>
 <body>
@@ -656,17 +756,113 @@
         </div>
       </div>
 
-      <!-- ===== OUTBOUND ===== -->
+      <!-- ===== OUTBOUND / EMAIL TRACKING ===== -->
       <div class="workspace" id="w-outbound">
-        <div class="top-bar"><div><h2>Outbound Tools</h2><p>Review email campaigns, track outreach, and export your data.</p></div></div>
-        <div id="export-selector">
-          <div class="export-cards">
-            <div class="export-card" onclick="showExport('queue')"><div class="export-icon blue"><svg viewBox="0 0 24 24"><path d="M4 5h16v2H4V5Zm0 6h16v2H4v-2Zm0 6h10v2H4v-2Z"/></svg></div><h4>Lead Queue Export</h4><p>Export the full lead queue with all details including contact info, region, and recommended products.</p></div>
-            <div class="export-card" onclick="showExport('email')"><div class="export-icon green"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><h4>Email Activity Export</h4><p>Export sent and failed email records with delivery status for campaign reporting.</p></div>
+        <div class="top-bar"><div><h2>Email Tracking</h2><p>Monitor delivery rates, opens, replies, and follow-ups across all campaigns.</p></div></div>
+
+        <!-- Metric Cards -->
+        <div class="et-metrics-grid">
+          <div class="et-metric-card et-active" id="et-metric-all" onclick="etFilterStatus('all')">
+            <div class="et-metric-icon icon-blue">📨</div>
+            <div class="et-metric-value" id="et-val-sent">0</div>
+            <div class="et-metric-label">Total Sent</div>
+            <div class="et-metric-change" id="et-trend-sent">—</div>
+            <div class="et-metric-bar bar-blue" style="width:100%"></div>
+          </div>
+          <div class="et-metric-card" id="et-metric-delivered" onclick="etFilterStatus('delivered')">
+            <div class="et-metric-icon icon-green">✅</div>
+            <div class="et-metric-value" id="et-val-delivered">0</div>
+            <div class="et-metric-label">Delivered</div>
+            <div class="et-metric-change" id="et-rate-delivered">0% rate</div>
+            <div class="et-metric-bar bar-green" style="width:0%"></div>
+          </div>
+          <div class="et-metric-card" id="et-metric-opened" onclick="etFilterStatus('opened')">
+            <div class="et-metric-icon icon-purple">👁️</div>
+            <div class="et-metric-value" id="et-val-opened">0</div>
+            <div class="et-metric-label">Opened</div>
+            <div class="et-metric-change" id="et-rate-opened">0% rate</div>
+            <div class="et-metric-bar bar-purple" style="width:0%"></div>
+          </div>
+          <div class="et-metric-card" id="et-metric-clicked" onclick="etFilterStatus('clicked')">
+            <div class="et-metric-icon icon-amber">🔗</div>
+            <div class="et-metric-value" id="et-val-clicked">0</div>
+            <div class="et-metric-label">Link Clicked</div>
+            <div class="et-metric-change" id="et-rate-clicked">0% rate</div>
+            <div class="et-metric-bar bar-amber" style="width:0%"></div>
+          </div>
+          <div class="et-metric-card" id="et-metric-replied" onclick="etFilterStatus('replied')">
+            <div class="et-metric-icon icon-cyan">💬</div>
+            <div class="et-metric-value" id="et-val-replied">0</div>
+            <div class="et-metric-label">Replied</div>
+            <div class="et-metric-change" id="et-rate-replied">0% rate</div>
+            <div class="et-metric-bar bar-cyan" style="width:0%"></div>
+          </div>
+          <div class="et-metric-card" id="et-metric-bounced" onclick="etFilterStatus('bounced')">
+            <div class="et-metric-icon icon-red">❌</div>
+            <div class="et-metric-value" id="et-val-bounced">0</div>
+            <div class="et-metric-label">Bounced</div>
+            <div class="et-metric-change" id="et-rate-bounced">0% rate</div>
+            <div class="et-metric-bar bar-red" style="width:0%"></div>
           </div>
         </div>
-        <div id="export-preview" style="display:none;margin-top:20px">
-          <div class="panel"><div class="panel-header"><div style="display:flex;align-items:center;gap:10px"><button class="btn" style="font-size:12px;padding:5px 12px" onclick="hideExport()"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div><div class="panel-title" id="ex-title">Export Preview</div><div class="panel-desc" id="ex-desc"></div></div></div><div style="display:flex;gap:8px;align-items:center"><select class="select-input" id="ex-filter" onchange="renderExport()" style="display:none"><option value="all">All</option><option value="sent">Sent</option></select><button class="btn btn-primary" style="font-size:12px;padding:5px 12px" onclick="doExport()"><svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/></svg>Export CSV</button></div></div><div class="table-wrap"><table><thead id="ex-head"></thead><tbody id="ex-body"></tbody></table></div></div>
+
+        <!-- Charts -->
+        <div class="et-chart-row">
+          <div class="et-chart-card">
+            <h3>📈 Daily Send Volume (Last 7 Days)</h3>
+            <div class="et-bar-chart-wrapper">
+              <div class="et-bar-chart-grid" id="etBarGrid"></div>
+              <div class="et-bar-chart" id="etBarChart"></div>
+            </div>
+          </div>
+          <div class="et-chart-card">
+            <h3> Status Breakdown</h3>
+            <div class="et-donut-container">
+              <div class="et-donut" id="etDonutChart">
+                <div class="et-donut-center">
+                  <div class="et-donut-value" id="etDonutTotal">0</div>
+                  <div class="et-donut-label">Total</div>
+                </div>
+              </div>
+              <div class="et-donut-legend" id="etDonutLegend"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="et-toolbar">
+          <div class="et-search-box">
+            <span class="et-search-icon">🔍</span>
+            <input type="text" placeholder="Search by company, email, or product..." id="etSearchInput">
+          </div>
+          <select id="etStatusFilter">
+            <option value="all">All Statuses</option>
+            <option value="sent">📨 Sent</option>
+            <option value="delivered">✅ Delivered</option>
+            <option value="opened">👁️ Opened</option>
+            <option value="clicked"> Clicked</option>
+            <option value="replied">💬 Replied</option>
+            <option value="bounced">❌ Bounced</option>
+          </select>
+          <select id="etProductFilter"><option value="all">All Products</option></select>
+          <button class="et-btn et-btn-outline" id="etExportCsv">Export CSV</button>
+          <button class="et-btn et-btn-primary" id="etSendCampaign"> Send Campaign</button>
+        </div>
+
+        <!-- Table -->
+        <div class="et-table-card">
+          <div class="et-table-header">
+            <h3>Email Activity Log</h3>
+            <span class="et-count" id="etTableCount">No records</span>
+          </div>
+          <table>
+            <thead><tr><th>Company</th><th>Email</th><th>Product</th><th>Status</th><th>Sent At</th><th>Opened</th><th>Replied</th><th>Actions</th></tr></thead>
+            <tbody id="etTableBody"></tbody>
+          </table>
+          <div class="et-pagination">
+            <div class="et-pagination-info" id="etPaginationInfo">No records</div>
+            <div class="et-pagination-pages" id="etPaginationPages"></div>
+          </div>
         </div>
       </div>
     </main>
@@ -1093,6 +1289,7 @@
       document.getElementById('w-' + ws).classList.add('active');
       if (ws === 'dashboard') renderDash();
       if (ws === 'crm') renderQueue();
+      if (ws === 'outbound') etInit();
     }
 
     // ===== RENDER =====
@@ -2575,6 +2772,106 @@
     initAdminPanel();
     loadProducts();
     loadTemplates();
+
+    // ===== EMAIL TRACKING =====
+    var etSummary={sent:0,delivered:0,opened:0,clicked:0,replied:0,bounced:0},etDailyData=[],etPage=1,etFilter='all',etAvatarColors=['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#06b6d4'];
+    function etGetColor(n){var h=0;for(var i=0;i<n.length;i++)h=n.charCodeAt(i)+((h<<5)-h);return etAvatarColors[Math.abs(h)%etAvatarColors.length]}
+    function etFmtDate(d){if(!d)return'—';return new Date(d).toLocaleString('en-MY',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+    function etFmtLong(d){if(!d)return'';return new Date(d).toLocaleString('en-MY',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}
+
+    async function etLoadSummary(){
+      try{var r=await fetch('/api/email/tracking/summary');if(!r.ok)return;etSummary=await r.json();
+      ['sent','delivered','opened','clicked','replied','bounced'].forEach(function(k){var el=document.getElementById('et-val-'+k);if(el)el.textContent=etSummary[k]||0});
+      var total=etSummary.sent||1;
+      ['delivered','opened','clicked','replied','bounced'].forEach(function(k){var bar=document.querySelector('#et-metric-'+k+' .et-metric-bar');var rate=document.getElementById('et-rate-'+k);if(bar)bar.style.width=((etSummary[k]||0)/total*100)+'%';if(rate)rate.textContent=(total>1?Math.round((etSummary[k]||0)/total*1000)/10:0)+'% rate'});
+      etRenderDonut();etUpdateTrend()}catch(e){}}
+
+    async function etLoadDaily(){
+      try{var r=await fetch('/api/email/tracking/daily');if(!r.ok)return;etDailyData=await r.json();etRenderBarChart()}catch(e){}}
+
+    function etRenderBarChart(){
+      var data=etDailyData.length?etDailyData:[{label:'Mon',count:0},{label:'Tue',count:0},{label:'Wed',count:0},{label:'Thu',count:0},{label:'Fri',count:0},{label:'Sat',count:0},{label:'Sun',count:0}];
+      var values=data.map(function(d){return d.count});var max=Math.max.apply(null,values.concat([1]));
+      var colors=['#3b82f6','#60a5fa','#3b82f6','#60a5fa','#3b82f6','#93c5fd','#cbd5e1'];
+      var grid=document.getElementById('etBarGrid');if(!grid)return;
+      var steps=[max,Math.round(max*0.75),Math.round(max*0.5),Math.round(max*0.25),0];
+      grid.innerHTML=steps.map(function(v){return'<div class="et-grid-line"><span>'+v+'</span></div>'}).join('');
+      var chart=document.getElementById('etBarChart');if(!chart)return;
+      chart.innerHTML=data.map(function(d,i){return'<div class="et-bar-group"><div class="et-bar-value">'+values[i]+'</div><div class="et-bar" style="height:'+(values[i]/max*100)+'%;background:'+colors[i]+'"></div><div class="et-bar-label">'+d.label+'</div></div>'}).join('')}
+
+    function etRenderDonut(){
+      var total=etSummary.sent||0;var segs=[{v:Math.max(0,etSummary.sent-etSummary.delivered-etSummary.bounced),c:'#3b82f6',l:'Sent'},{v:etSummary.delivered-etSummary.opened,c:'#10b981',l:'Delivered'},{v:etSummary.opened-etSummary.clicked-etSummary.replied,c:'#8b5cf6',l:'Opened'},{v:etSummary.clicked,c:'#f59e0b',l:'Clicked'},{v:etSummary.replied,c:'#06b6d4',l:'Replied'},{v:etSummary.bounced,c:'#ef4444',l:'Bounced'}];
+      var sum=0;segs.forEach(function(s){sum+=Math.max(0,s.v)});if(sum===0)sum=1;
+      var donut=document.getElementById('etDonutChart');if(!donut)return;
+      var g='conic-gradient(';var acc=0;
+      segs.forEach(function(s,i){var v=Math.max(0,s.v);var st=acc/sum*360;acc+=v;var en=acc/sum*360;g+=s.c+' '+st+'deg '+en+'deg';if(i<segs.length-1)g+=', '});g+=')';
+      donut.style.background=g;var te=document.getElementById('etDonutTotal');if(te)te.textContent=total;
+      var leg=document.getElementById('etDonutLegend');if(!leg)return;
+      leg.innerHTML=segs.map(function(s){return'<div class="et-legend-item"><div class="et-legend-dot" style="background:'+s.c+'"></div>'+s.l+' ('+Math.max(0,s.v)+')</div>'}).join('')}
+
+    function etUpdateTrend(){
+      if(!etDailyData.length)return;var recent=etDailyData.slice(-3).reduce(function(s,d){return s+d.count},0);var prev=etDailyData.slice(0,3).reduce(function(s,d){return s+d.count},0);
+      var el=document.getElementById('et-trend-sent');if(!el)return;
+      if(prev>0){var pct=Math.round((recent-prev)/prev*100);el.textContent=(pct>=0?'↑ ':'↓ ')+Math.abs(pct)+'% this week';el.className='et-metric-change '+(pct>=0?'up':'down')}else{el.textContent=recent>0?recent+' this week':'No sends yet'}}
+
+    async function etLoadActivity(){
+      try{var sf=document.getElementById('etStatusFilter');var pf=document.getElementById('etProductFilter');var si=document.getElementById('etSearchInput');
+      var p=new URLSearchParams({page:etPage,pageSize:12,status:etFilter!=='all'?etFilter:(sf?sf.value:'all'),product:pf?pf.value:'all',search:si?si.value:''});
+      var r=await fetch('/api/email/tracking/activity?'+p);if(!r.ok)return;var data=await r.json();var recs=data.records||[];
+      var ce=document.getElementById('etTableCount');var pi=document.getElementById('etPaginationInfo');
+      if(ce)ce.textContent=recs.length+' of '+(data.total||0)+' records';if(pi)pi.textContent='Showing '+((etPage-1)*12+1)+'-'+Math.min(etPage*12,data.total||0)+' of '+(data.total||0);
+      etRenderTable(recs,data.total||0);etRenderPagination(data.total||0)}catch(e){}}
+
+    function etRenderTable(recs){
+      var tb=document.getElementById('etTableBody');if(!tb)return;
+      if(!recs.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">No email activity found. Send your first campaign to see tracking data here.</td></tr>';return}
+      var sm={sent:'Sent',delivered:'Delivered',opened:'Opened',clicked:'Clicked',replied:'Replied',bounced:'Bounced'};
+      var sc={sent:'et-status-sent',delivered:'et-status-delivered',opened:'et-status-opened',clicked:'et-status-clicked',replied:'et-status-replied',bounced:'et-status-bounced'};
+      var dc={sent:'et-dot-sent',delivered:'et-dot-delivered',opened:'et-dot-opened',clicked:'et-dot-clicked',replied:'et-dot-replied',bounced:'et-dot-bounced'};
+      tb.innerHTML=recs.map(function(r){var c=etGetColor(r.company);var ini=r.company.charAt(0);var s=sc[r.status]||'et-status-sent';var d=dc[r.status]||'et-dot-sent';
+      return'<tr onclick="etOpenDetail(\''+r.id+'\')"><td><div class="et-company-cell"><div class="et-company-avatar" style="background:'+c+'">'+ini+'</div><div><div class="et-company-name">'+r.company+'</div><div class="et-company-email">'+(r.contactName||'')+'</div></div></div></td><td style="color:var(--text-muted);font-size:12px">'+(r.email||'—')+'</td><td><span class="et-product-tag">'+r.product+'</span></td><td><span class="et-status-badge '+s+'"><span class="et-status-dot '+d+'"></span>'+sm[r.status]+'</span></td><td>'+etFmtDate(r.sentAt)+'</td><td>'+(r.openedAt?etFmtDate(r.openedAt):'<span style="color:var(--text-muted)">—</span>')+'</td><td>'+(r.repliedAt?etFmtDate(r.repliedAt):'<span style="color:var(--text-muted)">—</span>')+'</td><td><div class="et-action-btns"><button title="View" onclick="event.stopPropagation();etOpenDetail(\''+r.id+'\')">👁️</button>'+((r.status!=='replied'?'<button title="Mark Replied" onclick="event.stopPropagation();etMarkReplied(\''+r.id+'\')"></button>':''))+'</div></td></tr>'}).join('')}
+
+    function etRenderPagination(total){
+      var con=document.getElementById('etPaginationPages');if(!con)return;var pages=Math.ceil(total/12)||1;var h='';
+      for(var i=1;i<=Math.min(pages,5);i++)h+='<button class="'+(i===etPage?'et-active':'')+'" onclick="etGoPage('+i+')">'+i+'</button>';con.innerHTML=h}
+
+    function etGoPage(p){etPage=p;etLoadActivity()}
+
+    function etFilterStatus(s){
+      etFilter=s;etPage=1;document.querySelectorAll('.et-metric-card').forEach(function(c){c.classList.remove('et-active')});
+      var a=document.getElementById('et-metric-'+s);if(a)a.classList.add('et-active');var sel=document.getElementById('etStatusFilter');if(sel)sel.value=s;etLoadActivity()}
+
+    async function etOpenDetail(id){
+      var r;try{var res=await fetch('/api/email/tracking/'+id);if(res.ok)r=await res.json()}catch(e){}if(!r)return;
+      var sm={sent:' Sent',delivered:'✅ Delivered',opened:'👁️ Opened',clicked:'🔗 Clicked',replied:'💬 Replied',bounced:'❌ Bounced'};
+      var tl='<div class="et-timeline-item"><div class="et-tl-dot et-tl-sent">📨</div><div class="et-tl-content"><div class="et-tl-title">Email Sent</div><div class="et-tl-time">'+etFmtLong(r.sentAt)+'</div><div class="et-tl-desc">Sent to '+(r.email||'')+'</div></div></div>';
+      if(r.openedAt)tl+='<div class="et-timeline-item"><div class="et-tl-dot et-tl-opened">👁️</div><div class="et-tl-content"><div class="et-tl-title">Email Opened</div><div class="et-tl-time">'+etFmtLong(r.openedAt)+'</div></div></div>';
+      if(r.clicked)tl+='<div class="et-timeline-item"><div class="et-tl-dot et-tl-clicked">🔗</div><div class="et-tl-content"><div class="et-tl-title">Link Clicked</div><div class="et-tl-time">'+etFmtLong(r.openedAt||r.sentAt)+'</div><div class="et-tl-desc">'+(r.clickedUrl||'Link in email')+'</div></div></div>';
+      if(r.repliedAt)tl+='<div class="et-timeline-item"><div class="et-tl-dot et-tl-replied">💬</div><div class="et-tl-content"><div class="et-tl-title">Reply Received</div><div class="et-tl-time">'+etFmtLong(r.repliedAt)+'</div></div></div>';
+      if(r.status==='bounced')tl+='<div class="et-timeline-item"><div class="et-tl-dot et-tl-bounced">❌</div><div class="et-tl-content"><div class="et-tl-title">Bounced</div><div class="et-tl-desc">Reason: '+(r.bounceReason||'Unknown')+'</div></div></div>';
+      var modal=document.getElementById('etDetailModal');if(!modal){modal=document.createElement('div');modal.id='etDetailModal';modal.className='et-modal-backdrop';modal.innerHTML='<div class="et-modal"><div class="et-modal-header"><h2 id="etModalTitle"></h2><button class="et-modal-close" onclick="etCloseModal()">✕</button></div><div class="et-modal-body" id="etModalBody"></div></div>';document.body.appendChild(modal);modal.addEventListener('click',function(e){if(e.target===modal)etCloseModal()})}
+      document.getElementById('etModalTitle').textContent=r.company+' — Email Detail';
+      document.getElementById('etModalBody').innerHTML='<div class="et-detail-row"><div class="et-detail-label">Company</div><div class="et-detail-value"><strong>'+r.company+'</strong></div></div><div class="et-detail-row"><div class="et-detail-label">Contact</div><div class="et-detail-value">'+(r.contactName||'—')+'</div></div><div class="et-detail-row"><div class="et-detail-label">Email</div><div class="et-detail-value">'+(r.email||'—')+'</div></div><div class="et-detail-row"><div class="et-detail-label">Product</div><div class="et-detail-value"><span class="et-product-tag">'+r.product+'</span></div></div><div class="et-detail-row"><div class="et-detail-label">Status</div><div class="et-detail-value">'+(sm[r.status]||r.status)+'</div></div>'+(r.bounceReason?'<div class="et-detail-row"><div class="et-detail-label">Bounce Reason</div><div class="et-detail-value" style="color:var(--red)">'+r.bounceReason+'</div></div>':'')+'<div class="et-timeline"><h4> Activity Timeline</h4>'+tl+'</div><div style="margin-top:16px;display:flex;gap:10px"><button class="et-btn et-btn-primary" onclick="etCloseModal()">Close</button>'+(r.status!=='replied'?'<button class="et-btn et-btn-outline" onclick="etMarkReplied(\''+r.id+'\')">💬 Mark Replied</button>':'')+'</div>';
+      modal.classList.add('et-show')}
+
+    function etCloseModal(){var m=document.getElementById('etDetailModal');if(m)m.classList.remove('et-show')}
+
+    async function etMarkReplied(id){try{var r=await fetch('/api/email/tracking/'+id+'/reply',{method:'POST'});if(r.ok){etCloseModal();await etLoadSummary();await etLoadActivity()}}catch(e){}}
+
+    function etLoadProducts(){
+      fetch('/api/templates').then(function(r){return r.json()}).then(function(data){var sel=document.getElementById('etProductFilter');if(!sel||!data.products)return;sel.innerHTML='<option value="all">All Products</option>';data.products.forEach(function(p){sel.innerHTML+='<option value="'+p.name+'">'+p.name+'</option>'})}).catch(function(){})}
+
+    function etInit(){
+      if(etInit._done)return;etInit._done=true;
+      var si=document.getElementById('etSearchInput');var sf=document.getElementById('etStatusFilter');var pf=document.getElementById('etProductFilter');var eb=document.getElementById('etExportCsv');var cb=document.getElementById('etSendCampaign');
+      var st;
+      if(si){si.addEventListener('input',function(){clearTimeout(st);st=setTimeout(function(){etPage=1;etLoadActivity()},300)})}
+      if(sf){sf.addEventListener('change',function(){etPage=1;etFilter=sf.value;document.querySelectorAll('.et-metric-card').forEach(function(c){c.classList.remove('et-active')});var a=document.getElementById('et-metric-'+sf.value);if(a)a.classList.add('et-active');etLoadActivity()})}
+      if(pf)pf.addEventListener('change',function(){etPage=1;etLoadActivity()});
+      if(eb)eb.addEventListener('click',function(){window.location.href='/api/export/sent.csv'});
+      if(cb)cb.addEventListener('click',function(){notify('Coming Soon','Campaign composer is under development.')});
+      etLoadProducts();
+      etLoadSummary();etLoadDaily();etLoadActivity()}
   </script>
 </body>
 </html>
