@@ -134,20 +134,20 @@ const emailTemplateSubjectInput = document.getElementById("emailTemplateSubjectI
 const emailTemplateBodyInput = document.getElementById("emailTemplateBodyInput");
 const senderEmailStatus = document.getElementById("senderEmailStatus");
 
-const showExportQueue = document.getElementById("showExportQueue");
-const showExportEmailActivity = document.getElementById("showExportEmailActivity");
-const exportPreviewPanel = document.getElementById("exportPreviewPanel");
-const exportPreviewEyebrow = document.getElementById("exportPreviewEyebrow");
-const exportPreviewTitle = document.getElementById("exportPreviewTitle");
-const exportPreviewButton = document.getElementById("exportPreviewButton");
-const emailActivityFilterWrap = document.getElementById("emailActivityFilterWrap");
-const emailActivityFilter = document.getElementById("emailActivityFilter");
-const exportQueueTable = document.getElementById("exportQueueTable");
-const exportEmailTable = document.getElementById("exportEmailTable");
-const exportQueueBody = document.getElementById("exportQueueBody");
-const exportEmailBody = document.getElementById("exportEmailBody");
-const exportPreviewEmpty = document.getElementById("exportPreviewEmpty");
-const exportSaveNote = document.getElementById("exportSaveNote");
+const showExportQueue = null; // removed — outbound is now tab-based UI
+const showExportEmailActivity = null; // removed — outbound is now tab-based UI
+const exportPreviewPanel = null; // removed
+const exportPreviewEyebrow = null; // removed
+const exportPreviewTitle = null; // removed
+const exportPreviewButton = null; // removed
+const emailActivityFilterWrap = null; // removed
+const emailActivityFilter = null; // removed
+const exportQueueTable = null; // removed
+const exportEmailTable = null; // removed
+const exportQueueBody = null; // removed
+const exportEmailBody = null; // removed
+const exportPreviewEmpty = null; // removed
+const exportSaveNote = null; // removed
 
 const emailDetailModal = document.getElementById("emailDetailModal");
 const closeEmailDetail = document.getElementById("closeEmailDetail");
@@ -1224,89 +1224,13 @@ function renderLeadDetail() {
 }
 
 
-function renderExportEmailTable() {
-  const activityLeads = getEmailActivityLeads();
-  exportEmailBody.innerHTML = "";
 
-  activityLeads.forEach((lead) => {
-    const row = document.createElement("tr");
-    row.className = "clickable-row";
-    row.innerHTML = `
-      <td>${lead.company}</td>
-      <td>${lead.contactName}</td>
-      <td>${lead.email}</td>
-      <td>${lead.region}</td>
-      <td>${lead.source}</td>
-      <td>
-        <div class="email-status-cell">
-          <span class="state-pill ${lead.emailStatus === "failed" ? "state-unqualified" : "state-sent"}">${formatEmailStatus(lead.emailStatus)}</span>
-          ${lead.emailLastError ? `<small>${lead.emailLastError}</small>` : ""}
-        </div>
-      </td>
-      <td>${lead.emailLastAttemptAt ? formatDate(lead.emailLastAttemptAt) : lead.sentAt ? formatDate(lead.sentAt) : "Not attempted"}</td>
-    `;
-    row.addEventListener("click", () => {
-      openEmailEditor(lead);
-    });
-    exportEmailBody.appendChild(row);
-  });
-}
 
-function renderExportQueueTable() {
-  const leads = getFilteredLeads();
-  exportQueueBody.innerHTML = "";
 
-  leads.forEach((lead) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${lead.company}</td>
-      <td>${lead.contactName}</td>
-      <td>${lead.email}</td>
-      <td>${lead.phone || ""}</td>
-      <td>${lead.region}</td>
-      <td>${lead.source}</td>
-      <td>${lead.priorityArea ? "Priority" : "Standard"}</td>
-      <td>${lead.recommendation.productName}</td>
-      <td>${lead.status}</td>
-    `;
-    exportQueueBody.appendChild(row);
-  });
-}
-
-function renderExportPreview() {
-  const isQueue = state.activeExportView === "queue";
-  const isEmail = state.activeExportView === "email";
-
-  exportPreviewPanel.hidden = !isQueue && !isEmail;
-  exportQueueTable.hidden = !isQueue;
-  exportEmailTable.hidden = !isEmail;
-  emailActivityFilterWrap.hidden = !isEmail;
-
-  showExportQueue.classList.toggle("active", isQueue);
-  showExportEmailActivity.classList.toggle("active", isEmail);
-
-  if (!isQueue && !isEmail) {
-    exportPreviewEmpty.hidden = true;
-    return;
-  }
-
-  if (isQueue) {
-    renderExportQueueTable();
-    const hasRows = getFilteredLeads().length > 0;
-    exportPreviewEyebrow.textContent = "Lead Queue";
-    exportPreviewTitle.textContent = "Lead Queue Table";
-    exportPreviewButton.textContent = "Export Lead Queue";
-    exportPreviewEmpty.hidden = hasRows;
-    return;
-  }
-
-  renderExportEmailTable();
-  const hasRows = getEmailActivityLeads().length > 0;
-  exportPreviewEyebrow.textContent = "Email Activity";
-  exportPreviewTitle.textContent = "Email Activity Table";
-  exportPreviewButton.textContent = "Export Email Activity";
-  exportPreviewEmpty.hidden = hasRows;
-}
+// Stub — old export preview replaced by outbound tab-based UI (functionality pending)
+function renderExportQueueTable() {}
+function renderExportEmailTable() {}
+function renderExportPreview() {}
 
 async function saveExcelFile(type) {
   const body = {
@@ -1925,33 +1849,26 @@ retryBiginStatusButton.addEventListener("click", async () => {
   }
 });
 
-showExportQueue.addEventListener("click", () => {
-  state.activeExportView = "queue";
-  renderExportPreview();
+// ===== OUTBOUND TABS =====
+const obTabs = document.querySelectorAll('.ob-tab');
+const obTabContents = {
+  campaigns: document.getElementById('obTabCampaigns'),
+  sent: document.getElementById('obTabSent'),
+  replies: document.getElementById('obTabReplies')
+};
+
+obTabs.forEach(function(tab) {
+  tab.addEventListener('click', function() {
+    obTabs.forEach(function(t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    var target = tab.getAttribute('data-ob-tab');
+    Object.keys(obTabContents).forEach(function(key) {
+      obTabContents[key].hidden = key !== target;
+    });
+  });
 });
 
-showExportEmailActivity.addEventListener("click", () => {
-  state.activeExportView = "email";
-  renderExportPreview();
-});
-
-emailActivityFilter.addEventListener("change", () => {
-  state.emailActivityFilter = emailActivityFilter.value;
-  if (state.activeExportView === "email") {
-    renderExportPreview();
-  }
-});
-
-exportPreviewButton.addEventListener("click", () => {
-  if (state.activeExportView === "queue") {
-    exportExcel("leads", "lead-queue-export.csv");
-    return;
-  }
-
-  if (state.activeExportView === "email") {
-    exportExcel("sent", "sent-email-export.csv");
-  }
-});
+// Old export buttons removed — outbound is now tab-based UI (functionality pending)
 
 loadSenderSettings();
 loadThemeMode();

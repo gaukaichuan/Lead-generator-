@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadGen AI — CRM Preview</title>
+<style>
+  :root {
+    --bg: #f8f9fc; --surface: #fff; --surface-hover: #f8f9fc;
+    --border: #e8eaef; --border-light: #f1f3f8;
+    --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+    --blue: #3b82f6; --blue-50: #eff6ff; --blue-100: #dbeafe; --blue-600: #2563eb; --blue-700: #1d4ed8;
+    --green: #10b981; --green-50: #ecfdf5; --green-100: #d1fae5;
+    --amber: #f59e0b; --amber-50: #fffbeb; --amber-100: #fef3c7;
+    --red: #ef4444; --red-50: #fef2f2; --red-100: #fee2e2;
+    --purple: #8b5cf6; --purple-50: #f5f3ff; --purple-100: #ede9fe;
+    --indigo: #6366f1; --cyan: #06b6d4; --orange: #f97316; --pink: #ec4899;
+    --radius-sm: 8px; --radius: 12px; --radius-lg: 16px; --radius-xl: 20px;
+    --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.03); --shadow: 0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px -1px rgba(0,0,0,0.03);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.07), 0 8px 10px -6px rgba(0,0,0,0.04);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* SIDEBAR */
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; }
+  .brand { display: flex; align-items: center; gap: 12px; padding: 4px 12px; margin-bottom: 28px; }
+  .brand-icon { width: 40px; height: 40px; border-radius: var(--radius); background: linear-gradient(135deg, var(--blue-600), var(--indigo)); display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(59,130,246,0.25); }
+  .brand-icon svg { width: 22px; height: 22px; fill: #fff; }
+  .brand h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; }
+  .brand p { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .nav-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; padding: 16px 12px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm); border: none; background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 150ms; text-align: left; font: inherit; font-size: 13.5px; font-weight: 500; width: 100%; }
+  .nav-item:hover { background: var(--surface-hover); color: var(--text); }
+  .nav-item.active { background: var(--blue-50); color: var(--blue-600); font-weight: 600; }
+  .nav-item svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; opacity: 0.7; }
+  .nav-item.active svg { opacity: 1; }
+  .sidebar-footer { margin-top: auto; padding: 16px; border-radius: var(--radius); background: linear-gradient(135deg, var(--blue-50), var(--purple-50)); border: 1px solid var(--blue-100); display: flex; align-items: center; gap: 10px; }
+  .sidebar-footer .sf-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-600), var(--purple)); display: grid; place-items: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .sidebar-footer strong { font-size: 13px; font-weight: 700; display: block; }
+  .sidebar-footer span { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* MAIN */
+  .main { padding: 16px 24px; max-width: 1400px; }
+  .workspace { display: none; }
+  .workspace.active { display: block; }
+  .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px; }
+  .top-bar h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+  .top-bar p { font-size: 14px; color: var(--text-secondary); }
+  .top-actions { display: flex; gap: 8px; }
+
+  /* BUTTONS */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 18px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: all 150ms; font-family: inherit; white-space: nowrap; box-shadow: var(--shadow-sm); }
+  .btn:hover { background: var(--surface-hover); box-shadow: var(--shadow); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--blue-600); border-color: var(--blue-600); color: #fff; }
+  .btn-primary:hover { background: var(--blue-700); }
+  .btn-green { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn-red { background: var(--red); border-color: var(--red); color: #fff; }
+  .btn-red:hover { background: #dc2626; }
+  .btn svg { width: 15px; height: 15px; fill: currentColor; }
+  .btn-primary svg, .btn-green svg, .btn-red svg { fill: #fff; }
+
+  /* METRICS */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 200ms; }
+  .metric:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .metric::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .metric.blue::after { background: linear-gradient(90deg, var(--blue), var(--blue-600)); }
+  .metric.green::after { background: linear-gradient(90deg, var(--green), #059669); }
+  .metric.amber::after { background: linear-gradient(90deg, var(--amber), #d97706); }
+  .metric.purple::after { background: linear-gradient(90deg, var(--purple), #7c3aed); }
+  .metric-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .metric-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+  .metric-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); display: grid; place-items: center; }
+  .metric-icon svg { width: 16px; height: 16px; }
+  .metric.blue .metric-icon { background: var(--blue-50); } .metric.blue .metric-icon svg { fill: var(--blue); }
+  .metric.green .metric-icon { background: var(--green-50); } .metric.green .metric-icon svg { fill: var(--green); }
+  .metric.amber .metric-icon { background: var(--amber-50); } .metric.amber .metric-icon svg { fill: var(--amber); }
+  .metric.purple .metric-icon { background: var(--purple-50); } .metric.purple .metric-icon svg { fill: var(--purple); }
+  .metric-value { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px; }
+  .metric-change { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+
+  /* PANELS */
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; align-items: flex-start; justify-content: space-between; }
+  .panel-title { font-size: 14px; font-weight: 700; }
+  .panel-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* CHART PANELS */
+  .chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
+  .chart-panel h3 { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .chart-panel p { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 140px; padding: 0 4px; }
+  .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; max-width: 48px; border-radius: 8px 8px 4px 4px; transition: all 250ms; min-height: 6px; position: relative; cursor: pointer; }
+  .bar:hover { filter: brightness(1.1); transform: scaleY(1.03); transform-origin: bottom; }
+  .bar-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-align: center; }
+  .donut-container { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .donut-chart { width: 120px; height: 120px; border-radius: 50%; position: relative; display: grid; place-items: center; }
+  .donut-center { position: absolute; text-align: center; background: var(--surface); border-radius: 50%; width: 80px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 0 6px var(--surface); }
+  .donut-center .number { font-size: 22px; font-weight: 800; }
+  .donut-center .label { font-size: 10px; color: var(--text-muted); }
+  .donut-legend { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .legend-item span { color: var(--text-secondary); flex: 1; }
+
+  /* ACTIVITY */
+  .activity-list { display: flex; flex-direction: column; gap: 4px; max-height: 260px; overflow-y: auto; }
+  .activity-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; }
+  .activity-item + .activity-item { border-top: 1px solid var(--border-light); }
+  .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .activity-dot.blue { background: var(--blue); }
+  .activity-dot.green { background: var(--green); }
+  .activity-dot.amber { background: var(--amber); }
+  .activity-dot.purple { background: var(--purple); }
+  .activity-text { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+  .activity-text strong { color: var(--text); }
+  .activity-time { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  /* TOOLBAR */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border-light); }
+  .toolbar-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .toolbar-right { display: flex; align-items: center; gap: 8px; }
+  .toolbar-summary { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  .search-input { position: relative; }
+  .search-input input { padding: 7px 12px 7px 32px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; background: var(--surface); outline: none; width: 200px; }
+  .search-input input:focus { border-color: var(--blue); }
+  .search-input svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; fill: var(--text-muted); }
+  .select-input { padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; background: var(--surface); outline: none; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; display: inline-block; }
+  .badge-new { background: var(--green-50); color: var(--green); }
+  .badge-qualified { background: var(--blue-50); color: var(--blue-600); }
+  .badge-unqualified { background: var(--red-50); color: var(--red); }
+  .badge-contacted { background: var(--amber-50); color: var(--amber); }
+  .badge-proposal { background: var(--purple-50); color: var(--purple); }
+
+  /* LEAD LIST */
+  .lead-list { display: flex; flex-direction: column; }
+  .lead-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border-light); cursor: pointer; transition: background 100ms; }
+  .lead-row:hover { background: var(--surface-hover); }
+  .lead-row.selected { background: var(--blue-50); border-left: 3px solid var(--blue); padding-left: 17px; }
+  .lead-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--border); display: grid; place-items: center; flex-shrink: 0; cursor: pointer; transition: all 150ms; }
+  .lead-row.selected .lead-check { border-color: var(--blue); background: var(--blue); }
+  .lead-row.selected .lead-check::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 700; }
+  .lead-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-50); color: var(--blue-600); display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .lead-info { flex: 1; min-width: 0; }
+  .lead-company { font-size: 13px; font-weight: 600; }
+  .lead-detail { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .lead-actions { display: flex; gap: 6px; }
+  .lead-action-btn { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; cursor: pointer; display: grid; place-items: center; transition: all 150ms; }
+  .lead-action-btn:hover { background: var(--blue-50); }
+  .lead-action-btn svg { width: 14px; height: 14px; fill: var(--text-muted); }
+  .lead-action-btn:hover svg { fill: var(--blue-600); }
+
+  /* PAGINATION */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-top: 1px solid var(--border-light); }
+  .pagination-info { font-size: 12px; color: var(--text-muted); }
+
+  /* FORMS */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-full { grid-column: 1 / -1; }
+  .form-label { font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; display: block; }
+  .form-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; outline: none; transition: border-color 150ms; }
+  .form-input:focus { border-color: var(--blue); }
+  .form-select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; outline: none; background: var(--surface); }
+  .form-textarea { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; outline: none; resize: vertical; }
+  .form-textarea:focus { border-color: var(--blue); }
+
+  /* MODALS */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: grid; place-items: center; z-index: 100; backdrop-filter: blur(2px); }
+  #m-email { z-index: 200; }
+  #m-email .modal { z-index: 201; }
+  #m-email .modal-close { z-index: 202; }
+  .modal { background: var(--surface); border-radius: var(--radius-xl); padding: 24px; width: min(520px, 95vw); max-height: 90vh; overflow-y: auto; position: relative; box-shadow: var(--shadow-xl); z-index: 101; }
+  .modal-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: grid; place-items: center; font-size: 18px; color: var(--text-muted); transition: all 150ms; z-index: 102; }
+  .modal-close:hover { background: var(--red-50); color: var(--red); border-color: var(--red-100); }
+  .modal-eyebrow { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .modal-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; padding-right: 32px; }
+  .modal-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  /* LEAD DETAIL MODAL */
+  .lead-detail-modal { width: min(640px, 100%); padding: 0; }
+  .ld-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0 20px; gap: 12px; }
+  .ld-header-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+  .ld-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, var(--blue-50), var(--purple-50)); display: grid; place-items: center; font-weight: 800; font-size: 16px; color: var(--blue-600); border: 1px solid var(--blue-100); flex-shrink: 0; }
+  .ld-company { font-size: 17px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ld-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .ld-section { padding: 8px 20px; }
+  .ld-section + .ld-section { border-top: 1px solid var(--border-light); }
+  .ld-section-title { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .ld-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+  .ld-field { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .ld-field-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; width: 72px; flex-shrink: 0; }
+  .ld-field-value { font-size: 12px; color: var(--text); }
+  .ld-pitch-card { background: linear-gradient(135deg, var(--green-50), var(--blue-50)); border: 1px solid var(--green-100); border-radius: 10px; padding: 10px 14px; }
+  .ld-pitch-name { font-size: 13px; font-weight: 700; }
+  .ld-pitch-text { font-size: 11px; color: var(--text-secondary); line-height: 1.45; }
+  .ld-notes { background: var(--surface-hover); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; white-space: pre-wrap; }
+  .ld-actions { display: flex; gap: 8px; padding: 16px 20px; border-top: 1px solid var(--border-light); flex-wrap: wrap; }
+  .ld-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 28px; }
+  .ld-form-field { display: flex; flex-direction: column; gap: 4px; }
+  .ld-form-full { grid-column: 1 / -1; }
+  .tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; display: inline-block; }
+  .tag-crm { background: var(--green-50); color: var(--green); border: 1px solid var(--green-100); }
+  .tag-product { background: var(--blue-50); color: var(--blue-600); border: 1px solid var(--blue-100); }
+  .tag-priority { background: var(--amber-50); color: var(--amber); border: 1px solid var(--amber-100); }
+  .tag-status { font-size: 11px; padding: 3px 10px; }
+  .tag-status.new { background: var(--green-50); color: var(--green); border: 1px solid var(--green-100); }
+  .tag-status.contacted { background: var(--amber-50); color: var(--amber); border: 1px solid var(--amber-100); }
+  .tag-status.qualified { background: var(--blue-50); color: var(--blue-600); border: 1px solid var(--blue-100); }
+  .tag-status.proposal { background: var(--purple-50); color: var(--purple); border: 1px solid var(--purple-100); }
+  .tag-status.closed-won { background: var(--green-100); color: #047857; border: 1px solid var(--green-100); }
+  .tag-status.closed-lost { background: var(--red-50); color: var(--red); border: 1px solid var(--red-100); }
+
+  /* CRM KANBAN */
+  .kanban { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; min-height: 500px; }
+  .kanban-col { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .kanban-col-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 8px; border-bottom: 2px solid; }
+  .kanban-col-header h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .kanban-col-header .col-count { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 99px; }
+  .kanban-col[data-stage="new"] .kanban-col-header { border-color: var(--green); }
+  .kanban-col[data-stage="new"] .col-count { background: var(--green-50); color: var(--green); }
+  .kanban-col[data-stage="contacted"] .kanban-col-header { border-color: var(--amber); }
+  .kanban-col[data-stage="contacted"] .col-count { background: var(--amber-50); color: var(--amber); }
+  .kanban-col[data-stage="qualified"] .kanban-col-header { border-color: var(--blue-600); }
+  .kanban-col[data-stage="qualified"] .col-count { background: var(--blue-50); color: var(--blue-600); }
+  .kanban-col[data-stage="proposal"] .kanban-col-header { border-color: var(--purple); }
+  .kanban-col[data-stage="proposal"] .col-count { background: var(--purple-50); color: var(--purple); }
+  .kanban-col[data-stage="closed-won"] .kanban-col-header { border-color: #047857; }
+  .kanban-col[data-stage="closed-won"] .col-count { background: var(--green-100); color: #047857; }
+  .kanban-col[data-stage="closed-lost"] .kanban-col-header { border-color: var(--red); }
+  .kanban-col[data-stage="closed-lost"] .col-count { background: var(--red-50); color: var(--red); }
+  .kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; cursor: pointer; transition: all 150ms; }
+  .kanban-card:hover { box-shadow: var(--shadow-md); border-color: var(--blue); transform: translateY(-1px); }
+  .kanban-card .kc-company { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .kanban-card .kc-contact { font-size: 11px; color: var(--text-muted); }
+  .kanban-card .kc-value { font-size: 12px; font-weight: 700; color: var(--green); margin-top: 8px; }
+  .kanban-card .kc-product { font-size: 10px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* PIPELINE ANALYTICS */
+  .pipeline-analytics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .analytics-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .analytics-card .ac-label { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+  .analytics-card .ac-value { font-size: 24px; font-weight: 800; }
+  .analytics-card .ac-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* CRM ACTIVITY TIMELINE */
+  .crm-timeline { padding: 16px 20px; max-height: 300px; overflow-y: auto; }
+  .timeline-item { display: flex; gap: 12px; padding: 8px 0; }
+  .timeline-item + .timeline-item { border-top: 1px solid var(--border-light); }
+  .timeline-icon { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; }
+  .timeline-icon.email { background: var(--blue-50); } .timeline-icon.email svg { fill: var(--blue-600); }
+  .timeline-icon.call { background: var(--green-50); } .timeline-icon.call svg { fill: var(--green); }
+  .timeline-icon.meeting { background: var(--purple-50); } .timeline-icon.meeting svg { fill: var(--purple); }
+  .timeline-icon.note { background: var(--amber-50); } .timeline-icon.note svg { fill: var(--amber); }
+  .timeline-icon svg { width: 14px; height: 14px; }
+  .timeline-content { flex: 1; }
+  .timeline-content .tl-type { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+  .timeline-content .tl-text { font-size: 12px; color: var(--text-secondary); margin-top: 2px; line-height: 1.4; }
+  .timeline-content .tl-time { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  /* DEAL ROW */
+  .deal-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border-light); }
+  .deal-row:hover { background: var(--surface-hover); }
+  .deal-info { flex: 1; min-width: 0; }
+  .deal-company { font-size: 13px; font-weight: 600; }
+  .deal-detail { font-size: 11px; color: var(--text-muted); }
+  .deal-value { font-size: 14px; font-weight: 700; color: var(--green); }
+
+  /* NOTIFICATION */
+  .notif-center { position: fixed; top: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+  .notif { padding: 12px 18px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-lg); font-size: 13px; display: flex; align-items: center; gap: 10px; animation: slideIn 200ms ease; min-width: 280px; }
+  .notif.error { border-color: var(--red-100); }
+  .notif .notif-icon { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .notif .notif-icon.ok { background: var(--green); }
+  .notif .notif-icon.err { background: var(--red); }
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* EXPORT CARDS */
+  .export-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .export-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; cursor: pointer; transition: all 150ms; }
+  .export-card:hover { border-color: var(--blue); box-shadow: var(--shadow); }
+  .export-icon { width: 44px; height: 44px; border-radius: var(--radius-sm); display: grid; place-items: center; margin-bottom: 12px; }
+  .export-icon.blue { background: var(--blue-50); } .export-icon.blue svg { fill: var(--blue-600); }
+  .export-icon.green { background: var(--green-50); } .export-icon.green svg { fill: var(--green); }
+  .export-icon svg { width: 20px; height: 20px; }
+  .export-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .export-card p { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* CRM TABS */
+  .crm-tabs { display: flex; gap: 2px; margin-bottom: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+  .crm-tab { padding: 8px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; background: transparent; transition: all 150ms; }
+  .crm-tab:hover { color: var(--text); }
+  .crm-tab.active { background: var(--blue-600); color: #fff; }
+
+  /* PRODUCT RANK */
+  .product-rank-bars { display: flex; flex-direction: column; gap: 8px; padding: 12px 20px 16px; }
+  .pr-bar-item { display: flex; align-items: center; gap: 10px; }
+  .pr-bar-label { font-size: 11px; font-weight: 600; width: 120px; flex-shrink: 0; }
+  .pr-bar-track { flex: 1; height: 8px; background: var(--border-light); border-radius: 99px; overflow: hidden; }
+  .pr-bar-fill { height: 100%; border-radius: 99px; transition: width 400ms; }
+  .pr-bar-count { font-size: 11px; font-weight: 700; width: 24px; text-align: right; }
+
+  /* SETTINGS DRAWER */
+  .settings-drawer { position: fixed; top: 0; right: 0; width: 400px; max-width: 95vw; height: 100vh; background: var(--surface); border-left: 1px solid var(--border); z-index: 150; overflow-y: auto; box-shadow: var(--shadow-xl); }
+  .settings-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 149; }
+  .settings-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+  .settings-header h3 { font-size: 16px; font-weight: 800; }
+  .settings-section { padding: 16px 20px; border-bottom: 1px solid var(--border-light); }
+  .settings-section h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .settings-section p { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+  .settings-section .form-input, .settings-section .form-select { margin-bottom: 8px; }
+
+  /* TEMPLATE CARDS */
+  .tmpl-list { display: flex; flex-direction: column; gap: 8px; }
+  .tmpl-card { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); cursor: pointer; transition: all 150ms; }
+  .tmpl-card:hover { border-color: var(--blue); }
+  .tmpl-card.selected { border-color: var(--blue); background: var(--blue-50); }
+  .tmpl-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); display: grid; place-items: center; flex-shrink: 0; }
+  .tmpl-card.selected .tmpl-check { border-color: var(--blue); background: var(--blue); }
+  .tmpl-card.selected .tmpl-check::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
+  .tmpl-info { flex: 1; min-width: 0; }
+  .tmpl-name { font-size: 13px; font-weight: 700; }
+  .tmpl-subject { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* CRM LOG ACTIVITY */
+  .crm-log-form { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border-light); flex-wrap: wrap; }
+  .crm-log-form select, .crm-log-form input { font-size: 12px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; }
+  .crm-log-form input[type="text"] { flex: 1; min-width: 200px; }
+  .crm-log-form .btn { font-size: 12px; padding: 6px 14px; }
+
+  /* PIPELINE VALUE BAR */
+  .pipeline-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .pipeline-bar-label { font-size: 10px; font-weight: 600; color: var(--text-muted); width: 60px; flex-shrink: 0; }
+  .pipeline-bar-track { flex: 1; height: 12px; background: var(--border-light); border-radius: 99px; overflow: hidden; }
+  .pipeline-bar-fill { height: 100%; border-radius: 99px; }
+  .pipeline-bar-val { font-size: 11px; font-weight: 700; width: 80px; text-align: right; }
+
+  /* QUALIFIED PANEL OVERLAY */
+  .qualified-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(420px, 95vw); max-height: 80vh; background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); z-index: 101; overflow: hidden; }
+  .qualified-panel-header { background: linear-gradient(135deg, var(--green-50), var(--blue-50)); padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .qualified-panel-header h3 { font-size: 15px; font-weight: 800; }
+  .qualified-panel-body { max-height: 50vh; overflow-y: auto; }
+  .qp-lead { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-bottom: 1px solid var(--border-light); }
+  .qp-lead:hover { background: var(--surface-hover); }
+  .qp-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--blue-50); color: var(--blue-600); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+  .qp-info { flex: 1; }
+  .qp-company { font-size: 13px; font-weight: 600; }
+  .qp-detail { font-size: 11px; color: var(--text-muted); }
+
+  /* SCANNER PANELS */
+  .import-step { padding: 10px 0; }
+  .import-step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--blue-50); color: var(--blue-600); display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .radius-row { display: flex; align-items: center; gap: 12px; }
+  .radius-row input[type="range"] { flex: 1; }
+  .radius-val { font-size: 13px; font-weight: 700; color: var(--blue-600); min-width: 40px; }
+
+  /* CRM SUB-PAGES */
+  .crm-sub { display: none; }
+  .crm-sub.active { display: block; }
+
+  /* DEAL FORM ROWS */
+  .deal-row-input { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .deal-row-input input, .deal-row-input select { font-size: 12px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon"><svg viewBox="0 0 24 24"><path fill="white" d="M12 2.5s-5 6-5 10.5C7 16.5 9.2 19 12 19s5-2.5 5-6C17 8.5 12 2.5 12 2.5zm0 12.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></div>
+      <div><p>Lead Generator</p><h1>LeadGen AI</h1></div>
+    </div>
+    <div class="nav-label">Workspace</div>
+    <button class="nav-item active" onclick="go('dashboard', this)">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> Dashboard
+    </button>
+    <button class="nav-item" onclick="go('scanner', this)">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg> Inbound Scanner
+    </button>
+    <button class="nav-item" onclick="go('crm', this)">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> CRM Manager
+    </button>
+    <button class="nav-item" onclick="go('outbound', this)">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> Outbound Tools
+    </button>
+    <div class="sidebar-footer">
+      <div class="sf-avatar">A</div>
+      <div><strong>Admin</strong><span>admin</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="workspace active" id="w-dashboard">
+      <div class="top-bar">
+        <div><h2>Dashboard</h2><p>Overview of your lead pipeline, performance metrics, and recent activity.</p></div>
+        <div class="top-actions">
+          <button class="btn" onclick="openSettings()"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg> Settings</button>
+        </div>
+      </div>
+      <div class="metrics" id="metrics"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="chart-panel"><h3>Pipeline Status</h3><p>Lead distribution by CRM stage</p><div class="donut-container" id="donut-chart"></div></div>
+        <div class="chart-panel"><h3>Email Outreach</h3><p>Sent vs pending emails</p><div class="donut-container" id="email-donut-chart"></div></div>
+        <div class="panel" id="product-rank-panel"><div class="panel-header"><div><div class="panel-title">Top Products</div><div class="panel-desc">Lead distribution by recommended product</div></div></div><div id="product-rank-bars"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="chart-panel"><h3>Lead Sources</h3><p>Breakdown of where your leads come from</p><div class="bar-chart" id="bar-chart"></div></div>
+        <div class="panel"><div class="panel-header"><div><div class="panel-title">Recent Activity</div><div class="panel-desc">Your team's latest actions</div></div></div><div class="activity-list" id="activity"></div></div>
+      </div>
+    </div>
+
+    <!-- ===== INBOUND SCANNER ===== -->
+    <div class="workspace" id="w-scanner">
+      <div class="top-bar"><div><h2>Inbound Scanner</h2><p>Add leads manually or discover nearby businesses.</p></div></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px" id="scanner-stats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="background:linear-gradient(135deg,#eff6ff,#ede9fe);padding:16px 20px;border-bottom:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:10px;background:white;display:grid;place-items:center;box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--blue-600)"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div><div><div style="font-size:14px;font-weight:700">Add Lead Manually</div><div style="font-size:11px;color:var(--text-secondary)">Fill in the details below</div></div></div>
+          </div>
+          <form class="form-grid" id="lead-form" onsubmit="addLead(event)" style="padding:18px 20px">
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">🏢 Company *</label><input class="form-input" name="company" placeholder="ABC Trading Sdn Bhd" required></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">👤 Contact Name *</label><input class="form-input" name="contactName" placeholder="Jackson Gau" required></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label"> Email *</label><input class="form-input" name="email" type="email" placeholder="lead@company.com" required></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">📱 Phone</label><input class="form-input" name="phone" placeholder="+60 12-345 6789"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">💼 Role</label><input class="form-input" name="role" placeholder="Owner / Manager"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">️ Industry</label><input class="form-input" name="industry" placeholder="Retail, clinic"></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">📍 Region *</label><input class="form-input" name="region" placeholder="Kuala Lumpur" required></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">🔗 Source *</label><select class="form-select" name="source" required><option value="Manual research">Manual research</option><option>Referral</option><option>Walk-in</option><option>WhatsApp</option><option>LinkedIn</option><option>Google Maps</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">🏪 Business Type *</label><select class="form-select" name="companyType" required><option value="retail">Retail</option><option value="fnb">F&B</option><option value="wholesale">Wholesale</option><option value="warehouse">Warehouse</option><option value="service">Service</option><option value="manufacturing">Manufacturing</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><label class="form-label">⚠️ Pain Point *</label><select class="form-select" name="painPoint" required><option value="checkout-pos">Checkout / POS</option><option value="stock-visibility">Stock Visibility</option><option value="warehouse-control">Warehouse Control</option><option value="manual-accounting">Manual Accounting</option><option value="payroll-compliance">Payroll Compliance</option></select></div>
+            <div class="form-full"><label class="form-label"> Notes</label><textarea class="form-textarea" name="notes" rows="2" placeholder="Optional notes"></textarea></div>
+            <div class="form-full"><button class="btn btn-primary" type="submit" style="width:100%;padding:12px;font-size:14px;font-weight:700"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>Save Lead to Queue</button></div>
+          </form>
+        </div>
+        <div class="panel" style="padding:0;overflow:hidden">
+          <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);padding:16px 20px;border-bottom:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:10px"><div style="width:36px;height:36px;border-radius:10px;background:white;display:grid;place-items:center;box-shadow:var(--shadow-sm)"><svg width="18" height="18" viewBox="0 0 24 24" fill="var(--green)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div><div><div style="font-size:14px;font-weight:700">Quick Import Demo</div><div style="font-size:11px;color:var(--text-secondary)">Simulated — adds random leads</div></div></div>
+          </div>
+          <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+            <p style="font-size:12px;color:var(--text-secondary)">In production this would call Google Maps API or Apify. For preview, click below to generate demo leads.</p>
+            <button class="btn btn-primary" onclick="addDemoLeads()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> Add 5 Demo Leads</button>
+            <button class="btn" onclick="clearAll()"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg> Clear All Leads</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CRM MANAGER ===== -->
+    <div class="workspace" id="w-crm">
+      <div class="top-bar">
+        <div><h2>CRM Manager</h2><p>Full pipeline management — no external CRM needed.</p></div>
+      </div>
+      <!-- CRM TABS -->
+      <div class="crm-tabs">
+        <button class="crm-tab active" onclick="crmTab('kanban', this)">📋 Pipeline</button>
+        <button class="crm-tab" onclick="crmTab('deals', this)">💰 Deals</button>
+        <button class="crm-tab" onclick="crmTab('contacts', this)">👥 Contacts</button>
+        <button class="crm-tab" onclick="crmTab('analytics', this)">📊 Analytics</button>
+      </div>
+
+      <!-- KANBAN VIEW -->
+      <div class="crm-sub active" id="crm-kanban">
+        <div class="kanban" id="kanban-board"></div>
+      </div>
+
+      <!-- DEALS VIEW -->
+      <div class="crm-sub" id="crm-deals">
+        <div class="pipeline-analytics" id="deal-analytics"></div>
+        <div class="panel">
+          <div class="panel-header"><div><div class="panel-title">Active Deals</div><div class="panel-desc">Track deal value through pipeline stages</div></div>
+          <button class="btn" onclick="addDealPrompt()"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg> New Deal</button></div>
+          <div id="deal-list"></div>
+        </div>
+      </div>
+
+      <!-- CONTACTS VIEW -->
+      <div class="crm-sub" id="crm-contacts">
+        <div class="panel">
+          <div class="toolbar">
+            <div class="toolbar-left"><div class="search-input"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input placeholder="Search contacts..." id="contact-search" oninput="renderContacts()"></div></div>
+            <div class="toolbar-right"><span class="toolbar-summary" id="contact-count">0 contacts</span></div>
+          </div>
+          <div id="contact-list"></div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS VIEW -->
+      <div class="crm-sub" id="crm-analytics">
+        <div class="pipeline-analytics" id="analytics-summary"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="panel">
+            <div class="panel-header"><div><div class="panel-title">Pipeline by Stage</div><div class="panel-desc">Deal values across stages</div></div></div>
+            <div style="padding:16px 20px" id="pipeline-stages"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><div><div class="panel-title">Win Rate by Product</div><div class="panel-desc">Conversion success per product</div></div></div>
+            <div style="padding:16px 20px" id="product-winrate"></div>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="panel">
+            <div class="panel-header"><div><div class="panel-title">Monthly Activity</div><div class="panel-desc">Emails, calls, meetings logged</div></div></div>
+            <div class="bar-chart" id="monthly-activity" style="height:140px;padding:16px 20px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== OUTBOUND ===== -->
+    <div class="workspace" id="w-outbound">
+      <div class="top-bar"><div><h2>Outbound Tools</h2><p>Review email campaigns, track outreach, and export your data.</p></div></div>
+      <div id="export-selector">
+        <div class="export-cards">
+          <div class="export-card" onclick="showExport('queue')"><div class="export-icon blue"><svg viewBox="0 0 24 24"><path d="M4 5h16v2H4V5Zm0 6h16v2H4v-2Zm0 6h10v2H4v-2Z"/></svg></div><h4>Lead Queue Export</h4><p>Export the full lead queue with all details including contact info, region, and recommended products.</p></div>
+          <div class="export-card" onclick="showExport('email')"><div class="export-icon green"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div><h4>Email Activity Export</h4><p>Export sent and failed email records with delivery status for campaign reporting.</p></div>
+        </div>
+      </div>
+      <div id="export-preview" style="display:none;margin-top:20px">
+        <div class="panel"><div class="panel-header"><div style="display:flex;align-items:center;gap:10px"><button class="btn" onclick="hideExport()" style="font-size:12px;padding:5px 12px"><svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>Back</button><div><div class="panel-title" id="ex-title">Export Preview</div><div class="panel-desc" id="ex-desc"></div></div></div><div style="display:flex;gap:8px;align-items:center"><button class="btn btn-primary" onclick="doExport()" style="font-size:12px;padding:5px 12px"><svg viewBox="0 0 24 24"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z"/></svg> Download CSV</button></div></div>
+        <div class="table-wrap" style="overflow-x:auto;max-height:400px"><table style="width:100%;border-collapse:collapse"><thead id="ex-head"></thead><tbody id="ex-body"></tbody></table></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- LEAD DETAIL MODAL -->
+<div class="modal-backdrop" id="m-lead" hidden>
+  <div class="modal lead-detail-modal">
+    <button class="modal-close" onclick="closeM('m-lead')">&times;</button>
+    <div class="ld-header">
+      <div class="ld-header-left">
+        <div class="ld-avatar" id="ld-avatar">A</div>
+        <div><div class="ld-company" id="ld-company">Company</div><div class="ld-subtitle" id="ld-subtitle">Contact · Region</div></div>
+      </div>
+    </div>
+    <div id="ld-view">
+      <div class="ld-section">
+        <div class="ld-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--blue-600)"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg> Contact Info</div>
+        <div class="ld-grid" id="ld-contact"></div>
+      </div>
+      <div class="ld-section">
+        <div class="ld-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--indigo)"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> Lead Profile</div>
+        <div class="ld-grid" id="ld-profile"></div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap" id="ld-profile-badges"></div>
+      </div>
+      <div class="ld-section" id="ld-pitch-section">
+        <div class="ld-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--green)"><path d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"/></svg> Recommended Product</div>
+        <div class="ld-pitch-card" id="ld-pitch"></div>
+      </div>
+      <div class="ld-section" id="ld-notes-section">
+        <div class="ld-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--text-muted)"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg> Notes</div>
+        <div class="ld-notes" id="ld-notes"></div>
+      </div>
+      <!-- CRM ACTIVITY TIMELINE -->
+      <div class="ld-section" id="ld-timeline-section">
+        <div class="ld-section-title"><svg viewBox="0 0 24 24" width="16" height="16" fill="var(--purple)"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg> CRM Activity</div>
+        <div class="crm-timeline" id="ld-timeline"></div>
+      </div>
+    </div>
+    <!-- CRM LOG ACTIVITY FORM -->
+    <div class="crm-log-form">
+      <select id="log-type"><option value="email">📧 Email</option><option value="call">📞 Call</option><option value="meeting">🤝 Meeting</option><option value="note">📝 Note</option></select>
+      <input type="text" id="log-text" placeholder="Log activity (e.g. Called — interested in POS)...">
+      <button class="btn btn-green" onclick="logActivity()" style="font-size:12px;padding:6px 14px">+ Log</button>
+    </div>
+    <div class="ld-actions">
+      <div id="ld-view-actions">
+        <button class="btn btn-primary" onclick="openEmail()"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Send Email</button>
+        <button class="btn" onclick="enterEditMode()"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>Edit</button>
+        <button class="btn btn-green" id="ld-qual-btn" onclick="cycleStage()">Set Qualified</button>
+        <button class="btn btn-red" onclick="delLead()"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>Delete</button>
+      </div>
+      <div id="ld-edit-actions" style="display:none;gap:10px">
+        <button class="btn btn-primary" onclick="saveLeadEdit()">Save</button>
+        <button class="btn" onclick="cancelEditMode()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMAIL MODAL -->
+<div class="modal-backdrop" id="m-email" hidden>
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('m-email')">&times;</button>
+    <div class="modal-eyebrow">Email Composer</div>
+    <div class="modal-title" id="e-company">Send Email</div>
+    <div style="padding:10px 0;font-size:12px;color:var(--text-muted)">Recipient: <strong id="e-recipient">-</strong></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div><label class="form-label">Subject</label><input class="form-input" id="e-subject"></div>
+      <div><label class="form-label">Message Body</label><textarea class="form-textarea" id="e-body" rows="6"></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="btn" onclick="closeM('m-email')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendEmail()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>Send (Simulated)</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="notif-center" id="notifs"></div>
+
+<!-- SETTINGS DRAWER -->
+<div class="settings-backdrop" id="s-backdrop" hidden onclick="closeSettings()"></div>
+<div class="settings-drawer" id="s-drawer" hidden>
+  <div class="settings-header"><h3>⚙️ Settings</h3><button class="btn" onclick="closeSettings()">Close</button></div>
+  <div class="settings-section">
+    <h4>Sender Defaults</h4>
+    <p>Default name and email used in email templates.</p>
+    <input class="form-input" id="s-name" value="Your Name" placeholder="Your Name">
+    <input class="form-input" id="s-email" value="sales@example.com" placeholder="sales@example.com">
+    <button class="btn btn-primary" onclick="saveSender()" style="margin-top:8px">Save</button>
+  </div>
+  <div class="settings-section">
+    <h4>CRM Pipeline Stages</h4>
+    <p>Stages used in the built-in CRM pipeline.</p>
+    <div style="display:flex;flex-direction:column;gap:6px" id="pipeline-stages-list"></div>
+  </div>
+  <div class="settings-section">
+    <h4>Product Recommendations</h4>
+    <p>Products mapped to pain points for auto-recommendation.</p>
+    <div id="product-rec-list"></div>
+  </div>
+</div>
+
+<script>
+// ===== SEED DATA =====
+const STAGES = ['new', 'contacted', 'qualified', 'proposal', 'closed-won', 'closed-lost'];
+const STAGE_LABELS = { new:'New', contacted:'Contacted', qualified:'Qualified', proposal:'Proposal', 'closed-won':'Closed Won', 'closed-lost':'Closed Lost' };
+const STAGE_COLORS = { new:'var(--green)', contacted:'var(--amber)', qualified:'var(--blue-600)', proposal:'var(--purple)', 'closed-won':'#047857', 'closed-lost':'var(--red)' };
+
+const PRODUCTS = [
+  { key:'autocount-pos', name:'AutoCount POS', pitch:'Upgrade in-store sales handling, stock sync, and branch reporting.', color:'#10b981', icon:'🏪' },
+  { key:'autocount-accounting', name:'AutoCount Accounting', pitch:'Improve accounting control, reporting speed, and day-to-day finance visibility.', color:'#3b82f6', icon:'📊' },
+  { key:'presoft-mobile-stock', name:'Presoft Mobile Stock', pitch:'Give sales teams live stock visibility and reduce order mistakes on the road.', color:'#f59e0b', icon:'' },
+  { key:'cubehous-wms', name:'Cubehous WMS', pitch:'Tighten warehouse control, trace stock movement, and improve picking accuracy.', color:'#8b5cf6', icon:'🚚' },
+  { key:'autocount-payroll', name:'AutoCount Payroll', pitch:'Simplify payroll processing, staff records, and monthly compliance work.', color:'#ec4899', icon:'💰' }
+];
+
+const PAIN_MAP = { 'checkout-pos':'autocount-pos', 'stock-visibility':'presoft-mobile-stock', 'warehouse-control':'cubehous-wms', 'manual-accounting':'autocount-accounting', 'payroll-compliance':'autocount-payroll' };
+
+let leads = [];
+let activities = [];
+let selId = null;
+let sel = new Set();
+let page = 1;
+const PS = 8;
+let sName = 'Your Name', sEmail = 'sales@example.com';
+
+// SEED LEADS
+function seedData() {
+  const demoLeads = [
+    { id:'1', company:'Malaysia Retail Chain Association (MRCA)', contactName:'David Lim', email:'info@mrca.org.my', phone:'03-5882 4333', role:'Secretary', industry:'association_or_organization', region:'Subang Jaya', source:'Google Maps', companyType:'service', painPoint:'checkout-pos', status:'contacted', notes:'Imported from Google Maps. Address: A-05-02,3,3A Block A, Level 5, Sky Park One City, Jalan USJ 25/1, One City, 47650 Subang Jaya, Selangor', sent:true, sentAt:'2026-05-20', crmLogged:true },
+    { id:'2', company:'Kedai Runcit Pak Mat', contactName:'Mohamad Yusof', email:'pakmat@gmail.com', phone:'012-345 6789', role:'Owner', industry:'retail', region:'Puchong', source:'Manual research', companyType:'retail', painPoint:'stock-visibility', status:'new', notes:'Small retail shop, uses manual stock tracking.' },
+    { id:'3', company:'Sunway Warehouse Solutions', contactName:'Tan Wei Ming', email:'tanwm@sunwayws.com', phone:'03-5634 8800', role:'Operations Manager', industry:'logistics', region:'Petaling Jaya', source:'Google Maps', companyType:'warehouse', painPoint:'warehouse-control', status:'qualified', notes:'Large warehouse operation, 3 locations.', sent:true, sentAt:'2026-05-19' },
+    { id:'4', company:'Cafe Delight Sdn Bhd', contactName:'Sarah Lim', email:'sarah@cafedelight.my', phone:'016-234 5678', role:'Manager', industry:'fnb', region:'Kuala Lumpur', source:'Walk-in', companyType:'fnb', painPoint:'checkout-pos', status:'proposal', notes:'Interested in POS system with kitchen display.' },
+    { id:'5', company:'Precision Manufacturing', contactName:'Raj Kumar', email:'raj@precisionmfg.com', phone:'07-234 5678', role:'Director', industry:'manufacturing', region:'Johor Bahru', source:'Referral', companyType:'manufacturing', painPoint:'manual-accounting', status:'closed-won', notes:'Signed deal for Accounting + Payroll package.' },
+    { id:'6', company:'FreshMart Supermarket', contactName:'Lee Chong Wei', email:'lee@freshmart.my', phone:'04-345 6789', role:'Procurement', industry:'retail', region:'Penang', source:'Google Maps', companyType:'retail', painPoint:'stock-visibility', status:'new', notes:'Chain of 5 supermarkets in Northern region.' },
+    { id:'7', company:'Nusantara Trading', contactName:'Aminah Hassan', email:'aminah@nusantara.com', phone:'06-234 5678', role:'Finance Manager', industry:'wholesale', region:'Melaka', source:'LinkedIn', companyType:'wholesale', painPoint:'manual-accounting', status:'contacted', notes:'Currently using spreadsheet for accounting.' },
+    { id:'8', company:'TechHub Workspace', contactName:'Kevin Ng', email:'kevin@techhub.my', phone:'03-8765 4321', role:'Facility Manager', industry:'service', region:'Cyberjaya', source:'Manual research', companyType:'service', painPoint:'checkout-pos', status:'new', notes:'Co-working space, interested in visitor management.' },
+  ];
+  leads = demoLeads;
+
+  const demoActivities = [
+    { id:'a1', leadId:'5', type:'email', text:'Sent introduction email — AutoCount Accounting pitch', time:'2026-05-19 14:30' },
+    { id:'a2', leadId:'5', type:'call', text:'Called Raj — discussed requirements, interested in full package', time:'2026-05-18 10:15' },
+    { id:'a3', leadId:'5', type:'meeting', text:'In-person meeting at Precision Manufacturing office', time:'2026-05-17 09:00' },
+    { id:'a4', leadId:'5', type:'note', text:'Deal closed! AutoCount Accounting + Payroll signed.', time:'2026-05-21 16:00' },
+    { id:'a5', leadId:'3', type:'email', text:'Sent WMS proposal with pricing', time:'2026-05-20 11:00' },
+    { id:'a6', leadId:'3', type:'call', text:'Follow-up call — requested site visit demo', time:'2026-05-19 15:30' },
+    { id:'a7', leadId:'4', type:'email', text:'Sent POS system proposal with KDS addon', time:'2026-05-21 09:45' },
+    { id:'a8', leadId:'1', type:'email', text:'Sent outreach email via CRM', time:'2026-05-20 16:20' },
+    { id:'a9', leadId:'1', type:'note', text:'Logged to CRM — association contact, may need multi-branch POS', time:'2026-05-20 16:22' },
+    { id:'a10', leadId:'7', type:'call', text:'Called Aminah — she is reviewing options', time:'2026-05-21 14:00' },
+  ];
+  activities = demoActivities;
+}
+
+// ===== NAVIGATION =====
+function go(ws, btn) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.workspace').forEach(w => w.classList.remove('active'));
+  document.getElementById('w-' + ws).classList.add('active');
+  if (ws === 'dashboard') renderDash();
+  if (ws === 'crm') renderCRM();
+}
+
+// ===== NOTIFICATIONS =====
+function notify(title, msg, type) {
+  const el = document.getElementById('notifs');
+  const n = document.createElement('div');
+  n.className = 'notif' + (type === 'error' ? ' error' : '');
+  n.innerHTML = `<div class="notif-icon ${type === 'error' ? 'err' : 'ok'}"></div><div><strong>${title}</strong><br><span style="font-size:12px;color:var(--text-muted)">${msg}</span></div>`;
+  el.appendChild(n);
+  setTimeout(() => n.remove(), 3000);
+}
+
+// ===== RENDER HELPERS =====
+function getProduct(painPoint) {
+  const key = PAIN_MAP[painPoint] || 'autocount-pos';
+  return PRODUCTS.find(p => p.key === key) || PRODUCTS[0];
+}
+
+function fmtMoney(v) { return 'RM ' + Number(v).toLocaleString(); }
+function randomValue() { return Math.round(5000 + Math.random() * 45000); }
+
+// ===== DASHBOARD =====
+function renderDash() {
+  const total = leads.length;
+  const qualified = leads.filter(l => l.status === 'qualified').length;
+  const sent = leads.filter(l => l.sent).length;
+  const closedWon = leads.filter(l => l.status === 'closed-won').length;
+
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric blue" onclick="go('crm',document.querySelectorAll('.nav-item')[2])"><div class="metric-header"><div><div class="metric-label">Total Leads</div><div class="metric-value">${total}</div><div class="metric-change">All pipeline stages</div></div><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div></div></div>
+    <div class="metric green"><div class="metric-header"><div><div class="metric-label">Qualified</div><div class="metric-value">${qualified}</div><div class="metric-change">Ready for proposals</div></div><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div></div>
+    <div class="metric amber"><div class="metric-header"><div><div class="metric-label">Emails Sent</div><div class="metric-value">${sent}</div><div class="metric-change">${total > 0 ? Math.round(sent/total*100) : 0}% outreach rate</div></div><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div></div></div>
+    <div class="metric purple"><div class="metric-header"><div><div class="metric-label">Closed Won</div><div class="metric-value">${closedWon}</div><div class="metric-change">Deals closed</div></div><div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div></div></div>`;
+
+  // Donut — pipeline
+  const statusCounts = {};
+  STAGES.forEach(s => statusCounts[s] = leads.filter(l => l.status === s).length);
+  const total2 = leads.length || 1;
+  let cumPct = 0;
+  const gradParts = [];
+  STAGES.forEach(s => {
+    const pct = (statusCounts[s] / total2) * 100;
+    gradParts.push(`${STAGE_COLORS[s]} ${cumPct}% ${cumPct + pct}%`);
+    cumPct += pct;
+  });
+  const donutGrad = gradParts.join(',');
+  document.getElementById('donut-chart').innerHTML = `
+    <div class="donut-chart" style="background:conic-gradient(${donutGrad})"><div class="donut-center"><div class="number">${leads.length}</div><div class="label">Total</div></div></div>
+    <div class="donut-legend">${STAGES.map(s => `<div class="legend-item"><div class="legend-dot" style="background:${STAGE_COLORS[s]}"></div><span>${STAGE_LABELS[s]}</span><strong>${statusCounts[s]}</strong></div>`).join('')}</div>`;
+
+  // Email donut
+  const emailSent = leads.filter(l => l.sent).length;
+  const emailPending = leads.length - emailSent;
+  const emailGrad = emailSent > 0 ? `var(--blue-600) 0 ${Math.round(emailSent/leads.length*100)}%, var(--border-light) ${Math.round(emailSent/leads.length*100)}% 100%` : 'var(--border-light) 0 100%';
+  document.getElementById('email-donut-chart').innerHTML = `
+    <div class="donut-chart" style="background:conic-gradient(${emailGrad})"><div class="donut-center"><div class="number">${emailSent}</div><div class="label">Sent</div></div></div>
+    <div class="donut-legend"><div class="legend-item"><div class="legend-dot" style="background:var(--blue-600)"></div><span>Sent</span><strong>${emailSent}</strong></div><div class="legend-item"><div class="legend-dot" style="background:var(--border-light)"></div><span>Pending</span><strong>${emailPending}</strong></div></div>`;
+
+  // Product rank
+  const prodCounts = {};
+  leads.forEach(l => { const p = getProduct(l.painPoint); prodCounts[p.name] = (prodCounts[p.name] || 0) + 1; });
+  const sorted = Object.entries(prodCounts).sort((a, b) => b[1] - a[1]);
+  const maxCount = sorted.length ? sorted[0][1] : 1;
+  document.getElementById('product-rank-bars').innerHTML = sorted.map(([name, count], i) => {
+    const pct = Math.round(count / maxCount * 100);
+    const color = PRODUCTS[i % PRODUCTS.length]?.color || 'var(--blue)';
+    return `<div class="pr-bar-item"><div class="pr-bar-label">${name}</div><div class="pr-bar-track"><div class="pr-bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="pr-bar-count">${count}</div></div>`;
+  }).join('');
+
+  // Source bar chart
+  const sourceCounts = {};
+  leads.forEach(l => { sourceCounts[l.source] = (sourceCounts[l.source] || 0) + 1; });
+  const maxSrc = Math.max(...Object.values(sourceCounts), 1);
+  const srcColors = { 'Google Maps':'var(--blue-600)', 'Manual research':'var(--green)', 'Referral':'var(--purple)', 'Walk-in':'var(--amber)', 'WhatsApp':'var(--cyan)', 'LinkedIn':'var(--indigo)' };
+  document.getElementById('bar-chart').innerHTML = Object.entries(sourceCounts).map(([src, cnt]) => {
+    const h = Math.round(cnt / maxSrc * 100);
+    return `<div class="bar-group"><div style="font-size:13px;font-weight:700">${cnt}</div><div class="bar" style="height:${h}%;background:${srcColors[src] || 'var(--blue-500)'}"></div><div class="bar-label">${src}</div></div>`;
+  }).join('');
+
+  // Activity
+  const recent = [...activities].sort((a, b) => b.time.localeCompare(a.time)).slice(0, 8);
+  const typeIcons = { email:'📧', call:'', meeting:'🤝', note:'' };
+  const typeColors = { email:'blue', call:'green', meeting:'purple', note:'amber' };
+  document.getElementById('activity').innerHTML = recent.map(a => {
+    const l = leads.find(l => l.id === a.leadId);
+    return `<div class="activity-item"><div class="activity-dot ${typeColors[a.type]}"></div><div><div class="activity-text">${typeIcons[a.type]} <strong>${l ? l.company : 'Unknown'}</strong> — ${a.text}</div><div class="activity-time">${a.time}</div></div></div>`;
+  }).join('') || '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:12px">No activity yet.</div>';
+
+  // Scanner stats
+  document.getElementById('scanner-stats').innerHTML = `
+    <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:white;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow-sm)">📋</div><div><div style="font-size:22px;font-weight:800;color:#1d4ed8">${leads.length}</div><div style="font-size:11px;color:#3b82f6;font-weight:500">Total Leads</div></div></div>
+    <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #a7f3d0;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:white;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow-sm)">✋</div><div><div style="font-size:22px;font-weight:800;color:#047857">${leads.filter(l=>l.source==='Manual research').length}</div><div style="font-size:11px;color:#10b981;font-weight:500">Manual Entry</div></div></div>
+    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #fcd34d;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:white;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow-sm)">🗺️</div><div><div style="font-size:22px;font-weight:800;color:#b45309">${leads.filter(l=>l.source==='Google Maps').length}</div><div style="font-size:11px;color:#f59e0b;font-weight:500">From Maps</div></div></div>
+    <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px"><div style="width:42px;height:42px;border-radius:10px;background:white;display:grid;place-items:center;font-size:20px;box-shadow:var(--shadow-sm)">📍</div><div><div style="font-size:22px;font-weight:800;color:#6d28d9">${new Set(leads.map(l=>l.region)).size}</div><div style="font-size:11px;color:#8b5cf6;font-weight:500">Regions</div></div></div>`;
+}
+
+// ===== CRM MANAGER =====
+function crmTab(tab, btn) {
+  document.querySelectorAll('.crm-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.crm-sub').forEach(s => s.classList.remove('active'));
+  document.getElementById('crm-' + tab).classList.add('active');
+  if (tab === 'kanban') renderKanban();
+  if (tab === 'deals') renderDeals();
+  if (tab === 'contacts') renderContacts();
+  if (tab === 'analytics') renderAnalytics();
+}
+
+function renderCRM() {
+  renderKanban();
+}
+
+// KANBAN
+function renderKanban() {
+  const board = document.getElementById('kanban-board');
+  board.innerHTML = STAGES.filter(s => s !== 'closed-lost').map(stage => {
+    const stageLeads = leads.filter(l => l.status === stage);
+    const cards = stageLeads.map(l => {
+      const prod = getProduct(l.painPoint);
+      const val = randomValue();
+      return `<div class="kanban-card" onclick="viewLead('${l.id}')"><div class="kc-company">${l.company}</div><div class="kc-contact">${l.contactName || ''} · ${l.region}</div><div class="kc-product">${prod.icon} ${prod.name}</div><div class="kc-value">${fmtMoney(val)}</div></div>`;
+    }).join('');
+    return `<div class="kanban-col" data-stage="${stage}"><div class="kanban-col-header"><h4>${STAGE_LABELS[stage]}</h4><span class="col-count">${stageLeads.length}</span></div>${cards || '<div style="text-align:center;padding:20px;font-size:12px;color:var(--text-muted)">Empty</div>'}</div>`;
+  }).join('');
+}
+
+// DEALS
+function renderDeals() {
+  const dealLeads = leads.filter(l => ['qualified', 'proposal'].includes(l.status));
+  const totalValue = dealLeads.reduce((s, l) => s + randomValue(), 0);
+  const avgValue = dealLeads.length ? Math.round(totalValue / dealLeads.length) : 0;
+  const winRate = leads.filter(l => l.status === 'closed-won').length;
+  const totalClosed = leads.filter(l => ['closed-won', 'closed-lost'].includes(l.status)).length;
+
+  document.getElementById('deal-analytics').innerHTML = `
+    <div class="analytics-card"><div class="ac-label">Pipeline Value</div><div class="ac-value">${fmtMoney(totalValue)}</div><div class="ac-sub">${dealLeads.length} active deals</div></div>
+    <div class="analytics-card"><div class="ac-label">Avg Deal Size</div><div class="ac-value">${fmtMoney(avgValue)}</div><div class="ac-sub">Per active deal</div></div>
+    <div class="analytics-card"><div class="ac-label">Win Rate</div><div class="ac-value">${totalClosed ? Math.round(winRate / totalClosed * 100) : 0}%</div><div class="ac-sub">${winRate} won / ${totalClosed} closed</div></div>`;
+
+  document.getElementById('deal-list').innerHTML = dealLeads.length
+    ? `<table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--surface-hover)"><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase">Company</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase">Product</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase">Stage</th><th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase">Value</th><th style="padding:10px 16px;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase">Actions</th></tr></thead><tbody>${dealLeads.map(l => {
+      const prod = getProduct(l.painPoint);
+      const val = randomValue();
+      return `<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:10px 16px"><strong style="font-size:13px">${l.company}</strong><br><span style="font-size:11px;color:var(--text-muted)">${l.contactName || ''} · ${l.region}</span></td><td style="padding:10px 16px"><span style="font-size:12px">${prod.icon} ${prod.name}</span></td><td style="padding:10px 16px"><span class="tag tag-status ${l.status}">${STAGE_LABELS[l.status]}</span></td><td style="padding:10px 16px;text-align:right;font-weight:700;color:var(--green)">${fmtMoney(val)}</td><td style="padding:10px 16px"><button class="btn" onclick="viewLead('${l.id}')" style="font-size:11px;padding:4px 10px">View</button> <button class="btn" onclick="advanceLead('${l.id}')" style="font-size:11px;padding:4px 10px">Advance →</button></td></tr>`;
+    }).join('')}</tbody></table>`
+    : '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:12px">No active deals yet. Mark leads as Qualified or Proposal to see them here.</div>';
+}
+
+// CONTACTS
+function renderContacts() {
+  const q = (document.getElementById('contact-search')?.value || '').toLowerCase();
+  const filtered = leads.filter(l => l.company.toLowerCase().includes(q) || (l.contactName||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q));
+  document.getElementById('contact-count').textContent = filtered.length + ' contacts';
+
+  document.getElementById('contact-list').innerHTML = filtered.length
+    ? filtered.map(l => {
+      const prod = getProduct(l.painPoint);
+      return `<div class="deal-row" onclick="viewLead('${l.id}')" style="cursor:pointer"><div class="lead-avatar" style="width:36px;height:36px;font-size:13px">${l.company[0]}</div><div class="deal-info"><div class="deal-company">${l.company}</div><div class="deal-detail">${l.contactName || 'No contact'} · ${l.email || 'No email'} · ${l.phone || ''}</div></div><span class="tag tag-status ${l.status}" style="font-size:10px">${STAGE_LABELS[l.status]}</span><div style="font-size:11px;color:var(--text-muted)">${prod.icon} ${prod.name}</div></div>`;
+    }).join('')
+    : '<div style="padding:24px;text-align:center;color:var(--text-muted);font-size:12px">No contacts found.</div>';
+}
+
+// ANALYTICS
+function renderAnalytics() {
+  const total = leads.length;
+  const won = leads.filter(l => l.status === 'closed-won').length;
+  const lost = leads.filter(l => l.status === 'closed-lost').length;
+  const active = leads.filter(l => !['closed-won','closed-lost'].includes(l.status)).length;
+  const avgCycle = 14; // simulated
+
+  document.getElementById('analytics-summary').innerHTML = `
+    <div class="analytics-card"><div class="ac-label">Total Pipeline</div><div class="ac-value">${total}</div><div class="ac-sub">${active} active, ${won} won, ${lost} lost</div></div>
+    <div class="analytics-card"><div class="ac-label">Win Rate</div><div class="ac-value">${total ? Math.round(won/total*100) : 0}%</div><div class="ac-sub">Of total leads</div></div>
+    <div class="analytics-card"><div class="ac-label">Avg Sales Cycle</div><div class="ac-value">${avgCycle} days</div><div class="ac-sub">From new to closed</div></div>`;
+
+  // Pipeline value by stage
+  const stageValues = {};
+  STAGES.forEach(s => {
+    const stageLeads = leads.filter(l => l.status === s);
+    stageValues[s] = stageLeads.reduce((sum, l) => sum + randomValue(), 0);
+  });
+  const maxStageVal = Math.max(...Object.values(stageValues), 1);
+  const stageColors2 = { new:'var(--green)', contacted:'var(--amber)', qualified:'var(--blue-600)', proposal:'var(--purple)', 'closed-won':'#047857', 'closed-lost':'var(--red)' };
+  document.getElementById('pipeline-stages').innerHTML = STAGES.filter(s => s !== 'closed-lost').map(s => {
+    const pct = Math.round(stageValues[s] / maxStageVal * 100);
+    return `<div class="pipeline-bar"><div class="pipeline-bar-label">${STAGE_LABELS[s]}</div><div class="pipeline-bar-track"><div class="pipeline-bar-fill" style="width:${pct}%;background:${stageColors2[s]}"></div></div><div class="pipeline-bar-val">${fmtMoney(stageValues[s])}</div></div>`;
+  }).join('');
+
+  // Product win rate
+  const prodStats = {};
+  PRODUCTS.forEach(p => {
+    const matching = leads.filter(l => PAIN_MAP[l.painPoint] === p.key);
+    const wonCount = matching.filter(l => l.status === 'closed-won').length;
+    const totalClosed = matching.filter(l => ['closed-won','closed-lost'].includes(l.status)).length;
+    prodStats[p.name] = { total: matching.length, won: wonCount, closed: totalClosed, rate: totalClosed ? Math.round(wonCount/totalClosed*100) : 0 };
+  });
+  document.getElementById('product-winrate').innerHTML = PRODUCTS.map(p => {
+    const s = prodStats[p.name];
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="width:80px;font-size:12px;font-weight:600">${p.icon} ${p.name.split(' ').pop()}</div><div style="flex:1"><div style="display:flex;gap:8px;font-size:11px"><span style="color:var(--text-muted)">${s.total} leads</span><span style="color:var(--green)">✓ ${s.won} won</span></div><div style="height:6px;background:var(--border-light);border-radius:99px;margin-top:4px;overflow:hidden"><div style="height:100%;width:${s.rate}%;background:${p.color};border-radius:99px"></div></div></div><div style="font-size:13px;font-weight:700;color:${p.color}">${s.rate}%</div></div>`;
+  }).join('');
+
+  // Monthly activity bars
+  const months = ['Jan','Feb','Mar','Apr','May','Jun'];
+  const actCounts = months.map(() => Math.floor(Math.random() * 20 + 5));
+  const maxAct = Math.max(...actCounts);
+  document.getElementById('monthly-activity').innerHTML = actCounts.map((c, i) => `<div class="bar-group"><div style="font-size:13px;font-weight:700">${c}</div><div class="bar" style="height:${Math.round(c/maxAct*100)}%;background:var(--blue-600)"></div><div class="bar-label">${months[i]}</div></div>`).join('');
+}
+
+// ===== LEAD DETAIL =====
+function viewLead(id) {
+  selId = id;
+  const l = leads.find(x => x.id === id);
+  if (!l) return;
+
+  document.getElementById('ld-view').style.display = '';
+  document.getElementById('ld-edit-actions').style.display = 'none';
+  document.getElementById('ld-view-actions').style.display = '';
+
+  const prod = getProduct(l.painPoint);
+  document.getElementById('ld-avatar').textContent = l.company[0];
+  document.getElementById('ld-company').textContent = l.company;
+  document.getElementById('ld-subtitle').textContent = `${l.contactName || 'No contact'} · ${l.region}`;
+
+  // Profile badges
+  let badges = '';
+  if (l.crmLogged) badges += `<span class="tag tag-crm" style="font-size:10px">CRM ✓</span>`;
+  badges += `<span class="tag tag-status ${l.status}" style="font-size:10px">${STAGE_LABELS[l.status]}</span>`;
+  badges += `<span class="tag tag-product" style="font-size:10px">${prod.icon} ${prod.name}</span>`;
+  document.getElementById('ld-profile-badges').innerHTML = badges;
+
+  document.getElementById('ld-contact').innerHTML = `
+    <div class="ld-field"><div class="ld-field-label">Email</div><div class="ld-field-value">${l.email || '<span style="color:var(--text-muted)">Not stored</span>'}</div></div>
+    <div class="ld-field"><div class="ld-field-label">Phone</div><div class="ld-field-value">${l.phone || '<span style="color:var(--text-muted)">Not stored</span>'}</div></div>
+    <div class="ld-field"><div class="ld-field-label">Website</div><div class="ld-field-value"><span style="color:var(--text-muted)">Not stored</span></div></div>
+    <div class="ld-field"><div class="ld-field-label">Role</div><div class="ld-field-value">${l.role || '<span style="color:var(--text-muted)">N/A</span>'}</div></div>`;
+
+  document.getElementById('ld-profile').innerHTML = `
+    <div class="ld-field"><div class="ld-field-label">Assigned To</div><div class="ld-field-value">Admin</div></div>
+    <div class="ld-field"><div class="ld-field-label">Source</div><div class="ld-field-value">${l.source}</div></div>
+    <div class="ld-field"><div class="ld-field-label">Region</div><div class="ld-field-value">${l.region}</div></div>
+    <div class="ld-field"><div class="ld-field-label">Industry</div><div class="ld-field-value">${l.industry || 'N/A'}</div></div>
+    <div class="ld-field"><div class="ld-field-label">Business Type</div><div class="ld-field-value">${l.companyType || 'N/A'}</div></div>
+    <div class="ld-field"><div class="ld-field-label">Pain Point</div><div class="ld-field-value">${l.painPoint}</div></div>`;
+
+  document.getElementById('ld-pitch-section').style.display = '';
+  document.getElementById('ld-pitch').innerHTML = `<div class="ld-pitch-name">${prod.icon} ${prod.name}</div><div class="ld-pitch-text">${prod.pitch}</div>`;
+
+  if (l.notes) {
+    document.getElementById('ld-notes-section').style.display = '';
+    document.getElementById('ld-notes').textContent = l.notes;
+  } else {
+    document.getElementById('ld-notes-section').style.display = 'none';
+  }
+
+  // CRM Activity Timeline
+  const leadActs = activities.filter(a => a.leadId === id).sort((a, b) => b.time.localeCompare(a.time));
+  const typeIcons2 = { email:'<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>', call:'<svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>', meeting:'<svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>', note:'<svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>' };
+  document.getElementById('ld-timeline').innerHTML = leadActs.length
+    ? leadActs.map(a => `<div class="timeline-item"><div class="timeline-icon ${a.type}">${typeIcons2[a.type]}</div><div class="timeline-content"><div class="tl-type">${a.type}</div><div class="tl-text">${a.text}</div><div class="tl-time">${a.time}</div></div></div>`).join('')
+    : '<div style="padding:12px;text-align:center;color:var(--text-muted);font-size:12px">No CRM activity yet. Log one below!</div>';
+  document.getElementById('ld-timeline-section').style.display = '';
+
+  // Qualify button
+  const qualBtn = document.getElementById('ld-qual-btn');
+  if (l.status === 'qualified') {
+    qualBtn.textContent = '✓ Qualified';
+    qualBtn.className = 'btn btn-green';
+  } else if (l.status === 'new') {
+    qualBtn.textContent = '→ Contacted';
+    qualBtn.className = 'btn';
+  } else if (l.status === 'contacted') {
+    qualBtn.textContent = '✓ Set Qualified';
+    qualBtn.className = 'btn btn-green';
+  } else if (l.status === 'proposal') {
+    qualBtn.textContent = '→ Closed Won';
+    qualBtn.className = 'btn';
+  } else if (l.status === 'closed-won') {
+    qualBtn.textContent = '✓ Won';
+    qualBtn.className = 'btn btn-green';
+  }
+
+  document.getElementById('m-lead').hidden = false;
+}
+
+function closeM(id) { document.getElementById(id).hidden = true; }
+
+// CYCLE STAGE
+function cycleStage() {
+  const l = leads.find(x => x.id === selId);
+  if (!l) return;
+  const nextStage = STAGES.indexOf(l.status) + 1;
+  if (nextStage < STAGES.length) {
+    l.status = STAGES[nextStage];
+    activities.push({ id: 'a' + Date.now(), leadId: l.id, type: 'note', text: `Stage changed: ${STAGE_LABELS[l.status]}`, time: new Date().toLocaleString() });
+    notify('Stage Updated', `${l.company} → ${STAGE_LABELS[l.status]}`);
+    viewLead(l.id);
+    renderDash();
+    renderKanban();
+  } else {
+    notify('Done', 'Lead already at final stage.');
+  }
+}
+
+// LOG ACTIVITY
+function logActivity() {
+  const l = leads.find(x => x.id === selId);
+  if (!l) return;
+  const type = document.getElementById('log-type').value;
+  const text = document.getElementById('log-text').value.trim();
+  if (!text) { notify('Empty', 'Type something to log.', 'error'); return; }
+  activities.push({ id: 'a' + Date.now(), leadId: l.id, type, text, time: new Date().toLocaleString() });
+  document.getElementById('log-text').value = '';
+  notify('Logged', `${type.charAt(0).toUpperCase() + type.slice(1)}: ${text}`);
+  viewLead(l.id);
+  renderDash();
+}
+
+// EDIT MODE
+function enterEditMode() {
+  const l = leads.find(x => x.id === selId);
+  if (!l) return;
+  document.getElementById('ld-view').style.display = 'none';
+  document.getElementById('ld-view-actions').style.display = 'none';
+  document.getElementById('ld-edit-actions').style.display = 'flex';
+
+  document.getElementById('lf-company').value = l.company;
+  document.getElementById('lf-contact').value = l.contactName || '';
+  document.getElementById('lf-email').value = l.email || '';
+  document.getElementById('lf-phone').value = l.phone || '';
+  document.getElementById('lf-website').value = '';
+  document.getElementById('lf-role').value = l.role || '';
+  document.getElementById('lf-industry').value = l.industry || '';
+  document.getElementById('lf-region').value = l.region;
+  document.getElementById('lf-type').value = l.companyType || 'retail';
+  document.getElementById('lf-pain').value = l.painPoint || 'checkout-pos';
+  document.getElementById('lf-source').value = l.source;
+  document.getElementById('lf-status').value = l.status;
+  document.getElementById('lf-notes').value = l.notes || '';
+}
+
+function saveLeadEdit() {
+  const l = leads.find(x => x.id === selId);
+  if (!l) return;
+  l.company = document.getElementById('lf-company').value;
+  l.contactName = document.getElementById('lf-contact').value;
+  l.email = document.getElementById('lf-email').value;
+  l.phone = document.getElementById('lf-phone').value;
+  l.role = document.getElementById('lf-role').value;
+  l.industry = document.getElementById('lf-industry').value;
+  l.region = document.getElementById('lf-region').value;
+  l.companyType = document.getElementById('lf-type').value;
+  l.painPoint = document.getElementById('lf-pain').value;
+  l.source = document.getElementById('lf-source').value;
+  l.status = document.getElementById('lf-status').value;
+  l.notes = document.getElementById('lf-notes').value;
+  document.getElementById('ld-view').style.display = '';
+  document.getElementById('ld-view-actions').style.display = '';
+  document.getElementById('ld-edit-actions').style.display = 'none';
+  notify('Saved', 'Lead updated.');
+  viewLead(l.id);
+  renderDash();
+}
+
+function cancelEditMode() {
+  document.getElementById('ld-view').style.display = '';
+  document.getElementById('ld-view-actions').style.display = '';
+  document.getElementById('ld-edit-actions').style.display = 'none';
+}
+
+// Advance lead stage from deals view
+function advanceLead(id) {
+  const l = leads.find(x => x.id === id);
+  if (!l) return;
+  const nextStage = STAGES.indexOf(l.status) + 1;
+  if (nextStage < STAGES.length) {
+    l.status = STAGES[nextStage];
+    activities.push({ id: 'a' + Date.now(), leadId: l.id, type: 'note', text: `Stage advanced: ${STAGE_LABELS[l.status]}`, time: new Date().toLocaleString() });
+    notify('Advanced', `${l.company} → ${STAGE_LABELS[l.status]}`);
+    renderDeals();
+    renderKanban();
+    renderDash();
+  }
+}
+
+// ===== ADD LEAD =====
+function addLead(e) {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const l = {
+    id: 'l' + Date.now(),
+    company: fd.get('company'),
+    contactName: fd.get('contactName'),
+    email: fd.get('email'),
+    phone: fd.get('phone') || '',
+    role: fd.get('role') || '',
+    industry: fd.get('industry') || '',
+    region: fd.get('region'),
+    source: fd.get('source'),
+    companyType: fd.get('companyType'),
+    painPoint: fd.get('painPoint'),
+    status: 'new',
+    notes: fd.get('notes') || '',
+    sent: false
+  };
+  leads.unshift(l);
+  e.target.reset();
+  notify('Added', `${l.company} added to pipeline.`);
+  renderDash();
+  renderKanban();
+}
+
+// DEMO LEADS
+function addDemoLeads() {
+  const demos = [
+    { company:'TechGadgets Store', contactName:'Ali Rahman', email:'ali@techgadgets.my', phone:'019-876 5432', role:'Owner', industry:'retail', region:'Shah Alam', source:'Google Maps', companyType:'retail', painPoint:'checkout-pos', notes:'Electronics retail store' },
+    { company:'Golden Dragon Restaurant', contactName:'Wong Mei Ling', email:'wong@goldendragon.my', phone:'012-111 2233', role:'Manager', industry:'fnb', region:'Kuala Lumpur', source:'Google Maps', companyType:'fnb', painPoint:'checkout-pos', notes:'Chinese restaurant chain' },
+    { company:'Mega Logistics Hub', contactName:'Kumar Rajesh', email:'kumar@megalog.com', phone:'07-333 4455', role:'Director', industry:'logistics', region:'Johor Bahru', source:'Referral', companyType:'warehouse', painPoint:'warehouse-control', notes:'Large distribution center' },
+    { company:'BestPrice Wholesale', contactName:'Lim Ah Huat', email:'ahhuat@bestprice.my', phone:'04-555 6677', role:'Owner', industry:'wholesale', region:'Penang', source:'Manual research', companyType:'wholesale', painPoint:'manual-accounting', notes:'FMCG wholesale distributor' },
+    { company:'SwiftPay HR Services', contactName:'Nurul Aisyah', email:'nurul@swiftpay.my', phone:'03-777 8899', role:'CEO', industry:'service', region:'Cyberjaya', source:'LinkedIn', companyType:'service', painPoint:'payroll-compliance', notes:'HR consultancy firm' }
+  ];
+  demos.forEach((d, i) => {
+    leads.unshift({ id: 'd' + Date.now() + i, ...d, status: 'new', sent: false });
+  });
+  notify('Added', `${demos.length} demo leads added.`);
+  renderDash();
+  renderKanban();
+}
+
+function clearAll() {
+  if (!confirm('Clear all leads?')) return;
+  leads = [];
+  activities = [];
+  notify('Cleared', 'All leads removed.');
+  renderDash();
+  renderKanban();
+}
+
+function delLead() {
+  const l = leads.find(x => x.id === selId);
+  if (!l) return;
+  if (!confirm('Delete ' + l.company + '?')) return;
+  leads = leads.filter(x => x.id !== selId);
+  activities = activities.filter(a => a.leadId !== selId);
+  closeM('m-lead');
+  notify('Deleted', l.company + ' removed.');
+  renderDash();
+  renderKanban();
+}
+
+// ===== EMAIL =====
+function openEmail() {
+  const l = leads.find(x => x.id === selId);
+  if (!l) return;
+  closeM('m-lead');
+  const prod = getProduct(l.painPoint);
+  document.getElementById('e-company').textContent = l.company;
+  document.getElementById('e-recipient').textContent = l.email || 'No email stored';
+  document.getElementById('e-subject').value = `${prod.name} solution for ${l.company}`;
+  document.getElementById('e-body').value = `Hi ${l.contactName || 'there'},\n\nI came across ${l.company} and believe ${prod.name} could help with your ${l.painPoint.replace(/-/g, ' ')} needs.\n\n${prod.pitch}\n\nWould love to schedule a quick demo.\n\nBest,\n${sName}\n${sEmail}`;
+  document.getElementById('m-email').hidden = false;
+}
+
+function sendEmail() {
+  const l = leads.find(x => x.id === selId);
+  if (!l) { notify('Failed', 'Lead not found.', 'error'); return; }
+  if (!l.email) { notify('Failed', 'No email address.', 'error'); return; }
+  l.sent = true;
+  l.sentAt = new Date().toISOString().split('T')[0];
+  activities.push({ id: 'a' + Date.now(), leadId: l.id, type: 'email', text: document.getElementById('e-subject').value, time: new Date().toLocaleString() });
+  closeM('m-email');
+  notify('Sent (Simulated)', `Email "sent" to ${l.email}`);
+  renderDash();
+}
+
+// ===== EXPORT =====
+let exView = null;
+function showExport(v) {
+  exView = v;
+  document.getElementById('export-selector').style.display = 'none';
+  document.getElementById('export-preview').style.display = 'block';
+  renderExport();
+}
+function hideExport() {
+  exView = null;
+  document.getElementById('export-selector').style.display = 'block';
+  document.getElementById('export-preview').style.display = 'none';
+}
+function renderExport() {
+  const h = document.getElementById('ex-head'), b = document.getElementById('ex-body');
+  if (exView === 'queue') {
+    document.getElementById('ex-title').textContent = 'Lead Queue';
+    document.getElementById('ex-desc').textContent = leads.length + ' leads';
+    h.innerHTML = '<tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Company</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Contact</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Email</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Region</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Stage</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Product</th></tr>';
+    b.innerHTML = leads.map(l => {
+      const prod = getProduct(l.painPoint);
+      return `<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:10px 16px"><strong>${l.company}</strong></td><td style="padding:10px 16px">${l.contactName || '-'}</td><td style="padding:10px 16px">${l.email || '-'}</td><td style="padding:10px 16px">${l.region}</td><td style="padding:10px 16px"><span class="tag tag-status ${l.status}">${STAGE_LABELS[l.status]}</span></td><td style="padding:10px 16px">${prod.name}</td></tr>`;
+    }).join('');
+  } else {
+    const el = leads.filter(l => l.sent);
+    document.getElementById('ex-title').textContent = 'Email Activity';
+    document.getElementById('ex-desc').textContent = el.length + ' emails';
+    h.innerHTML = '<tr><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Company</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Email</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Region</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Status</th><th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;background:var(--surface-hover);border-bottom:1px solid var(--border)">Sent</th></tr>';
+    b.innerHTML = el.length ? el.map(l => `<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:10px 16px"><strong>${l.company}</strong></td><td style="padding:10px 16px">${l.email || '-'}</td><td style="padding:10px 16px">${l.region}</td><td style="padding:10px 16px"><span class="badge badge-sent" style="background:var(--blue-50);color:var(--blue-600)">Sent</span></td><td style="padding:10px 16px">${l.sentAt || '-'}</td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No emails sent yet.</td></tr>';
+  }
+}
+
+function doExport() {
+  let csv = '';
+  if (exView === 'queue') {
+    csv = 'Company,Contact,Email,Phone,Region,Stage,Product,Source\n';
+    leads.forEach(l => { const p = getProduct(l.painPoint); csv += `"${l.company}","${l.contactName||''}","${l.email||''}","${l.phone||''}","${l.region}","${STAGE_LABELS[l.status]}","${p.name}","${l.source}"\n`; });
+  } else {
+    csv = 'Company,Email,Region,Status,SentAt\n';
+    leads.filter(l => l.sent).forEach(l => { csv += `"${l.company}","${l.email||''}","${l.region}","Sent","${l.sentAt||''}"\n`; });
+  }
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = exView === 'queue' ? 'lead-queue.csv' : 'email-activity.csv'; a.click();
+  notify('Exported', 'CSV downloaded.');
+}
+
+// ===== SETTINGS =====
+function openSettings() { document.getElementById('s-backdrop').hidden = false; document.getElementById('s-drawer').hidden = false; renderSettings(); }
+function closeSettings() { document.getElementById('s-backdrop').hidden = true; document.getElementById('s-drawer').hidden = true; }
+function saveSender() { sName = document.getElementById('s-name').value; sEmail = document.getElementById('s-email').value; notify('Saved', 'Sender defaults updated.'); }
+
+function renderSettings() {
+  // Pipeline stages
+  document.getElementById('pipeline-stages-list').innerHTML = STAGES.map(s => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0"><div style="width:10px;height:10px;border-radius:50%;background:${STAGE_COLORS[s]};flex-shrink:0"></div><span style="font-size:12px;font-weight:600;flex:1">${STAGE_LABELS[s]}</span><span class="tag tag-status ${s}" style="font-size:10px">${leads.filter(l=>l.status===s).length}</span></div>`).join('');
+
+  // Product recommendations
+  document.getElementById('product-rec-list').innerHTML = Object.entries(PAIN_MAP).map(([pain, key]) => {
+    const prod = PRODUCTS.find(p => p.key === key);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0"><span style="font-size:10px;font-weight:600;color:var(--text-muted);width:120px;flex-shrink:0">${pain.replace(/-/g,' ')}</span><span style="font-size:16px">${prod?.icon||''}</span><span style="font-size:12px;font-weight:600">${prod?.name||key}</span></div>`;
+  }).join('');
+}
+
+// ===== INIT =====
+seedData();
+renderDash();
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+  backdrop.addEventListener('click', e => {
+    if (e.target === backdrop) backdrop.hidden = true;
+  });
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.hidden = true);
+    closeSettings();
+  }
+});
+</script>
+</body>
+</html>

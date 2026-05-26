@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Tracking — LeadGen AI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 240px; background: #fff; border-right: 1px solid #e2e8f0; padding: 20px 16px; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 32px; }
+    .sidebar-logo .icon { width: 36px; height: 36px; background: linear-gradient(135deg, #2563eb, #7c3aed); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; }
+    .sidebar-logo .text { font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .sidebar-logo .text strong { display: block; font-size: 15px; color: #1e293b; text-transform: none; letter-spacing: 0; }
+    .sidebar-section { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; margin-top: 16px; }
+    .sidebar-nav { list-style: none; }
+    .sidebar-nav li { margin-bottom: 2px; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: #64748b; font-size: 14px; text-decoration: none; transition: all 0.15s; }
+    .sidebar-nav a:hover { background: #f1f5f9; color: #1e293b; }
+    .sidebar-nav a.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+    .sidebar-nav a .nav-icon { width: 18px; text-align: center; font-size: 15px; }
+    .sidebar-user { margin-top: auto; padding: 12px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; gap: 10px; }
+    .sidebar-user .avatar { width: 32px; height: 32px; background: #7c3aed; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+    .sidebar-user .info { flex: 1; }
+    .sidebar-user .info .name { font-size: 13px; font-weight: 600; }
+    .sidebar-user .info .role { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
+    .sidebar-user .logout { font-size: 12px; color: #94a3b8; text-decoration: none; cursor: pointer; }
+    .sidebar-user .logout:hover { color: #ef4444; }
+
+    /* Main */
+    .main { margin-left: 240px; flex: 1; padding: 24px 32px; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 24px; font-weight: 700; }
+    .page-header p { color: #64748b; font-size: 14px; margin-top: 4px; }
+
+    /* Metric Cards */
+    .metrics-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 24px; }
+    .metric-card { background: #fff; border-radius: 12px; padding: 18px 20px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .metric-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transform: translateY(-1px); }
+    .metric-card.active { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+    .metric-card .metric-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
+    .metric-card .metric-value { font-size: 28px; font-weight: 700; line-height: 1; }
+    .metric-card .metric-label { font-size: 12px; color: #64748b; margin-top: 4px; font-weight: 500; }
+    .metric-card .metric-change { font-size: 11px; margin-top: 8px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .metric-card .metric-change.up { color: #059669; }
+    .metric-card .metric-change.down { color: #ef4444; }
+    .metric-card .metric-bar { position: absolute; bottom: 0; left: 0; height: 3px; border-radius: 0 3px 0 0; transition: width 0.5s ease; }
+    .icon-blue { background: #eff6ff; color: #2563eb; }
+    .icon-green { background: #f0fdf4; color: #16a34a; }
+    .icon-amber { background: #fffbeb; color: #d97706; }
+    .icon-purple { background: #f5f3ff; color: #7c3aed; }
+    .icon-red { background: #fef2f2; color: #dc2626; }
+    .icon-cyan { background: #ecfeff; color: #0891b2; }
+    .bar-blue { background: #2563eb; }
+    .bar-green { background: #16a34a; }
+    .bar-amber { background: #d97706; }
+    .bar-purple { background: #7c3aed; }
+    .bar-red { background: #dc2626; }
+    .bar-cyan { background: #0891b2; }
+
+    /* Toolbar */
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .toolbar .search-box { position: relative; flex: 1; min-width: 200px; }
+    .toolbar .search-box input { width: 100%; padding: 9px 14px 9px 38px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; transition: border-color 0.2s; }
+    .toolbar .search-box input:focus { border-color: #2563eb; }
+    .toolbar .search-box .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; }
+    .toolbar select, .toolbar button { padding: 9px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: #fff; color: #1e293b; cursor: pointer; outline: none; }
+    .toolbar select:focus { border-color: #2563eb; }
+    .toolbar button.btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 600; }
+    .toolbar button.btn-primary:hover { background: #1d4ed8; }
+    .toolbar button.btn-outline { background: #fff; }
+    .toolbar button.btn-outline:hover { background: #f8fafc; }
+
+    /* Table */
+    .table-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+    .table-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; }
+    .table-header h3 { font-size: 15px; font-weight: 600; }
+    .table-header .count { font-size: 13px; color: #64748b; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { text-align: left; padding: 12px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0; cursor: pointer; user-select: none; white-space: nowrap; }
+    thead th:hover { color: #1e293b; }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.3; }
+    thead th.sorted .sort-icon { opacity: 1; color: #2563eb; }
+    tbody tr { border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.15s; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td { padding: 14px 20px; font-size: 13px; vertical-align: middle; }
+    .company-cell { display: flex; align-items: center; gap: 10px; }
+    .company-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .company-name { font-weight: 600; }
+    .company-email { font-size: 12px; color: #94a3b8; }
+    .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-sent { background: #eff6ff; color: #2563eb; }
+    .status-delivered { background: #f0fdf4; color: #16a34a; }
+    .status-opened { background: #f5f3ff; color: #7c3aed; }
+    .status-replied { background: #ecfeff; color: #0891b2; }
+    .status-bounced { background: #fef2f2; color: #dc2626; }
+    .status-clicked { background: #fffbeb; color: #d97706; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .dot-sent { background: #2563eb; }
+    .dot-delivered { background: #16a34a; }
+    .dot-opened { background: #7c3aed; }
+    .dot-replied { background: #0891b2; }
+    .dot-bounced { background: #dc2626; }
+    .dot-clicked { background: #d97706; }
+    .timeline-cell { font-size: 12px; color: #64748b; }
+    .timeline-cell .time { font-weight: 600; color: #1e293b; }
+    .action-btns { display: flex; gap: 6px; }
+    .action-btns button { width: 30px; height: 30px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.15s; }
+    .action-btns button:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    .action-btns button.btn-view:hover { background: #eff6ff; border-color: #93c5fd; color: #2563eb; }
+    .action-btns button.btn-resend:hover { background: #f0fdf4; border-color: #86efac; color: #16a34a; }
+    .action-btns button.btn-bounce:hover { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+    .product-tag { font-size: 12px; background: #f1f5f9; padding: 3px 8px; border-radius: 4px; font-weight: 500; }
+
+    /* Pagination */
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 1px solid #e2e8f0; }
+    .pagination .info { font-size: 13px; color: #64748b; }
+    .pagination .pages { display: flex; gap: 4px; }
+    .pagination .pages button { width: 32px; height: 32px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fff; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .pagination .pages button:hover { background: #f8fafc; }
+    .pagination .pages button.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+    /* Modal */
+    .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-backdrop.show { display: flex; }
+    .modal { background: #fff; border-radius: 16px; width: 640px; max-width: 95vw; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #e2e8f0; }
+    .modal-header h2 { font-size: 18px; font-weight: 700; }
+    .modal-close { width: 32px; height: 32px; border: none; background: #f1f5f9; border-radius: 8px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: #e2e8f0; }
+    .modal-body { padding: 24px; }
+    .detail-row { display: flex; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { width: 140px; font-size: 13px; color: #64748b; font-weight: 500; flex-shrink: 0; }
+    .detail-value { flex: 1; font-size: 13px; }
+    .detail-value strong { color: #1e293b; }
+    .email-timeline { margin-top: 20px; }
+    .email-timeline h4 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    .timeline-item { display: flex; gap: 12px; padding-bottom: 16px; position: relative; }
+    .timeline-item:not(:last-child)::after { content: ''; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: #e2e8f0; }
+    .timeline-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .timeline-content { flex: 1; }
+    .timeline-content .tl-title { font-size: 13px; font-weight: 600; }
+    .timeline-content .tl-time { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .timeline-content .tl-desc { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .tl-sent { background: #eff6ff; color: #2563eb; }
+    .tl-delivered { background: #f0fdf4; color: #16a34a; }
+    .tl-opened { background: #f5f3ff; color: #7c3aed; }
+    .tl-clicked { background: #fffbeb; color: #d97706; }
+    .tl-replied { background: #ecfeff; color: #0891b2; }
+    .tl-bounced { background: #fef2f2; color: #dc2626; }
+
+    /* Chart area */
+    .chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .chart-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .chart-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+    .bar-chart-wrapper { position: relative; height: 160px; }
+    .bar-chart-grid { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
+    .bar-chart-grid .grid-line { border-top: 1px dashed #e2e8f0; position: relative; }
+    .bar-chart-grid .grid-line span { position: absolute; left: -32px; top: -6px; font-size: 10px; color: #94a3b8; }
+    .bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 100%; padding-left: 36px; padding-bottom: 24px; position: relative; z-index: 1; }
+    .bar-chart .bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+    .bar-chart .bar { width: 32px; border-radius: 6px 6px 0 0; transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); min-height: 4px; }
+    .bar-chart .bar-label { font-size: 11px; color: #64748b; font-weight: 500; }
+    .bar-chart .bar-value { font-size: 12px; font-weight: 700; color: #1e293b; }
+    .donut-container { display: flex; align-items: center; justify-content: center; gap: 20px; }
+    .donut { width: 120px; height: 120px; border-radius: 50%; position: relative; }
+    .donut-center { position: absolute; inset: 20px; background: #fff; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .donut-center .donut-value { font-size: 24px; font-weight: 700; }
+    .donut-center .donut-label { font-size: 10px; color: #94a3b8; }
+    .donut-legend { display: flex; flex-direction: column; gap: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    /* Responsive */
+    @media (max-width: 1200px) { .metrics-grid { grid-template-columns: repeat(3, 1fr); } .chart-row { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">💧</div>
+      <div class="text">Lead Generator <strong>LeadGen AI</strong></div>
+    </div>
+    <div class="sidebar-section">Workspace</div>
+    <ul class="sidebar-nav">
+      <li><a href="#"><span class="nav-icon"></span> Dashboard</a></li>
+      <li><a href="#"><span class="nav-icon">🔍</span> Inbound Scanner</a></li>
+      <li><a href="#"><span class="nav-icon">👥</span> CRM Manager</a></li>
+      <li><a href="#" class="active"><span class="nav-icon">📧</span> Outbound Tools</a></li>
+    </ul>
+    <div class="sidebar-user">
+      <div class="avatar">A</div>
+      <div class="info"><div class="name">admin</div><div class="role">Admin</div></div>
+      <span class="logout">↪ Log Out</span>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="main">
+    <div class="page-header">
+      <h1> Email Tracking</h1>
+      <p>Monitor delivery rates, opens, replies, and follow-ups across all campaigns.</p>
+    </div>
+
+    <!-- Metric Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card active" onclick="filterByStatus('all')" id="metric-all">
+        <div class="metric-icon icon-blue">📨</div>
+        <div class="metric-value" id="val-sent">48</div>
+        <div class="metric-label">Total Sent</div>
+        <div class="metric-change up">↑ 12% this week</div>
+        <div class="metric-bar bar-blue" style="width:100%"></div>
+      </div>
+      <div class="metric-card" onclick="filterByStatus('delivered')" id="metric-delivered">
+        <div class="metric-icon icon-green">✅</div>
+        <div class="metric-value" id="val-delivered">45</div>
+        <div class="metric-label">Delivered</div>
+        <div class="metric-change up">93.8% rate</div>
+        <div class="metric-bar bar-green" style="width:93.8%"></div>
+      </div>
+      <div class="metric-card" onclick="filterByStatus('opened')" id="metric-opened">
+        <div class="metric-icon icon-purple">👁️</div>
+        <div class="metric-value" id="val-opened">28</div>
+        <div class="metric-label">Opened</div>
+        <div class="metric-change up">58.3% rate</div>
+        <div class="metric-bar bar-purple" style="width:58.3%"></div>
+      </div>
+      <div class="metric-card" onclick="filterByStatus('clicked')" id="metric-clicked">
+        <div class="metric-icon icon-amber"></div>
+        <div class="metric-value" id="val-clicked">14</div>
+        <div class="metric-label">Link Clicked</div>
+        <div class="metric-change up">29.2% rate</div>
+        <div class="metric-bar bar-amber" style="width:29.2%"></div>
+      </div>
+      <div class="metric-card" onclick="filterByStatus('replied')" id="metric-replied">
+        <div class="metric-icon icon-cyan">💬</div>
+        <div class="metric-value" id="val-replied">9</div>
+        <div class="metric-label">Replied</div>
+        <div class="metric-change up">18.8% rate</div>
+        <div class="metric-bar bar-cyan" style="width:18.8%"></div>
+      </div>
+      <div class="metric-card" onclick="filterByStatus('bounced')" id="metric-bounced">
+        <div class="metric-icon icon-red">❌</div>
+        <div class="metric-value" id="val-bounced">3</div>
+        <div class="metric-label">Bounced</div>
+        <div class="metric-change down">6.2% rate</div>
+        <div class="metric-bar bar-red" style="width:6.2%"></div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="chart-row">
+      <div class="chart-card">
+        <h3>📈 Daily Send Volume (Last 7 Days)</h3>
+        <div class="bar-chart-wrapper">
+          <div class="bar-chart-grid" id="barGrid"></div>
+          <div class="bar-chart" id="barChart">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3>🎯 Status Breakdown</h3>
+        <div class="donut-container">
+          <div class="donut" id="donutChart">
+            <div class="donut-center">
+              <div class="donut-value">48</div>
+              <div class="donut-label">Total</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#2563eb"></div> Sent (3)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div> Delivered (14)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div> Opened (8)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div> Clicked (6)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#0891b2"></div> Replied (9)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div> Bounced (3)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Search by company, email, or product..." id="searchInput" oninput="filterTable()">
+      </div>
+      <select id="statusFilter" onchange="filterTable()">
+        <option value="all">All Statuses</option>
+        <option value="sent">📨 Sent</option>
+        <option value="delivered">✅ Delivered</option>
+        <option value="opened">👁️ Opened</option>
+        <option value="clicked"> Clicked</option>
+        <option value="replied">💬 Replied</option>
+        <option value="bounced">❌ Bounced</option>
+      </select>
+      <select id="productFilter" onchange="filterTable()">
+        <option value="all">All Products</option>
+        <option value="AutoCount Accounting">AutoCount Accounting</option>
+        <option value="AutoCount POS">AutoCount POS</option>
+        <option value="Presoft Mobile Stock">Presoft Mobile Stock</option>
+        <option value="Cubehous WMS">Cubehous WMS</option>
+        <option value="AutoCount Payroll">AutoCount Payroll</option>
+      </select>
+      <button class="btn-outline" onclick="exportCSV()"> Export CSV</button>
+      <button class="btn-primary" onclick="openBulkSend()">📤 Send Campaign</button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Email Activity Log</h3>
+        <span class="count" id="tableCount">Showing 12 of 48 records</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('company')">Company <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('email')">Email <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('product')">Product <span class="sort-icon">↕</span></th>
+            <th onclick="sortTable('status')">Status <span class="sort-icon">↕</span></th>
+            <th>Sent At</th>
+            <th>Opened</th>
+            <th>Replied</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="emailTableBody">
+          <!-- Filled by JS -->
+        </tbody>
+      </table>
+      <div class="pagination">
+        <div class="info" id="paginationInfo">Showing 1-12 of 48</div>
+        <div class="pages">
+          <button onclick="changePage(-1)">‹</button>
+          <button class="active" id="page1">1</button>
+          <button id="page2">2</button>
+          <button id="page3">3</button>
+          <button id="page4">4</button>
+          <button onclick="changePage(1)">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-backdrop" id="detailModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Email Detail</h2>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===== API-DRIVEN DATA =====
+let emailData = [];
+let summaryData = { sent: 0, delivered: 0, opened: 0, clicked: 0, replied: 0, bounced: 0 };
+let currentPage = 1;
+let currentFilter = 'all';
+let sortField = 'sentAt';
+let sortDir = -1;
+const avatarColors = ['#2563eb','#16a34a','#d97706','#7c3aed','#dc2626','#0891b2','#ec4899','#f97316'];
+
+function getColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return avatarColors[Math.abs(h) % avatarColors.length];
+}
+
+// ===== FETCH DATA FROM API =====
+async function loadSummary() {
+  try {
+    const res = await fetch('/api/email/tracking/summary');
+    if (!res.ok) return;
+    summaryData = await res.json();
+    document.getElementById('val-sent').textContent = summaryData.sent || 0;
+    document.getElementById('val-delivered').textContent = summaryData.delivered || 0;
+    document.getElementById('val-opened').textContent = summaryData.opened || 0;
+    document.getElementById('val-clicked').textContent = summaryData.clicked || 0;
+    document.getElementById('val-replied').textContent = summaryData.replied || 0;
+    document.getElementById('val-bounced').textContent = summaryData.bounced || 0;
+
+    // Update bar widths
+    const total = summaryData.sent || 1;
+    document.querySelector('#metric-delivered .metric-bar').style.width = ((summaryData.delivered / total) * 100) + '%';
+    document.querySelector('#metric-opened .metric-bar').style.width = ((summaryData.opened / total) * 100) + '%';
+    document.querySelector('#metric-clicked .metric-bar').style.width = ((summaryData.clicked / total) * 100) + '%';
+    document.querySelector('#metric-replied .metric-bar').style.width = ((summaryData.replied / total) * 100) + '%';
+    document.querySelector('#metric-bounced .metric-bar').style.width = ((summaryData.bounced / total) * 100) + '%';
+
+    // Update rates
+    document.querySelector('#metric-delivered .metric-change').textContent = total > 1 ? Math.round((summaryData.delivered / total) * 1000) / 10 + '% rate' : '0% rate';
+    document.querySelector('#metric-opened .metric-change').textContent = total > 1 ? Math.round((summaryData.opened / total) * 1000) / 10 + '% rate' : '0% rate';
+    document.querySelector('#metric-clicked .metric-change').textContent = total > 1 ? Math.round((summaryData.clicked / total) * 1000) / 10 + '% rate' : '0% rate';
+    document.querySelector('#metric-replied .metric-change').textContent = total > 1 ? Math.round((summaryData.replied / total) * 1000) / 10 + '% rate' : '0% rate';
+    document.querySelector('#metric-bounced .metric-change').textContent = total > 1 ? Math.round((summaryData.bounced / total) * 1000) / 10 + '% rate' : '0% rate';
+
+    // Update donut
+    renderDonut();
+  } catch (e) { console.error('Failed to load summary:', e); }
+}
+
+async function loadActivity() {
+  try {
+    const statusF = document.getElementById('statusFilter').value;
+    const productF = document.getElementById('productFilter').value;
+    const search = document.getElementById('searchInput').value;
+    const params = new URLSearchParams({
+      page: currentPage,
+      pageSize: 12,
+      status: currentFilter !== 'all' ? currentFilter : statusF,
+      product: productF,
+      search: search
+    });
+    const res = await fetch('/api/email/tracking/activity?' + params);
+    if (!res.ok) return;
+    const data = await res.json();
+    emailData = data.records || [];
+
+    // Update counts
+    document.getElementById('tableCount').textContent = `Showing ${emailData.length} of ${data.total || 0} records`;
+    document.getElementById('paginationInfo').textContent = `Showing ${((currentPage - 1) * 12) + 1}-${Math.min(currentPage * 12, data.total || 0)} of ${data.total || 0}`;
+
+    renderTable(data.total || 0);
+  } catch (e) { console.error('Failed to load activity:', e); }
+}
+
+// ===== RENDER TABLE =====
+function renderTable(totalCount) {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const statusF = document.getElementById('statusFilter').value;
+  const productF = document.getElementById('productFilter').value;
+
+  let filtered = emailData.filter(r => {
+    if (currentFilter !== 'all' && r.status !== currentFilter) return false;
+    if (statusF !== 'all' && r.status !== statusF) return false;
+    if (productF !== 'all' && r.product !== productF) return false;
+    if (search && !r.company.toLowerCase().includes(search) && !r.email.toLowerCase().includes(search) && !r.product.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    const va = a[sortField] || '';
+    const vb = b[sortField] || '';
+    return va > vb ? sortDir : va < vb ? -sortDir : 0;
+  });
+
+  const pageSize = 12;
+  const totalPages = Math.ceil(totalCount / pageSize);
+  const page = filtered;
+
+  const tbody = document.getElementById('emailTableBody');
+  if (page.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:#94a3b8;">No email activity found. Send your first campaign to see tracking data here.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = page.map(r => {
+    const color = getColor(r.company);
+    const initial = r.company.charAt(0);
+    const statusClass = `status-${r.status}`;
+    const dotClass = `dot-${r.status}`;
+    const statusLabels = { sent:'Sent', delivered:'Delivered', opened:'Opened', clicked:'Clicked', replied:'Replied', bounced:'Bounced' };
+    const formattedSent = r.sentAt ? new Date(r.sentAt).toLocaleString('en-MY', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+    const formattedOpened = r.openedAt ? new Date(r.openedAt).toLocaleString('en-MY', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : null;
+    const formattedReplied = r.repliedAt ? new Date(r.repliedAt).toLocaleString('en-MY', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : null;
+    return `<tr onclick="openDetail('${r.id}')">
+      <td><div class="company-cell"><div class="company-avatar" style="background:${color}">${initial}</div><div><div class="company-name">${r.company}</div><div class="company-email">${r.contactName || ''}</div></div></div></td>
+      <td style="color:#64748b;font-size:12px">${r.email || '—'}</td>
+      <td><span class="product-tag">${r.product}</span></td>
+      <td><span class="status-badge ${statusClass}"><span class="status-dot ${dotClass}"></span>${statusLabels[r.status] || r.status}</span></td>
+      <td class="timeline-cell"><div class="time">${formattedSent}</div></td>
+      <td class="timeline-cell">${formattedOpened ? '<div class="time">' + formattedOpened + '</div>' : '<span style="color:#cbd5e1">—</span>'}</td>
+      <td class="timeline-cell">${formattedReplied ? '<div class="time">' + formattedReplied + '</div>' : '<span style="color:#cbd5e1">—</span>'}</td>
+      <td><div class="action-btns">
+        <button class="btn-view" title="View Detail" onclick="event.stopPropagation();openDetail('${r.id}')">👁️</button>
+        ${r.status !== 'replied' ? '<button class="btn-resend" title="Mark Replied" onclick="event.stopPropagation();markReplied(\'' + r.id + '\')">💬</button>' : ''}
+        ${r.status === 'bounced' ? '<button class="btn-bounce" title="Mark Invalid" onclick="event.stopPropagation()">🚫</button>' : ''}
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  // Pagination buttons
+  for (let i = 1; i <= Math.min(totalPages, 4); i++) {
+    const btn = document.getElementById('page' + i);
+    if (btn) {
+      btn.className = i === currentPage ? 'active' : '';
+      btn.onclick = () => { currentPage = i; loadActivity(); };
+    }
+  }
+}
+
+function changePage(delta) {
+  currentPage = Math.max(1, currentPage + delta);
+  loadActivity();
+}
+
+// ===== FILTER =====
+function filterByStatus(status) {
+  currentFilter = status;
+  currentPage = 1;
+  document.querySelectorAll('.metric-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('metric-' + status).classList.add('active');
+  document.getElementById('statusFilter').value = status === 'all' ? 'all' : status;
+  loadActivity();
+}
+
+function filterTable() {
+  currentPage = 1;
+  loadActivity();
+}
+
+// ===== SORT =====
+function sortTable(field) {
+  if (sortField === field) sortDir *= -1;
+  else { sortField = field; sortDir = -1; }
+  loadActivity();
+}
+
+// ===== DETAIL MODAL =====
+async function openDetail(id) {
+  let r = emailData.find(d => d.id === id);
+  if (!r) {
+    try {
+      const res = await fetch(`/api/email/tracking/${id}`);
+      if (res.ok) r = await res.json();
+    } catch (e) { console.error('Failed to load detail:', e); return; }
+  }
+  if (!r) return;
+  document.getElementById('modalTitle').textContent = r.company + ' — Email Detail';
+  const statusLabels = { sent:'📨 Sent', delivered:'✅ Delivered', opened:'👁️ Opened', clicked:'🔗 Clicked', replied:'💬 Replied', bounced:'❌ Bounced' };
+  const fmtTime = t => t ? new Date(t).toLocaleString('en-MY', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+
+  let timeline = '';
+  timeline += `<div class="timeline-item"><div class="timeline-dot tl-sent">📨</div><div class="timeline-content"><div class="tl-title">Email Sent</div><div class="tl-time">${fmtTime(r.sentAt)}</div><div class="tl-desc">Sent via EngineMailer to ${r.email}${r.messageId ? '<br/>ID: ' + r.messageId : ''}</div></div></div>`;
+  if (r.openedAt) {
+    timeline += `<div class="timeline-item"><div class="timeline-dot tl-opened">👁️</div><div class="timeline-content"><div class="tl-title">Email Opened</div><div class="tl-time">${fmtTime(r.openedAt)}</div><div class="tl-desc">Recipient opened the email (tracking pixel fired)</div></div></div>`;
+  }
+  if (r.clicked) {
+    timeline += `<div class="timeline-item"><div class="timeline-dot tl-clicked">🔗</div><div class="timeline-content"><div class="tl-title">Link Clicked</div><div class="tl-time">${fmtTime(r.openedAt || r.sentAt)}</div><div class="tl-desc">${r.clickedUrl || 'Recipient clicked a link in the email'}</div></div></div>`;
+  }
+  if (r.repliedAt) {
+    timeline += `<div class="timeline-item"><div class="timeline-dot tl-replied">💬</div><div class="timeline-content"><div class="tl-title">Reply Received</div><div class="tl-time">${fmtTime(r.repliedAt)}</div><div class="tl-desc">Recipient replied — follow up needed</div></div></div>`;
+  }
+  if (r.status === 'bounced') {
+    timeline += `<div class="timeline-item"><div class="timeline-dot tl-bounced">❌</div><div class="timeline-content"><div class="tl-title">Bounced</div><div class="tl-time">${fmtTime(r.sentAt)}</div><div class="tl-desc">Reason: ${r.bounceReason || 'Unknown'}</div></div></div>`;
+  }
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-row"><div class="detail-label">Company</div><div class="detail-value"><strong>${r.company}</strong></div></div>
+    <div class="detail-row"><div class="detail-label">Contact</div><div class="detail-value">${r.contactName || '—'}</div></div>
+    <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value">${r.email || '—'}</div></div>
+    <div class="detail-row"><div class="detail-label">Product</div><div class="detail-value"><span class="product-tag">${r.product}</span></div></div>
+    <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value">${statusLabels[r.status] || r.status}</div></div>
+    ${r.bounceReason ? '<div class="detail-row"><div class="detail-label">Bounce Reason</div><div class="detail-value" style="color:#dc2626">' + r.bounceReason + '</div></div>' : ''}
+    ${r.emailLastError ? '<div class="detail-row"><div class="detail-label">Last Error</div><div class="detail-value" style="color:#dc2626">' + r.emailLastError + '</div></div>' : ''}
+    <div class="email-timeline"><h4>📋 Activity Timeline</h4>${timeline}</div>
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn-primary" style="padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:600;background:#2563eb;color:#fff" onclick="closeModal()">Close</button>
+      ${r.status !== 'replied' ? '<button class="btn-outline" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;background:#fff" onclick="markReplied(\'' + r.id + '\')">💬 Mark Replied</button>' : ''}
+    </div>`;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
+
+async function markReplied(id) {
+  try {
+    const res = await fetch(`/api/email/tracking/${id}/reply`, { method: 'POST' });
+    if (res.ok) { await loadSummary(); await loadActivity(); closeModal(); }
+  } catch (e) { console.error('Failed:', e); }
+}
+
+function exportCSV() { window.location.href = '/api/export/sent.csv'; }
+function openBulkSend() { alert('📤 Opening bulk email campaign composer...'); }
+
+// ===== CHARTS =====
+let dailyData = [];
+
+async function loadDaily() {
+  try {
+    const res = await fetch('/api/email/tracking/daily');
+    if (!res.ok) return;
+    dailyData = await res.json();
+    renderBarChart();
+  } catch (e) { console.error('Failed to load daily:', e); }
+}
+
+function renderBarChart() {
+  const data = dailyData.length > 0 ? dailyData : [
+    { label: 'Mon', count: 0 }, { label: 'Tue', count: 0 }, { label: 'Wed', count: 0 },
+    { label: 'Thu', count: 0 }, { label: 'Fri', count: 0 }, { label: 'Sat', count: 0 },
+    { label: 'Sun', count: 0 }
+  ];
+  const values = data.map(d => d.count);
+  const max = Math.max(...values, 1);
+  const colors = ['#2563eb','#3b82f6','#2563eb','#3b82f6','#2563eb','#93c5fd','#cbd5e1'];
+  const grid = document.getElementById('barGrid');
+  const gridSteps = [max, Math.round(max * 0.75), Math.round(max * 0.5), Math.round(max * 0.25), 0];
+  grid.innerHTML = gridSteps.map(v => `<div class="grid-line"><span>${v}</span></div>`).join('');
+  const chart = document.getElementById('barChart');
+  chart.innerHTML = data.map((d, i) => `
+    <div class="bar-group">
+      <div class="bar-value">${values[i]}</div>
+      <div class="bar" style="height:${(values[i] / max) * 100}%;background:${colors[i]}"></div>
+      <div class="bar-label">${d.label}</div>
+    </div>`).join('');
+}
+
+function renderDonut() {
+  const total = summaryData.sent || 1;
+  const data = [
+    { value: Math.max(0, summaryData.sent - summaryData.delivered - summaryData.bounced), color: '#2563eb' },
+    { value: summaryData.delivered - summaryData.opened, color: '#16a34a' },
+    { value: summaryData.opened - summaryData.clicked - summaryData.replied, color: '#7c3aed' },
+    { value: summaryData.clicked, color: '#d97706' },
+    { value: summaryData.replied, color: '#0891b2' },
+    { value: summaryData.bounced, color: '#dc2626' },
+  ];
+  const sum = data.reduce((s, d) => s + Math.max(0, d.value), 0) || 1;
+  let gradient = 'conic-gradient(';
+  let acc = 0;
+  data.forEach((d, i) => {
+    const v = Math.max(0, d.value);
+    const start = (acc / sum) * 360;
+    acc += v;
+    const end = (acc / sum) * 360;
+    gradient += `${d.color} ${start}deg ${end}deg`;
+    if (i < data.length - 1) gradient += ', ';
+  });
+  gradient += ')';
+  document.getElementById('donutChart').style.background = gradient;
+  document.querySelector('.donut-value').textContent = total;
+
+  // Update legend
+  const legend = document.querySelector('.donut-legend');
+  const labels = ['Sent', 'Delivered', 'Opened', 'Clicked', 'Replied', 'Bounced'];
+  legend.innerHTML = data.map((d, i) => `<div class="legend-item"><div class="legend-dot" style="background:${d.color}"></div>${labels[i]} (${Math.max(0, d.value)})</div>`).join('');
+}
+
+// ===== INIT =====
+async function init() {
+  await loadSummary();
+  await loadDaily();
+  await loadActivity();
+  updateWeeklyTrend();
+}
+
+function updateWeeklyTrend() {
+  if (dailyData.length === 0) return;
+  // Last 3 days vs previous 3 days
+  const recent = dailyData.slice(-3).reduce((s, d) => s + d.count, 0);
+  const prev = dailyData.slice(0, 3).reduce((s, d) => s + d.count, 0);
+  const trendEl = document.querySelector('#metric-all .metric-change');
+  if (trendEl && prev > 0) {
+    const pct = Math.round(((recent - prev) / prev) * 100);
+    if (pct >= 0) trendEl.textContent = `↑ ${pct}% this week`;
+    else trendEl.textContent = `↓ ${Math.abs(pct)}% this week`;
+    trendEl.className = `metric-change ${pct >= 0 ? 'up' : 'down'}`;
+  } else if (trendEl) {
+    trendEl.textContent = recent > 0 ? `${recent} this week` : 'No sends yet';
+    trendEl.className = 'metric-change';
+  }
+}
+
+init();
+
+document.getElementById('detailModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
