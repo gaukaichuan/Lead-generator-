@@ -4,25 +4,34 @@
       "id": "lead-1778751600967-c069ff",
       "company": "Seri Setia Construction",
       "contactName": "Business Contact",
-      "email": "",
+      "email": "jacksongau123@gmail.com",
       "phone": "017-265 3080",
       "website": "",
       "role": "",
       "industry": "general_contractor",
       "region": "Other",
-      "companyType": "",
-      "painPoint": "",
+      "companyType": "retail",
+      "painPoint": "checkout-pos",
       "source": "Google Maps",
       "status": "new",
       "notes": "Imported from Google Maps. Address: 29-1a, Jalan Puteri 2/3, Bandar Puteri, 47100 Puchong, Selangor Distance: 0.2 km",
       "sent": false,
       "sentAt": null,
-      "emailStatus": "not_sent",
-      "emailLastError": "",
-      "emailLastAttemptAt": null,
+      "emailStatus": "failed",
+      "emailLastError": "EngineMailer is not configured. Set ENGINEMAILER_API_KEY on the server.",
+      "emailLastAttemptAt": "2026-05-26T07:25:24.460Z",
       "crmLogged": false,
       "createdAt": "2026-05-14T09:40:00.967Z",
-      "externalRef": "ChIJpTXKNAC1zTERDCbuKgt3MKM"
+      "externalRef": "ChIJpTXKNAC1zTERDCbuKgt3MKM",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": "",
+      "assignedTo": "admin"
     },
     {
       "id": "lead-1778751600967-a5e921",
@@ -46,7 +55,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T09:40:00.967Z",
-      "externalRef": "ChIJ6SE0f1izzTERTSAxpvdCZz8"
+      "externalRef": "ChIJ6SE0f1izzTERTSAxpvdCZz8",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-dacc76",
@@ -70,7 +87,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJoR5m6-FLzDERarpKzmsIdPY"
+      "externalRef": "ChIJoR5m6-FLzDERarpKzmsIdPY",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-c51202",
@@ -94,7 +119,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJu0lv_dpLzDERe7OGxXP6rhc"
+      "externalRef": "ChIJu0lv_dpLzDERe7OGxXP6rhc",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-14f7c3",
@@ -118,7 +151,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJYVIFLGBJzDERAJb6EwhjuW8"
+      "externalRef": "ChIJYVIFLGBJzDERAJb6EwhjuW8",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-aa5c1b",
@@ -142,7 +183,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJw5njQZ9NzDER2-_kTWA2FJI"
+      "externalRef": "ChIJw5njQZ9NzDER2-_kTWA2FJI",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-730585",
@@ -166,7 +215,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJQeeN1otKzDERDNnLlC1Hic8"
+      "externalRef": "ChIJQeeN1otKzDERDNnLlC1Hic8",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-4904b5",
@@ -190,7 +247,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJ47QQrpqxzTERJFVcjUCcHX8"
+      "externalRef": "ChIJ47QQrpqxzTERJFVcjUCcHX8",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-ae9664",
@@ -214,7 +279,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJuRjQikSxzTERRIAX9kxAU5s"
+      "externalRef": "ChIJuRjQikSxzTERRIAX9kxAU5s",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-33a159",
@@ -238,7 +311,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJ7caW_otKzDERv7fPGxs_Ag4"
+      "externalRef": "ChIJ7caW_otKzDERv7fPGxs_Ag4",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-a9dd41",
@@ -262,7 +343,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJzSN8aVtNzDERCETwb5XUdj4"
+      "externalRef": "ChIJzSN8aVtNzDERCETwb5XUdj4",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-14e00c",
@@ -286,7 +375,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJDYb0QDO1zTERQYGNPww3QFQ"
+      "externalRef": "ChIJDYb0QDO1zTERQYGNPww3QFQ",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-3f5882",
@@ -310,7 +407,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJKw_U-gJNzDERmJHupGaz-rA"
+      "externalRef": "ChIJKw_U-gJNzDERmJHupGaz-rA",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-328bd0",
@@ -334,7 +439,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJE4GuhlpMzDERlKsWoxJfAgY"
+      "externalRef": "ChIJE4GuhlpMzDERlKsWoxJfAgY",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-6317b4",
@@ -358,7 +471,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJoxHlE1tMzDERxXE3YmPw6Iw"
+      "externalRef": "ChIJoxHlE1tMzDERxXE3YmPw6Iw",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-59f6f5",
@@ -382,7 +503,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJoUeHhae1zTER1-BVgN6UVUo"
+      "externalRef": "ChIJoUeHhae1zTER1-BVgN6UVUo",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-38f63c",
@@ -406,7 +535,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJcS-RHDy1zTER574VhzEZaCI"
+      "externalRef": "ChIJcS-RHDy1zTER574VhzEZaCI",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-9fde49",
@@ -430,7 +567,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJaZGVr6dLzDERhwVRpGG4-x8"
+      "externalRef": "ChIJaZGVr6dLzDERhwVRpGG4-x8",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-9b6233",
@@ -454,7 +599,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJy3GS8CazzTERBBmQKS1wj-o"
+      "externalRef": "ChIJy3GS8CazzTERBBmQKS1wj-o",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-bf7bdd",
@@ -478,7 +631,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJbbB-XgBLzDERyEDLlGNhvvI"
+      "externalRef": "ChIJbbB-XgBLzDERyEDLlGNhvvI",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-9a6e58",
@@ -502,7 +663,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJxbPIFvpNzDERBNSh6ceivfw"
+      "externalRef": "ChIJxbPIFvpNzDERBNSh6ceivfw",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808041-e5c098",
@@ -526,7 +695,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.041Z",
-      "externalRef": "ChIJQdBFiVNNzDER2CkdZXzK_fA"
+      "externalRef": "ChIJQdBFiVNNzDER2CkdZXzK_fA",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-44e6b9",
@@ -550,7 +727,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJ2XdxWl9NzDER-YUGZxa84Gw"
+      "externalRef": "ChIJ2XdxWl9NzDER-YUGZxa84Gw",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-beecb2",
@@ -574,7 +759,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJaWwkTBhMzDER-otQza6BPio"
+      "externalRef": "ChIJaWwkTBhMzDER-otQza6BPio",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-1d9a98",
@@ -598,7 +791,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJy3VREq7IzTERTDG5xhO8oVk"
+      "externalRef": "ChIJy3VREq7IzTERTDG5xhO8oVk",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-c0ef38",
@@ -622,7 +823,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJdTww3XVLzDERiz4JYYD7yh0"
+      "externalRef": "ChIJdTww3XVLzDERiz4JYYD7yh0",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-c8a812",
@@ -646,7 +855,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJrYpymoatzTERPFNNN7nyWqQ"
+      "externalRef": "ChIJrYpymoatzTERPFNNN7nyWqQ",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-745fb6",
@@ -670,7 +887,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJq0DgdEVJzDERwWF-Msvq0UE"
+      "externalRef": "ChIJq0DgdEVJzDERwWF-Msvq0UE",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-fe7ce9",
@@ -694,7 +919,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJtVwjVfpLzDER7cCusLpPrBI"
+      "externalRef": "ChIJtVwjVfpLzDER7cCusLpPrBI",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-a58b5e",
@@ -718,7 +951,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJPyK_ycdLzDERt2fBKV19eUg"
+      "externalRef": "ChIJPyK_ycdLzDERt2fBKV19eUg",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-f93f0e",
@@ -742,7 +983,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJ2cto--myzTERoIdG0PwARm0"
+      "externalRef": "ChIJ2cto--myzTERoIdG0PwARm0",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-15fac4",
@@ -766,7 +1015,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJdZawMgBLzDERqgZiIioTib8"
+      "externalRef": "ChIJdZawMgBLzDERqgZiIioTib8",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-ffcb90",
@@ -790,7 +1047,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJb8H7U7BLzDER9NfQbS47aPM"
+      "externalRef": "ChIJb8H7U7BLzDER9NfQbS47aPM",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-869aac",
@@ -814,7 +1079,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJMXRDhYBLzDERB3p2USHQ8xo"
+      "externalRef": "ChIJMXRDhYBLzDERB3p2USHQ8xo",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-432ac1",
@@ -838,7 +1111,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJgR7hbodMzDERj-e8NVEEZV4"
+      "externalRef": "ChIJgR7hbodMzDERj-e8NVEEZV4",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-927aff",
@@ -862,7 +1143,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJK3UceJNNzDERAFKj2qtLUWk"
+      "externalRef": "ChIJK3UceJNNzDERAFKj2qtLUWk",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-05f5ba",
@@ -886,7 +1175,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJWe7OW5NMzDERzx3g_WvRkgI"
+      "externalRef": "ChIJWe7OW5NMzDERzx3g_WvRkgI",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-42b925",
@@ -910,7 +1207,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJe1lhQ8RMzDERtO24OPx8XBY"
+      "externalRef": "ChIJe1lhQ8RMzDERtO24OPx8XBY",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-5da0dc",
@@ -934,7 +1239,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJ3bkIEn9LzDER8Dsaj5JjNi8"
+      "externalRef": "ChIJ3bkIEn9LzDER8Dsaj5JjNi8",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-81c284",
@@ -958,7 +1271,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJUUSqdi1NzDERykl3YfJuv-o"
+      "externalRef": "ChIJUUSqdi1NzDERykl3YfJuv-o",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-910925",
@@ -982,7 +1303,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJL9cQ3i-zzTERVhhxcS_YMKY"
+      "externalRef": "ChIJL9cQ3i-zzTERVhhxcS_YMKY",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778745808040-1f4973",
@@ -1006,7 +1335,15 @@
       "emailLastAttemptAt": null,
       "crmLogged": false,
       "createdAt": "2026-05-14T08:03:28.040Z",
-      "externalRef": "ChIJi-cvSlhLzDERCDGiJGs5LK8"
+      "externalRef": "ChIJi-cvSlhLzDERCDGiJGs5LK8",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     },
     {
       "id": "lead-1778741753937",
@@ -1029,10 +1366,34 @@
       "emailLastError": "",
       "emailLastAttemptAt": null,
       "crmLogged": false,
-      "createdAt": "2026-05-14T06:55:53.937Z"
+      "createdAt": "2026-05-14T06:55:53.937Z",
+      "emailMessageId": "",
+      "emailOpenedAt": null,
+      "emailRepliedAt": null,
+      "emailClicked": false,
+      "emailClickedUrl": null,
+      "emailBounceReason": null,
+      "emailBouncedAt": null,
+      "recommendedProductKey": ""
     }
   ],
   "activities": [
+    {
+      "id": "activity-1779780324460",
+      "leadId": "lead-1778751600967-c069ff",
+      "title": "Outreach email failed",
+      "body": "Seri Setia Construction email send failed: EngineMailer is not configured. Set ENGINEMAILER_API_KEY on the server.",
+      "performedBy": "admin",
+      "createdAt": "2026-05-26T07:25:24.460Z"
+    },
+    {
+      "id": "activity-1779780316433",
+      "leadId": "lead-1778751600967-c069ff",
+      "title": "Lead updated",
+      "body": "Seri Setia Construction details were edited manually.",
+      "performedBy": "admin",
+      "createdAt": "2026-05-26T07:25:16.433Z"
+    },
     {
       "id": "activity-1778751600967",
       "leadId": "lead-1778751600967-c069ff",

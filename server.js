@@ -465,8 +465,12 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
   }
 
   // Check for API-level errors even on HTTP 200
-  if (payload.status === "error" || payload.error) {
-    throw new Error(`EngineMailer API error: ${payload.message || payload.error || rawPayload}`);
+  if (payload.status === "error" || payload.error ||
+      (payload.Result && payload.Result.StatusCode === "500")) {
+    const errMsg = payload.Result
+      ? `EngineMailer server error: ${payload.Result.ErrorMessage || payload.Result.Status || 'unknown'}`
+      : `EngineMailer API error: ${payload.message || payload.error || rawPayload}`;
+    throw new Error(errMsg);
   }
 
   return { messageId: payload.MessageId ? String(payload.MessageId) : "", rawResponse: payload };
