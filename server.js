@@ -452,6 +452,7 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
   });
 
   const rawPayload = await response.text();
+  console.log("[ENGINEMAILER] HTTP status:", response.status, "| Response:", rawPayload);
   let payload = {};
   try {
     payload = rawPayload ? JSON.parse(rawPayload) : {};
@@ -463,7 +464,12 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
     throw new Error(`EngineMailer send failed: ${payload.message || payload.error || rawPayload || `HTTP ${response.status}`}`);
   }
 
-  return { messageId: payload.MessageId ? String(payload.MessageId) : "" };
+  // Check for API-level errors even on HTTP 200
+  if (payload.status === "error" || payload.error) {
+    throw new Error(`EngineMailer API error: ${payload.message || payload.error || rawPayload}`);
+  }
+
+  return { messageId: payload.MessageId ? String(payload.MessageId) : "", rawResponse: payload };
 }
 
 function normalizeLeadIdentityPart(value) {
@@ -2914,6 +2920,7 @@ async function handleApi(request, response, pathname, options = {}) {
     }
 
     try {
+      console.log("[EMAIL] Sending to:", String(lead.email).trim(), "| From:", senderEmail, "| Subject:", subject);
       const mailResult = await sendEmail({
         to: String(lead.email).trim(),
         fromName: senderName,
