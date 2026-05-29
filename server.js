@@ -444,10 +444,11 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
     },
     body: JSON.stringify({
       CampaignName: emFromName,
-      FromEmail: emFromEmail,
       ToEmail: recipient,
       Subject: messageSubject,
-      HTMLBody: htmlBody
+      SenderEmail: emFromEmail,
+      SenderName: emFromName,
+      SubmittedContent: htmlBody
     })
   });
 
