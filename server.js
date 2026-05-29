@@ -336,8 +336,14 @@ function writeStore(store) {
 
 function ensureStoreShape(store) {
   if (!store || typeof store !== "object") {
-    return { leads: [], activities: [], users: [], products: [] };
+    return { leads: [], activities: [], users: [], products: [], emailSettings: { senderName: "Jackson", senderEmail: "info@presoft.my" } };
   }
+
+  if (!store.emailSettings) {
+    store.emailSettings = { senderName: "Jackson", senderEmail: "info@presoft.my" };
+  }
+  if (!store.emailSettings.senderName) store.emailSettings.senderName = "Jackson";
+  if (!store.emailSettings.senderEmail) store.emailSettings.senderEmail = "info@presoft.my";
 
   if (!Array.isArray(store.leads)) {
     store.leads = [];
@@ -2272,6 +2278,30 @@ async function handleApi(request, response, pathname, options = {}) {
     return;
   }
 
+  // ===== EMAIL SETTINGS =====
+
+  // GET /api/email/settings — load sender defaults
+  if (request.method === "GET" && pathname === "/api/email/settings") {
+    sendJson(response, 200, {
+      senderName: store.emailSettings.senderName || "Jackson",
+      senderEmail: store.emailSettings.senderEmail || "info@presoft.my"
+    });
+    return;
+  }
+
+  // PATCH /api/email/settings — update sender defaults
+  if (request.method === "PATCH" && pathname === "/api/email/settings") {
+    const body = await readRequestBody(request);
+    if (body.senderName !== undefined) store.emailSettings.senderName = String(body.senderName).trim();
+    if (body.senderEmail !== undefined) store.emailSettings.senderEmail = String(body.senderEmail).trim();
+    writeStore(store);
+    sendJson(response, 200, {
+      senderName: store.emailSettings.senderName,
+      senderEmail: store.emailSettings.senderEmail
+    });
+    return;
+  }
+
   // ===== EMAIL TRACKING ENDPOINTS (Phase 1) =====
 
   // GET /api/email/tracking/summary — metric cards for the dashboard
@@ -2914,8 +2944,8 @@ async function handleApi(request, response, pathname, options = {}) {
     }
 
     const body = await readRequestBody(request);
-    const senderName = String(body.senderName || "").trim() || "LeadGen AI";
-    const senderEmail = String(body.senderEmail || "").trim() || process.env.ENGINEMAILER_FROM_EMAIL || "";
+    const senderName = String(body.senderName || "").trim() || store.emailSettings.senderName || "Jackson";
+    const senderEmail = String(body.senderEmail || "").trim() || store.emailSettings.senderEmail || process.env.ENGINEMAILER_FROM_EMAIL || "";
     const subject = String(body.subject || "").trim();
     const messageBody = String(body.body || "").trim();
 

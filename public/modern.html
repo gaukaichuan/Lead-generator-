@@ -2302,10 +2302,17 @@
     function openSettings() { document.getElementById('s-backdrop').hidden = false; document.getElementById('s-drawer').hidden = false; }
     function closeSettings() { document.getElementById('s-backdrop').hidden = true; document.getElementById('s-drawer').hidden = true; }
     function toggleSender() { document.getElementById('sender-panel').classList.toggle('show'); }
-    function saveSenderDetails() {
+    async function saveSenderDetails() {
       sName = document.getElementById('s-name').value;
       sEmail = document.getElementById('s-email').value;
       localStorage.setItem('leadgen-sender', JSON.stringify({ sName, sEmail }));
+      try {
+        await fetch('/api/email/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ senderName: sName, senderEmail: sEmail })
+        });
+      } catch(e) {}
       notify('Saved', 'Sender details updated.');
     }
 
@@ -2436,16 +2443,27 @@
       window.location.href = '/api/integrations/bigin/connect';
     }
 
-    function loadSettings() {
+    async function loadSettings() {
+      // Try server API first, fallback to localStorage
+      try {
+        const res = await fetch('/api/email/settings');
+        if (res.ok) {
+          const data = await res.json();
+          sName = data.senderName || sName;
+          sEmail = data.senderEmail || sEmail;
+        }
+      } catch (e) {}
+      // Also check localStorage as fallback
       try {
         const raw = localStorage.getItem('leadgen-sender');
         if (raw) {
           const p = JSON.parse(raw);
           sName = p.sName || sName; sEmail = p.sEmail || sEmail;
-          document.getElementById('s-name').value = sName;
-          document.getElementById('s-email').value = sEmail;
         }
       } catch (e) {}
+      // Update UI fields
+      document.getElementById('s-name').value = sName;
+      document.getElementById('s-email').value = sEmail;
     }
 
     // ===== HELPERS =====
