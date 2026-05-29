@@ -382,16 +382,26 @@ function ensureStoreShape(store) {
     ...lead,
     emailStatus: lead.emailStatus || (lead.sent ? "sent" : "not_sent"),
     emailLastError: lead.emailLastError || "",
-    emailLastAttemptAt: lead.emailLastAttemptAt || lead.sentAt || null
+    emailLastAttemptAt: lead.emailLastAttemptAt || lead.sentAt || null,
+    // Phase 1 tracking fields
+    emailMessageId: lead.emailMessageId || "",
+    emailOpenedAt: lead.emailOpenedAt || null,
+    emailRepliedAt: lead.emailRepliedAt || null,
+    emailClicked: lead.emailClicked || false,
+    emailClickedUrl: lead.emailClickedUrl || null,
+    emailBounceReason: lead.emailBounceReason || null,
+    emailBouncedAt: lead.emailBouncedAt || null,
+    // Product key for filtering
+    recommendedProductKey: lead.recommendedProductKey || lead.recommendation?.productKey || ""
   }));
 
   return store;
 }
 
-async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
+async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId, baseUrl }) {
   const apiKey = process.env.ENGINEMAILER_API_KEY || "";
   const emFromEmail = process.env.ENGINEMAILER_FROM_EMAIL || "";
-  const emFromName = String(fromName || process.env.ENGINEMAILER_FROM_NAME || "LeadGen AI").replace(/"/g, "");
+  const emFromName = String(fromName || process.env.ENGINEMAILER_FROM_NAME || "LeadGen AI");
   const recipient = String(to || "").trim();
   const messageSubject = String(subject || "");
   const messageBody = String(body || "");
@@ -402,6 +412,28 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
 
   if (!emFromEmail) {
     throw new Error("EngineMailer is not configured. Set ENGINEMAILER_FROM_EMAIL on the server.");
+  }
+
+  // Phase 2: Inject tracking pixel + Phase 3: Rewrite links for click tracking
+  // Convert plain text to HTML: double newlines → paragraph breaks, single newlines → <br>
+  let htmlBody = messageBody
+    .split(/\n\n+/)
+    .map(block => `<p>${block.replace(/\n/g, "<br>")}</p>`).join("");
+  if (leadId && baseUrl) {
+    // Inject tracking pixel
+    const pixelUrl = `${baseUrl}/track/open?leadId=${encodeURIComponent(leadId)}`;
+    htmlBody += `<img src="${pixelUrl}" width="1" height="1" style="display:none" alt="" />`;
+
+    // Rewrite all <a href="..."> links to go through click tracker
+    const clickTrackerPattern = /<a\s+([^>]*?)href=["']([^"']+)["']([^>]*)>/gi;
+    htmlBody = htmlBody.replace(clickTrackerPattern, (match, before, href, after) => {
+      // Skip mailto:, tel:, and already-tracked links
+      if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#') || href.includes('/track/click')) {
+        return match;
+      }
+      const trackedUrl = `${baseUrl}/track/click?leadId=${encodeURIComponent(leadId)}&url=${encodeURIComponent(href)}`;
+      return `<a ${before}href="${trackedUrl}"${after}>`;
+    });
   }
 
   const response = await fetch("https://api.enginemailer.com/RESTAPI/V2/Submission/SendEmail", {
@@ -415,7 +447,7 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body }) {
       FromEmail: emFromEmail,
       ToEmail: recipient,
       Subject: messageSubject,
-      HTMLBody: `<p>${messageBody.replace(/\n/g, "</p><p>")}</p>`
+      HTMLBody: htmlBody
     })
   });
 
@@ -2037,6 +2069,106 @@ async function handleApi(request, response, pathname, options = {}) {
     return;
   }
 
+  // ===== EMAIL TRACKING ENDPOINTS (no auth required — called by browsers/email clients) =====
+
+  // GET /track/open — 1x1 tracking pixel (Phase 2)
+  if (request.method === "GET" && pathname === "/track/open") {
+    console.log("[TRACK] /track/open hit, leadId:", new URL(request.url, `http://${request.headers.host}`).searchParams.get("leadId"));
+    const urlObj = new URL(request.url, `http://${request.headers.host}`);
+    const leadId = urlObj.searchParams.get("leadId");
+    if (leadId) {
+      const lead = store.leads.find(l => l.id === leadId);
+      if (lead && (!lead.emailOpenedAt || lead.emailStatus === "sent" || lead.emailStatus === "delivered")) {
+        lead.emailOpenedAt = new Date().toISOString();
+        if (lead.emailStatus === "sent" || lead.emailStatus === "delivered") {
+          lead.emailStatus = "opened";
+        }
+        writeStore(store);
+      }
+    }
+    response.writeHead(200, {
+      "Content-Type": "image/gif",
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      "Content-Length": "43"
+    });
+    response.end(Buffer.from("R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==", "base64"));
+    return;
+  }
+
+  // GET /track/click — link proxy for click tracking (Phase 3)
+  if (request.method === "GET" && pathname === "/track/click") {
+    const urlObj = new URL(request.url, `http://${request.headers.host}`);
+    const leadId = urlObj.searchParams.get("leadId");
+    const targetUrl = urlObj.searchParams.get("url");
+
+    if (leadId && targetUrl) {
+      const lead = store.leads.find(l => l.id === leadId);
+      if (lead) {
+        lead.emailClicked = true;
+        lead.emailClickedUrl = targetUrl;
+        if (!lead.emailOpenedAt) {
+          lead.emailOpenedAt = new Date().toISOString();
+        }
+        if (lead.emailStatus === "sent" || lead.emailStatus === "delivered" || lead.emailStatus === "opened") {
+          lead.emailStatus = "clicked";
+        }
+        writeStore(store);
+      }
+    }
+
+    response.writeHead(302, {
+      "Location": decodeURIComponent(targetUrl),
+      "Cache-Control": "no-store"
+    });
+    response.end();
+    return;
+  }
+
+  // POST /webhooks/enginemailer — EngineMailer delivery/bounce events
+  if (request.method === "POST" && pathname === "/webhooks/enginemailer") {
+    const webhookSecret = process.env.ENGINEMAILER_WEBHOOK_SECRET || "";
+    const body = await readRequestBody(request);
+
+    // Validate webhook secret if configured
+    if (webhookSecret) {
+      const provided = String(body.secret || "");
+      if (provided !== webhookSecret) {
+        sendJson(response, 403, { error: "Invalid webhook secret" });
+        return;
+      }
+    }
+
+    const { messageId, event, recipient, bounceType, bounceReason } = body;
+
+    const lead = store.leads.find(l => l.emailMessageId === messageId);
+    if (!lead) {
+      sendJson(response, 200, { message: "OK — no matching lead" });
+      return;
+    }
+
+    if (event === "delivered") {
+      if (lead.emailStatus === "sent") lead.emailStatus = "delivered";
+    } else if (event === "opened") {
+      if (!lead.emailOpenedAt) lead.emailOpenedAt = new Date().toISOString();
+      if (lead.emailStatus === "sent" || lead.emailStatus === "delivered") lead.emailStatus = "opened";
+    } else if (event === "clicked") {
+      lead.emailClicked = true;
+      if (body.clickUrl) lead.emailClickedUrl = body.clickUrl;
+      if (lead.emailStatus !== "replied") lead.emailStatus = "clicked";
+    } else if (event === "bounced") {
+      lead.emailStatus = "bounced";
+      lead.emailBounceReason = bounceReason || bounceType || "Unknown bounce";
+      lead.emailBouncedAt = new Date().toISOString();
+    } else if (event === "replied") {
+      lead.emailStatus = "replied";
+      lead.emailRepliedAt = new Date().toISOString();
+    }
+
+    writeStore(store);
+    sendJson(response, 200, { message: "OK" });
+    return;
+  }
+
   // ===== ALL OTHER API ROUTES REQUIRE AUTH =====
   const session = requireAuth(request, response, store);
   if (!session) return;
@@ -2126,6 +2258,149 @@ async function handleApi(request, response, pathname, options = {}) {
     store.products.splice(idx, 1);
     writeStore(store);
     sendJson(response, 200, { message: "Product deleted." });
+    return;
+  }
+
+  // ===== EMAIL TRACKING ENDPOINTS (Phase 1) =====
+
+  // GET /api/email/tracking/summary — metric cards for the dashboard
+  if (request.method === "GET" && pathname === "/api/email/tracking/summary") {
+    const allLeads = store.leads.filter(l => l.emailStatus && l.emailStatus !== "not_sent");
+    const counts = {
+      sent: allLeads.filter(l => l.emailStatus === "sent" || l.emailStatus === "delivered" || l.emailStatus === "opened" || l.emailStatus === "clicked" || l.emailStatus === "replied").length,
+      delivered: allLeads.filter(l => l.emailStatus === "delivered" || l.emailStatus === "opened" || l.emailStatus === "clicked" || l.emailStatus === "replied").length,
+      opened: allLeads.filter(l => l.emailStatus === "opened" || l.emailStatus === "clicked" || l.emailStatus === "replied").length,
+      clicked: allLeads.filter(l => l.emailStatus === "clicked" || l.emailStatus === "replied").length,
+      replied: allLeads.filter(l => l.emailStatus === "replied").length,
+      bounced: allLeads.filter(l => l.emailStatus === "bounced").length
+    };
+    // sent = total with any status (delivered + bounced = sent total)
+    counts.sent = counts.delivered + counts.bounced;
+    sendJson(response, 200, counts);
+    return;
+  }
+
+  // GET /api/email/tracking/daily — daily send volume (last 7 days)
+  if (request.method === "GET" && pathname === "/api/email/tracking/daily") {
+    const now = new Date();
+    const days = [];
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+      days.push({ date: key, label: dayNames[d.getDay()], count: 0 });
+    }
+    // Count emails per day
+    store.leads.forEach(l => {
+      if (l.sentAt) {
+        const sentDate = l.sentAt.slice(0, 10);
+        const entry = days.find(d => d.date === sentDate);
+        if (entry) entry.count++;
+      }
+    });
+    sendJson(response, 200, days);
+    return;
+  }
+
+  // GET /api/email/tracking/activity — paginated activity log
+  if (request.method === "GET" && pathname === "/api/email/tracking/activity") {
+    const urlObj = new URL(request.url, `http://${request.headers.host}`);
+    const page = parseInt(urlObj.searchParams.get("page") || "1", 10);
+    const pageSize = parseInt(urlObj.searchParams.get("pageSize") || "12", 10);
+    const statusFilter = urlObj.searchParams.get("status") || "all";
+    const productFilter = urlObj.searchParams.get("product") || "all";
+    const search = (urlObj.searchParams.get("search") || "").toLowerCase();
+
+    let leads = store.leads.filter(l => l.emailStatus && l.emailStatus !== "not_sent");
+
+    if (statusFilter !== "all") {
+      leads = leads.filter(l => l.emailStatus === statusFilter);
+    }
+    if (productFilter !== "all") {
+      leads = leads.filter(l => {
+        const info = resolveProductInfo(store, l.recommendedProductKey || "");
+        return info.name === productFilter;
+      });
+    }
+    if (search) {
+      leads = leads.filter(l =>
+        (l.company || "").toLowerCase().includes(search) ||
+        (l.email || "").toLowerCase().includes(search) ||
+        (l.recommendedProductKey || "").toLowerCase().includes(search)
+      );
+    }
+
+    // Sort by most recent first
+    leads.sort((a, b) => new Date(b.emailLastAttemptAt || b.sentAt || 0) - new Date(a.emailLastAttemptAt || a.sentAt || 0));
+
+    const total = leads.length;
+    const start = (page - 1) * pageSize;
+    const pageLeads = leads.slice(start, start + pageSize);
+
+    const records = pageLeads.map(l => {
+      const info = resolveProductInfo(store, l.recommendedProductKey || "");
+      return {
+        id: l.id,
+        company: l.company,
+        contactName: l.contactName,
+        email: l.email,
+        product: info.name || l.recommendedProductKey || "Unknown",
+        status: l.emailStatus,
+        sentAt: l.sentAt || null,
+        openedAt: l.emailOpenedAt || null,
+        repliedAt: l.emailRepliedAt || null,
+        clicked: l.emailClicked || false,
+        clickedUrl: l.emailClickedUrl || null,
+        bounceReason: l.emailBounceReason || null,
+        messageId: l.emailMessageId || null
+      };
+    });
+
+    sendJson(response, 200, { records, total, page, pageSize });
+    return;
+  }
+
+  // GET /api/email/tracking/:leadId — detail for a single email
+  if (request.method === "GET" && pathname.match(/^\/api\/email\/tracking\/[^/]+$/)) {
+    const leadId = pathname.split("/api/email/tracking/")[1];
+    const lead = store.leads.find(l => l.id === leadId);
+    if (!lead) {
+      sendJson(response, 404, { error: "Lead not found." });
+      return;
+    }
+    const info = resolveProductInfo(store, lead.recommendedProductKey || "");
+    sendJson(response, 200, {
+      id: lead.id,
+      company: lead.company,
+      contactName: lead.contactName,
+      email: lead.email,
+      product: info.name || lead.recommendedProductKey || "Unknown",
+      status: lead.emailStatus,
+      sentAt: lead.sentAt || null,
+      openedAt: lead.emailOpenedAt || null,
+      repliedAt: lead.emailRepliedAt || null,
+      clicked: lead.emailClicked || false,
+      clickedUrl: lead.emailClickedUrl || null,
+      bounceReason: lead.emailBounceReason || null,
+      messageId: lead.emailMessageId || null,
+      emailLastError: lead.emailLastError || ""
+    });
+    return;
+  }
+
+  // POST /api/email/tracking/:leadId/reply — manually mark a lead as replied
+  if (request.method === "POST" && pathname.match(/^\/api\/email\/tracking\/[^/]+\/reply$/)) {
+    const leadId = pathname.split("/api/email/tracking/")[1].replace("/reply", "");
+    const lead = store.leads.find(l => l.id === leadId);
+    if (!lead) {
+      sendJson(response, 404, { error: "Lead not found." });
+      return;
+    }
+    lead.emailStatus = "replied";
+    lead.emailRepliedAt = new Date().toISOString();
+    writeStore(store);
+    sendJson(response, 200, { message: "Lead marked as replied.", leadId });
     return;
   }
 
@@ -2629,7 +2904,7 @@ async function handleApi(request, response, pathname, options = {}) {
 
     const body = await readRequestBody(request);
     const senderName = String(body.senderName || "").trim() || "LeadGen AI";
-    const senderEmail = String(body.senderEmail || "").trim() || process.env.GMAIL_SMTP_EMAIL || "";
+    const senderEmail = String(body.senderEmail || "").trim() || process.env.ENGINEMAILER_FROM_EMAIL || "";
     const subject = String(body.subject || "").trim();
     const messageBody = String(body.body || "").trim();
 
@@ -2644,7 +2919,9 @@ async function handleApi(request, response, pathname, options = {}) {
         fromName: senderName,
         fromEmail: senderEmail,
         subject,
-        body: messageBody
+        body: messageBody,
+        leadId: lead.id,
+        baseUrl: getBaseUrl(request)
       });
 
       lead.sent = true;
@@ -2652,6 +2929,10 @@ async function handleApi(request, response, pathname, options = {}) {
       lead.emailStatus = "sent";
       lead.emailLastError = "";
       lead.emailLastAttemptAt = lead.sentAt;
+      // Store messageId for webhook correlation (Phase 1)
+      if (mailResult && mailResult.messageId) {
+        lead.emailMessageId = mailResult.messageId;
+      }
       appendActivity(
         store,
         lead.id,
@@ -2805,6 +3086,12 @@ function createAppServer(options = {}) {
       const pathname = decodeURIComponent(url.pathname);
 
       if (pathname.startsWith("/api/")) {
+        await handleApi(request, response, pathname, options);
+        return;
+      }
+
+      // Track and webhook endpoints (non-/api paths that need special handling)
+      if (pathname.startsWith("/track/") || pathname.startsWith("/webhooks/")) {
         await handleApi(request, response, pathname, options);
         return;
       }
