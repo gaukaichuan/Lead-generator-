@@ -248,20 +248,20 @@ function seedDefaultEmailTemplates(store) {
     {
       id: "tmpl_default_1",
       name: "General Outreach",
-      subject: "Quick question about {{company}}'s operations",
-      body: "Hi {{contactName}},\n\nI hope this finds you well. I'm reaching out from PreSoft — we work with {{industry}} businesses across {{region}} to streamline their daily operations.\n\nMany companies like {{company}} are using our solutions to reduce admin time and gain better visibility into their finances and stock. I'd love to share how this might apply to your setup.\n\nWould you be open to a brief chat next week?\n\nBest regards,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
+      subject: "Solutions that could benefit {{company}}",
+      body: "Hi {{contactName}},\n\nI hope this finds you well. I'm reaching out from PreSoft — we work with {{industry}} businesses across {{region}} to streamline their daily operations.\n\nBased on your setup, I believe these solutions could be a strong fit:\n\n{{productBlocks}}\n\nWould you be open to a brief chat next week to discuss which might suit {{company}} best?\n\nBest regards,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
     },
     {
       id: "tmpl_default_2",
       name: "Follow-up",
-      subject: "Re: Quick question about {{company}}'s operations",
-      body: "Hi {{contactName}},\n\nI wanted to circle back on my previous note — I know things get busy.\n\nIn case it helps, here's what other {{industry}} businesses in {{region}} have told us they value most:\n\n• Less time on manual bookkeeping and reporting\n• Real-time visibility into stock levels and sales\n• One system that handles POS, accounting, and payroll together\n\nIf any of that resonates, I'd be happy to arrange a quick demo at your convenience.\n\nWarm regards,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
+      subject: "Re: Solutions that could benefit {{company}}",
+      body: "Hi {{contactName}},\n\nI wanted to circle back on my previous note — I know things get busy.\n\nIn case it helps, here are the solutions I mentioned that other {{industry}} businesses in {{region}} are using:\n\n{{productBlocks}}\n\nIf any of those resonate, I'd be happy to arrange a quick demo at your convenience.\n\nWarm regards,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
     },
     {
       id: "tmpl_default_3",
       name: "Partnership Inquiry",
       subject: "Exploring a collaboration with {{company}}",
-      body: "Dear {{contactName}},\n\nI'm reaching out from PreSoft, a Malaysian business software company founded in 2004. We've been following {{company}}'s work in {{region}} and see strong alignment between what you do and the solutions we provide.\n\nWe're currently expanding our network of partners across the {{industry}} sector and would love to explore how we might work together — whether through referrals, joint offerings, or shared client support.\n\nWould you be available for a brief introductory call in the coming week?\n\nSincerely,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
+      body: "Dear {{contactName}},\n\nI'm reaching out from PreSoft, a Malaysian business software company founded in 2004. We've been following {{company}}'s work in {{region}} and see strong alignment between what you do and the solutions we provide.\n\nOur core offerings include:\n\n{{productBlocks}}\n\nWe're currently expanding our network of partners across the {{industry}} sector and would love to explore how we might work together — whether through referrals, joint offerings, or shared client support.\n\nWould you be available for a brief introductory call in the coming week?\n\nSincerely,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
     }
   ];
   store.defaultTemplateId = "tmpl_default_1";
