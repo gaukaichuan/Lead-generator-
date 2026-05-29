@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CRM Manager — Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #f8f9fc;
+  --surface: #ffffff;
+  --border: #e8eaef;
+  --border-light: #f1f3f8;
+  --text: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --blue-50: #eff6ff;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --green-50: #ecfdf5;
+  --green-500: #10b981;
+  --green-600: #059669;
+  --amber-50: #fffbeb;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --red-50: #fef2f2;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --purple-500: #8b5cf6;
+  --purple-600: #7c3aed;
+  --indigo-500: #6366f1;
+  --cyan-500: #06b6d4;
+  --pink-500: #ec4899;
+  --orange-500: #f97316;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --transition: 0.2s ease;
+}
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; font-size: 14px; }
+
+/* ===== LAYOUT ===== */
+.app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+.sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 24px 16px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; }
+.main { padding: 24px 32px; overflow-y: auto; }
+
+/* ===== SIDEBAR ===== */
+.brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.brand-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--blue-500), var(--purple-600)); display: grid; place-items: center; color: white; font-size: 16px; font-weight: 700; }
+.brand-text { line-height: 1.2; }
+.brand-title { font-size: 15px; font-weight: 700; }
+.brand-subtitle { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.nav-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 8px 8px 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius); color: var(--text-secondary); text-decoration: none; font-size: 13.5px; font-weight: 500; cursor: pointer; transition: var(--transition); }
+.nav-item:hover { background: var(--border-light); color: var(--text); }
+.nav-item.active { background: var(--blue-50); color: var(--blue-600); font-weight: 600; }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.sidebar-footer .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--blue-500), var(--purple-600)); display: grid; place-items: center; color: white; font-size: 13px; font-weight: 600; }
+.sidebar-footer .user-info { flex: 1; }
+.sidebar-footer .user-name { font-size: 13px; font-weight: 600; }
+.sidebar-footer .user-role { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+/* ===== STAT CARDS ===== */
+.stat-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; position: relative; overflow: hidden; transition: var(--transition); cursor: default; }
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.stat-card.blue::before { background: linear-gradient(90deg, var(--blue-500), var(--blue-700)); }
+.stat-card.green::before { background: linear-gradient(90deg, var(--green-500), var(--green-600)); }
+.stat-card.amber::before { background: linear-gradient(90deg, var(--amber-500), var(--amber-600)); }
+.stat-card.purple::before { background: linear-gradient(90deg, var(--purple-600), var(--purple-500)); }
+.stat-card.red::before { background: linear-gradient(90deg, var(--red-500), var(--red-600)); }
+.stat-value { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.stat-card.blue .stat-value { color: var(--blue-600); }
+.stat-card.green .stat-value { color: var(--green-600); }
+.stat-card.amber .stat-value { color: var(--amber-600); }
+.stat-card.purple .stat-value { color: var(--purple-600); }
+.stat-card.red .stat-value { color: var(--red-600); }
+.stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+.stat-change { font-size: 11px; font-weight: 600; margin-top: 6px; display: flex; align-items: center; gap: 3px; }
+.stat-change.up { color: var(--green-600); }
+.stat-change.down { color: var(--red-600); }
+
+/* ===== TOOLBAR ===== */
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.toolbar-right { display: flex; align-items: center; gap: 10px; }
+.page-title { font-size: 22px; font-weight: 700; }
+.page-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
+.search-box { position: relative; }
+.search-box input { width: 240px; padding: 8px 12px 8px 34px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text); transition: var(--transition); outline: none; }
+.search-box input:focus { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted); }
+.filter-select { padding: 8px 28px 8px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text); cursor: pointer; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+.filter-select:focus { border-color: var(--blue-500); }
+.btn { padding: 8px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; border: none; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--blue-600); color: white; }
+.btn-primary:hover { background: var(--blue-700); }
+.btn-secondary { background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
+.btn-danger { background: var(--red-500); color: white; }
+.btn-danger:hover { background: var(--red-600); }
+.btn-success { background: var(--green-600); color: white; }
+.btn-success:hover { background: var(--green-500); }
+.btn svg { width: 16px; height: 16px; }
+.selection-info { font-size: 12px; color: var(--text-muted); font-weight: 500; padding: 0 8px; }
+
+/* ===== VIEW TOGGLE ===== */
+.view-toggle { display: flex; background: var(--border-light); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+.view-toggle button { padding: 7px 14px; border: none; background: transparent; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--text-secondary); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 5px; }
+.view-toggle button.active { background: var(--surface); color: var(--blue-600); box-shadow: var(--shadow-sm); }
+.view-toggle button:hover:not(.active) { color: var(--text); }
+.view-toggle button svg { width: 15px; height: 15px; }
+
+/* ===== LEAD LIST VIEW ===== */
+.lead-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.lead-row { display: grid; grid-template-columns: 40px 1fr auto auto auto auto auto; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-light); transition: var(--transition); position: relative; cursor: default; }
+.lead-row:last-child { border-bottom: none; }
+.lead-row:hover { background: var(--border-light); }
+.lead-row.stale { border-left: 3px solid var(--amber-500); background: #fffbf0; }
+.lead-row.stale:hover { background: #fff8e6; }
+
+/* Checkbox */
+.lead-check { display: flex; align-items: center; justify-content: center; }
+.lead-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue-600); cursor: pointer; }
+
+/* Lead info with avatar */
+.lead-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.lead-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; position: relative; }
+.lead-avatar .activity-dot { position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--surface); }
+.lead-avatar .activity-dot.active { background: var(--green-500); }
+.lead-name { font-weight: 600; font-size: 13.5px; line-height: 1.3; }
+.lead-detail { font-size: 12px; color: var(--text-muted); }
+
+/* Quality badge */
+.quality-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.quality-badge.hot { background: #fef2f2; color: var(--red-600); }
+.quality-badge.warm { background: #fffbeb; color: var(--amber-600); }
+.quality-badge.cold { background: #f3f4f6; color: var(--text-muted); }
+.quality-dot { width: 8px; height: 8px; border-radius: 50%; }
+.quality-badge.hot .quality-dot { background: var(--red-500); box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+.quality-badge.warm .quality-dot { background: var(--amber-500); }
+.quality-badge.cold .quality-dot { background: var(--text-muted); }
+
+/* Product tag */
+.product-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--blue-50); color: var(--blue-600); white-space: nowrap; }
+
+/* Status */
+.status-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.status-tag.new { background: var(--blue-50); color: var(--blue-600); }
+.status-tag.contacted { background: var(--amber-50); color: var(--amber-600); }
+.status-tag.qualified { background: var(--green-50); color: var(--green-600); }
+.status-tag.lost { background: #f3f4f6; color: var(--text-muted); }
+
+/* Stale indicator */
+.stale-badge { font-size: 11px; color: var(--amber-600); font-weight: 600; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.stale-badge svg { width: 14px; height: 14px; }
+
+/* Hover actions overlay */
+.hover-actions { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; opacity: 0; pointer-events: none; transition: var(--transition); z-index: 2; }
+.lead-row:hover .hover-actions { opacity: 1; pointer-events: auto; }
+.hover-action-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); color: var(--text-secondary); font-size: 13px; box-shadow: var(--shadow-sm); }
+.hover-action-btn:hover { background: var(--blue-600); color: white; border-color: var(--blue-600); }
+.hover-action-btn.danger:hover { background: var(--red-500); border-color: var(--red-500); }
+
+/* Pagination */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 20px; border-top: 1px solid var(--border-light); }
+.pagination button { padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 12px; font-weight: 600; font-family: inherit; color: var(--text-secondary); cursor: pointer; transition: var(--transition); }
+.pagination button:hover:not(:disabled) { border-color: var(--blue-500); color: var(--blue-600); }
+.pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+.pagination .page-info { font-size: 12px; color: var(--text-muted); }
+
+/* ===== KANBAN VIEW ===== */
+.kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; min-height: 500px; }
+.kanban-column { background: var(--border-light); border-radius: var(--radius-lg); padding: 12px; display: flex; flex-direction: column; }
+.kanban-column-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 4px 8px; }
+.kanban-column-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.kanban-column-title .col-dot { width: 10px; height: 10px; border-radius: 50%; }
+.kanban-column-title .col-dot.blue { background: var(--blue-500); }
+.kanban-column-title .col-dot.amber { background: var(--amber-500); }
+.kanban-column-title .col-dot.green { background: var(--green-500); }
+.kanban-column-title .col-dot.gray { background: var(--text-muted); }
+.kanban-count { font-size: 12px; font-weight: 600; background: var(--surface); padding: 2px 8px; border-radius: 10px; color: var(--text-secondary); }
+.kanban-cards { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; min-height: 100px; }
+.kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; cursor: grab; transition: var(--transition); }
+.kanban-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.kanban-card:active { cursor: grabbing; }
+.kanban-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.kanban-card-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; }
+.kanban-card-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kanban-card-region { font-size: 11px; color: var(--text-muted); }
+.kanban-card-product { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--blue-50); color: var(--blue-600); margin-top: 6px; display: inline-block; }
+.kanban-card-quality { margin-top: 8px; }
+.kanban-card-actions { display: flex; gap: 4px; margin-top: 10px; }
+.kanban-card-actions button { flex: 1; padding: 5px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); font-size: 11px; cursor: pointer; transition: var(--transition); color: var(--text-secondary); }
+.kanban-card-actions button:hover { background: var(--blue-600); color: white; border-color: var(--blue-600); }
+
+/* ===== MAP VIEW ===== */
+.map-view { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: visible; }
+.map-header { padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; }
+.map-legend { display: flex; gap: 16px; }
+.map-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.map-legend-item .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.map-container { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; }
+.map-svg { width: 500px; height: 600px; display: block; }
+.map-pin { cursor: pointer; transition: var(--transition); }
+.map-pin:hover { transform: scale(1.2); }
+.map-pin-group { transition: var(--transition); }
+.map-pin-group:hover { transform: scale(1.1); }
+.map-tooltip { position: absolute; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--shadow-lg); z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.15s; max-width: 220px; }
+.map-tooltip.show { opacity: 1; }
+.map-tooltip-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.map-tooltip-detail { font-size: 12px; color: var(--text-secondary); }
+
+/* ===== BULK ACTION MENU ===== */
+.bulk-action-wrapper { position: relative; }
+.bulk-menu { position: absolute; top: 100%; right: 0; margin-top: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); min-width: 200px; z-index: 50; display: none; }
+.bulk-menu.show { display: block; }
+.bulk-menu-item { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: var(--transition); border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+.bulk-menu-item:hover { background: var(--border-light); }
+.bulk-menu-item svg { width: 16px; height: 16px; color: var(--text-secondary); }
+.bulk-menu-item.danger { color: var(--red-600); }
+.bulk-menu-item.danger svg { color: var(--red-500); }
+.bulk-menu-divider { height: 1px; background: var(--border-light); margin: 4px 0; }
+
+/* ===== MODAL ===== */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(17,24,39,0.35); backdrop-filter: blur(4px); z-index: 100; display: grid; place-items: center; }
+.modal-backdrop[hidden] { display: none !important; }
+.modal { background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); width: 90%; max-width: 560px; max-height: 85vh; overflow-y: auto; animation: modalIn 0.2s ease; }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 18px; transition: var(--transition); }
+.modal-close:hover { background: var(--border-light); color: var(--text); }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 10px; }
+
+/* ===== NOTIFICATION ===== */
+.notification-container { position: fixed; top: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+.notification { padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; animation: notifIn 0.3s ease; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 8px; }
+.notification.success { background: var(--green-50); color: var(--green-600); border: 1px solid var(--green-500); }
+.notification.info { background: var(--blue-50); color: var(--blue-600); border: 1px solid var(--blue-500); }
+.notification.warning { background: var(--amber-50); color: var(--amber-600); border: 1px solid var(--amber-500); }
+@keyframes notifIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .stat-cards { grid-template-columns: repeat(3, 1fr); }
+  .kanban-board { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .stat-cards { grid-template-columns: repeat(2, 1fr); }
+  .lead-row { grid-template-columns: 40px 1fr; gap: 8px; }
+  .lead-row > :nth-child(4),
+  .lead-row > :nth-child(5),
+  .lead-row > :nth-child(6),
+  .lead-row > :nth-child(7) { display: none; }
+  .kanban-board { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">L</div>
+      <div class="brand-text">
+        <div class="brand-subtitle">Lead Generator</div>
+        <div class="brand-title">LeadGen AI</div>
+      </div>
+    </div>
+    <div class="nav-label">Workspace</div>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Inbound Scanner
+    </a>
+    <a class="nav-item active" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      CRM Manager
+    </a>
+    <a class="nav-item" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Outbound Tools
+    </a>
+    <div class="sidebar-footer">
+      <div class="avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">admin</div>
+        <div class="user-role">Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <h1 class="page-title">CRM Manager</h1>
+    <p class="page-subtitle">Review your pipeline, qualify leads, and manage CRM actions.</p>
+
+    <!-- STAT CARDS -->
+    <div class="stat-cards" id="statCards">
+      <div class="stat-card blue">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-change up">+12% vs last month</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-value" id="statQualified">0</div>
+        <div class="stat-label">Qualified</div>
+        <div class="stat-change up">+8% vs last month</div>
+      </div>
+      <div class="stat-card amber">
+        <div class="stat-value" id="statPriority">0</div>
+        <div class="stat-label">Priority (KL/Selangor)</div>
+        <div class="stat-change up">+5% vs last month</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-value" id="statEmailed">0</div>
+        <div class="stat-label">Emailed</div>
+        <div class="stat-change up">+20% vs last month</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-value" id="statStale">0</div>
+        <div class="stat-label">Stale (30+ days)</div>
+        <div class="stat-change down">Action needed</div>
+      </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <span class="selection-info" id="selectionInfo">0 selected</span>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search leads..." id="searchInput" oninput="filterLeads()" />
+        </div>
+        <select class="filter-select" id="productFilter" onchange="filterLeads()">
+          <option value="">All Products</option>
+        </select>
+        <select class="filter-select" id="statusFilter" onchange="filterLeads()">
+          <option value="">All Status</option>
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="qualified">Qualified</option>
+          <option value="lost">Lost</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <div class="view-toggle">
+          <button class="active" onclick="switchView('list', this)" title="List View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            List
+          </button>
+          <button onclick="switchView('kanban', this)" title="Kanban View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
+            Board
+          </button>
+          <button onclick="switchView('map', this)" title="Map View">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Map
+          </button>
+        </div>
+        <select class="filter-select" id="qualityFilter" onchange="filterLeads()">
+          <option value="">All Quality</option>
+          <option value="hot">Hot</option>
+          <option value="warm">Warm</option>
+          <option value="cold">Cold</option>
+        </select>
+        <div class="bulk-action-wrapper">
+          <button class="btn btn-primary" id="bulkBtn" onclick="toggleBulkMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>
+            Bulk Actions
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="bulk-menu" id="bulkMenu">
+            <button class="bulk-menu-item" onclick="bulkAction('email')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Send Bulk Email
+            </button>
+            <button class="bulk-menu-item" onclick="bulkAction('qualify')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Mark as Qualified
+            </button>
+            <button class="bulk-menu-item" onclick="bulkAction('contacted')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+              Mark as Contacted
+            </button>
+            <button class="bulk-menu-item" onclick="bulkAction('lost')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Mark as Lost
+            </button>
+            <div class="bulk-menu-divider"></div>
+            <button class="bulk-menu-item" onclick="bulkAction('assign')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              Assign to User
+            </button>
+            <button class="bulk-menu-item" onclick="bulkAction('export')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export Selected
+            </button>
+            <div class="bulk-menu-divider"></div>
+            <button class="bulk-menu-item danger" onclick="bulkAction('delete')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              Delete Selected
+            </button>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="loadDemo()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Load Demo
+        </button>
+      </div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div id="listView">
+      <div class="lead-list" id="leadList"></div>
+    </div>
+
+    <!-- KANBAN VIEW -->
+    <div id="kanbanView" style="display:none">
+      <div class="kanban-board" id="kanbanBoard"></div>
+    </div>
+
+    <!-- MAP VIEW -->
+    <div id="mapView" style="display:none">
+      <div class="map-view">
+        <div class="map-header">
+          <span style="font-weight:700;font-size:15px;">Lead Locations — Malaysia</span>
+          <div class="map-legend">
+            <div class="map-legend-item"><div class="legend-dot" style="background:#2563eb"></div> KL / Selangor (Priority)</div>
+            <div class="map-legend-item"><div class="legend-dot" style="background:#10b981"></div> Penang / North</div>
+            <div class="map-legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Johor / South</div>
+            <div class="map-legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Other Regions</div>
+          </div>
+        </div>
+        <div class="map-container" id="mapContainer">
+          <svg viewBox="0 0 500 600" class="map-svg" id="mapSvg"></svg>
+          <div class="map-tooltip" id="mapTooltip"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- EMAIL COMPOSE MODAL -->
+<div class="modal-backdrop" hidden id="emailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Compose Email</div>
+      <button class="modal-close" onclick="closeModal('emailModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">To</label>
+        <input type="text" id="emailTo" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit" readonly />
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">Subject</label>
+        <input type="text" id="emailSubject" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit" />
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">Body</label>
+        <textarea id="emailBody" rows="8" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('emailModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendEmail()">Send Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK EMAIL MODAL -->
+<div class="modal-backdrop" hidden id="bulkEmailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Bulk Email</div>
+      <button class="modal-close" onclick="closeModal('bulkEmailModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Send email to <strong id="bulkEmailCount">0</strong> selected leads.</p>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">Subject</label>
+        <input type="text" id="bulkEmailSubject" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit" value="Follow-up on your business needs" />
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px">Body</label>
+        <textarea id="bulkEmailBody" rows="6" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical">Hi there,
+
+Following up on our previous outreach. We'd love to discuss how our solutions can help your business.
+
+Best regards,
+LeadGen AI Team</textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('bulkEmailModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendBulkEmail()">Send to All</button>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGN MODAL -->
+<div class="modal-backdrop" hidden id="assignModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Assign to User</div>
+      <button class="modal-close" onclick="closeModal('assignModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">Assign <strong id="assignCount">0</strong> selected leads to:</p>
+      <select id="assignUser" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+        <option value="admin">Admin (admin)</option>
+        <option value="user">Staff User (user)</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('assignModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="doAssign()">Assign</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEAD DETAIL MODAL -->
+<div class="modal-backdrop" hidden id="detailModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="detailTitle">Lead Details</div>
+      <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('detailModal')">Close</button>
+      <button class="btn btn-success" id="detailQualifyBtn" onclick="detailQualify()">Mark Qualified</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="notification-container" id="notifContainer"></div>
+
+<script>
+// ===== DATA =====
+const avatarColors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#f97316','#6366f1','#14b8a6','#e11d48','#0ea5e9'];
+
+function getAvatarColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
+  return avatarColors[Math.abs(h) % avatarColors.length];
+}
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+}
+
+function daysAgo(dateStr) {
+  const d = new Date(dateStr);
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function timeAgo(dateStr) {
+  const days = daysAgo(dateStr);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return days + ' days ago';
+  if (days < 30) return Math.floor(days / 7) + 'w ago';
+  return Math.floor(days / 30) + 'mo ago';
+}
+
+// Sample leads
+let leads = [];
+let selectedIds = new Set();
+
+function generateDemoLeads() {
+  const companies = [
+    { company: 'New Factory', contact: 'Tan Wei Ming', email: 'tan@newfactory.com.my', phone: '+6012-3456789', region: 'Shah Alam', industry: 'Manufacturing', status: 'new', quality: 'hot', product: 'AutoCount Accounting', source: 'Google Maps', createdAt: '2026-05-25T10:00:00Z', lastActivity: '2026-05-28T14:00:00Z' },
+    { company: 'Seri Setia Construction', contact: 'Ahmad Razali', email: 'ahmad@serisetia.com', phone: '+6012-9876543', region: 'Petaling Jaya', industry: 'Construction', status: 'contacted', quality: 'warm', product: 'AutoCount POS', source: 'Apify', createdAt: '2026-05-20T09:00:00Z', lastActivity: '2026-05-27T11:00:00Z' },
+    { company: 'Klang Retail Hub', contact: 'Lim Siew Ling', email: 'siew@klangretail.my', phone: '+6016-1112233', region: 'Klang', industry: 'Retail', status: 'qualified', quality: 'hot', product: 'AutoCount POS', source: 'Google Maps', createdAt: '2026-05-18T08:00:00Z', lastActivity: '2026-05-29T09:00:00Z' },
+    { company: 'Penang Seafood House', contact: 'Chong Ah Hock', email: 'chong@penangseafood.com', phone: '+6019-4455667', region: 'Penang', industry: 'F&B', status: 'new', quality: 'warm', product: 'AutoCount POS', source: 'Apify', createdAt: '2026-05-26T14:00:00Z', lastActivity: '2026-05-26T14:00:00Z' },
+    { company: 'Dakwah Corner Bookstore', contact: 'Hafiz Rahman', email: 'hafiz@dakwahcorner.my', phone: '+6013-7788990', region: 'Subang Jaya', industry: 'Retail', status: 'contacted', quality: 'cold', product: 'AutoCount Accounting', source: 'Google Maps', createdAt: '2026-05-15T11:00:00Z', lastActivity: '2026-05-20T16:00:00Z' },
+    { company: 'Johor Logistics Sdn Bhd', contact: 'Raj Kumar', email: 'raj@johorlogistics.com', phone: '+6012-3344556', region: 'Johor Bahru', industry: 'Warehouse', status: 'new', quality: 'hot', product: 'Cubehous WMS', source: 'Apify', createdAt: '2026-05-28T07:00:00Z', lastActivity: '2026-05-28T07:00:00Z' },
+    { company: 'BookXcess Amcorp Mall', contact: 'Sarah Tan', email: 'sarah@bookxcess.com', phone: '+6016-6677889', region: 'Petaling Jaya', industry: 'Retail', status: 'qualified', quality: 'warm', product: 'AutoCount Accounting', source: 'Google Maps', createdAt: '2026-05-10T13:00:00Z', lastActivity: '2026-05-28T10:00:00Z' },
+    { company: 'Cyberjaya Tech Solutions', contact: 'David Wong', email: 'david@cybertech.my', phone: '+6019-9900112', region: 'Cyberjaya', industry: 'Service', status: 'contacted', quality: 'warm', product: 'AutoCount Cloud Payroll', source: 'Apify', createdAt: '2026-05-22T16:00:00Z', lastActivity: '2026-05-25T08:00:00Z' },
+    { company: 'Ipoh Traditional Cafe', contact: 'Mdm. Lee', email: 'lee@ipohcafe.com', phone: '+6013-2233445', region: 'Ipoh', industry: 'F&B', status: 'lost', quality: 'cold', product: 'AutoCount POS', source: 'Google Maps', createdAt: '2026-04-15T10:00:00Z', lastActivity: '2026-04-20T14:00:00Z' },
+    { company: 'KL Wholesale Trading', contact: 'Ravi Anand', email: 'ravi@klwholesale.my', phone: '+6012-5566778', region: 'Kuala Lumpur', industry: 'Wholesale', status: 'new', quality: 'hot', product: 'Presoft Mobile Stock', source: 'Google Maps', createdAt: '2026-05-27T09:00:00Z', lastActivity: '2026-05-29T08:00:00Z' },
+    { company: 'Kuching Hardware Store', contact: 'James Ting', email: 'james@kuchinghardware.com', phone: '+6019-8899001', region: 'Kuching', industry: 'Retail', status: 'contacted', quality: 'cold', product: 'AutoCount POS', source: 'Apify', createdAt: '2026-04-20T12:00:00Z', lastActivity: '2026-04-25T15:00:00Z' },
+    { company: 'Ampang Dental Clinic', contact: 'Dr. Priya', email: 'priya@ampangdental.my', phone: '+6016-4455667', region: 'Ampang', industry: 'Healthcare', status: 'new', quality: 'warm', product: 'AutoCount Cloud Payroll', source: 'Google Maps', createdAt: '2026-05-24T11:00:00Z', lastActivity: '2026-05-24T11:00:00Z' },
+    { company: 'Melaka Heritage Hotel', contact: 'Azizah Hassan', email: 'azizah@melakaheritage.com', phone: '+6012-7788990', region: 'Melaka', industry: 'Service', status: 'contacted', quality: 'warm', product: 'AutoCount Accounting', source: 'Apify', createdAt: '2026-05-12T14:00:00Z', lastActivity: '2026-05-18T09:00:00Z' },
+    { company: 'Puchong Auto Parts', contact: 'Kevin Loh', email: 'kevin@puchongauto.my', phone: '+6019-1122334', region: 'Puchong', industry: 'Retail', status: 'qualified', quality: 'hot', product: 'AutoCount POS', source: 'Google Maps', createdAt: '2026-05-08T10:00:00Z', lastActivity: '2026-05-29T10:00:00Z' },
+    { company: 'Kota Kinabalu Supplies', contact: 'Mary Joseph', email: 'mary@kksupplies.com', phone: '+6013-5566778', region: 'Kota Kinabalu', industry: 'Wholesale', status: 'new', quality: 'cold', product: 'Presoft Mobile Stock', source: 'Apify', createdAt: '2026-05-26T08:00:00Z', lastActivity: '2026-05-26T08:00:00Z' },
+    { company: 'Kajang Bakery & Cafe', contact: 'Nurul Aisyah', email: 'nurul@kajangeb.my', phone: '+6016-9900112', region: 'Kajang', industry: 'F&B', status: 'contacted', quality: 'warm', product: 'AutoCount POS', source: 'Google Maps', createdAt: '2026-05-19T15:00:00Z', lastActivity: '2026-05-26T12:00:00Z' },
+    { company: 'Cheras Medical Supplies', contact: 'Dr. Tan Kim Seng', email: 'kim@cherasmedical.my', phone: '+6012-3344556', region: 'Cheras', industry: 'Healthcare', status: 'new', quality: 'hot', product: 'AutoCount Accounting', source: 'Google Maps', createdAt: '2026-05-28T11:00:00Z', lastActivity: '2026-05-28T11:00:00Z' },
+    { company: 'Seremban Furniture Co', contact: 'Ahmad Faisal', email: 'faisal@serembanfurniture.com', phone: '+6019-6677889', region: 'Seremban', industry: 'Retail', status: 'lost', quality: 'cold', product: 'AutoCount POS', source: 'Apify', createdAt: '2026-04-10T09:00:00Z', lastActivity: '2026-04-15T10:00:00Z' },
+  ];
+
+  leads = companies.map((c, i) => ({
+    id: `lead_${Date.now()}_${i}`,
+    ...c,
+    createdAt: c.createdAt,
+    lastActivity: c.lastActivity,
+    activity: generateActivity(c),
+    stale: daysAgo(c.lastActivity) > 30
+  }));
+}
+
+function generateActivity(lead) {
+  const acts = [];
+  const d = new Date(lead.lastActivity);
+  if (lead.status === 'qualified') {
+    acts.push({ type: 'email_opened', time: new Date(d - 86400000).toISOString(), label: 'Email opened' });
+    acts.push({ type: 'link_clicked', time: new Date(d - 43200000).toISOString(), label: 'Link clicked' });
+    acts.push({ type: 'qualified', time: d.toISOString(), label: 'Marked qualified' });
+  } else if (lead.status === 'contacted') {
+    acts.push({ type: 'email_sent', time: new Date(d - 172800000).toISOString(), label: 'Email sent' });
+    acts.push({ type: 'email_opened', time: new Date(d - 86400000).toISOString(), label: 'Email opened' });
+  } else if (lead.status === 'new') {
+    acts.push({ type: 'lead_added', time: d.toISOString(), label: 'Lead added from ' + lead.source });
+  } else if (lead.status === 'lost') {
+    acts.push({ type: 'email_sent', time: new Date(d - 172800000).toISOString(), label: 'Email sent' });
+    acts.push({ type: 'lost', time: d.toISOString(), label: 'Marked lost' });
+  }
+  return acts;
+}
+
+function getLeadQuality(lead) {
+  if (lead.quality) return lead.quality;
+  // Score based on industry + engagement
+  let score = 0;
+  if (['Manufacturing', 'Warehouse', 'Wholesale'].includes(lead.industry)) score += 3;
+  if (['Retail', 'F&B'].includes(lead.industry)) score += 2;
+  if (lead.activity.some(a => a.type === 'email_opened' || a.type === 'link_clicked')) score += 2;
+  if (lead.activity.some(a => a.type === 'email_replied')) score += 3;
+  if (daysAgo(lead.createdAt) < 7) score += 1;
+  if (score >= 5) return 'hot';
+  if (score >= 3) return 'warm';
+  return 'cold';
+}
+
+// ===== RENDER FUNCTIONS =====
+function renderStatCards() {
+  const filtered = getFilteredLeads();
+  document.getElementById('statTotal').textContent = filtered.length;
+  document.getElementById('statQualified').textContent = filtered.filter(l => l.status === 'qualified').length;
+  const priorityAreas = ['kuala lumpur','petaling jaya','subang jaya','shah alam','puchong','klang','cheras','ampang','kajang','selangor','cyberjaya'];
+  document.getElementById('statPriority').textContent = filtered.filter(l => priorityAreas.includes(l.region.toLowerCase())).length;
+  document.getElementById('statEmailed').textContent = filtered.filter(l => l.activity.some(a => a.type === 'email_sent')).length;
+  document.getElementById('statStale').textContent = filtered.filter(l => daysAgo(l.lastActivity) > 30).length;
+}
+
+function renderListView() {
+  const filtered = getFilteredLeads();
+  const container = document.getElementById('leadList');
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-muted)"><div style="font-size:48px;margin-bottom:12px"></div><div style="font-size:15px;font-weight:600">No leads found</div><div style="font-size:13px;margin-top:4px">Try adjusting your filters or search terms</div></div>';
+    return;
+  }
+
+  let html = '';
+  filtered.forEach(lead => {
+    const quality = getLeadQuality(lead);
+    const initials = getInitials(lead.company);
+    const color = getAvatarColor(lead.company);
+    const hasActivity = lead.activity.length > 1;
+    const isStale = daysAgo(lead.lastActivity) > 30;
+    const isSelected = selectedIds.has(lead.id);
+    const staleDays = daysAgo(lead.lastActivity);
+
+    html += `
+      <div class="lead-row ${isStale ? 'stale' : ''}" data-id="${lead.id}" onclick="showDetail('${lead.id}', event)">
+        <div class="lead-check" onclick="event.stopPropagation()">
+          <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSelect('${lead.id}', this.checked)" />
+        </div>
+        <div class="lead-info">
+          <div class="lead-avatar" style="background:${color}">
+            ${initials}
+            <span class="activity-dot ${hasActivity ? 'active' : ''}"></span>
+          </div>
+          <div>
+            <div class="lead-name">${esc(lead.company)}</div>
+            <div class="lead-detail">${esc(lead.contact)} · ${esc(lead.region)} · ${timeAgo(lead.lastActivity)}</div>
+          </div>
+        </div>
+        <div>
+          <span class="quality-badge ${quality}">
+            <span class="quality-dot"></span>
+            ${quality.charAt(0).toUpperCase() + quality.slice(1)}
+          </span>
+        </div>
+        <div><span class="product-tag">${esc(lead.product)}</span></div>
+        <div><span class="status-tag ${lead.status}">${lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}</span></div>
+        <div>
+          ${isStale ? `<span class="stale-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${staleDays}d</span>` : '<span style="font-size:12px;color:var(--text-muted)">${timeAgo(lead.lastActivity)}</span>'}
+        </div>
+        <div class="hover-actions" onclick="event.stopPropagation()">
+          <button class="hover-action-btn" title="Email" onclick="openEmail('${lead.id}')">✉️</button>
+          <button class="hover-action-btn" title="Qualify" onclick="quickAction('${lead.id}','qualified')">⭐</button>
+          <button class="hover-action-btn" title="Contacted" onclick="quickAction('${lead.id}','contacted')">📞</button>
+          <button class="hover-action-btn danger" title="Lost" onclick="quickAction('${lead.id}','lost')">✕</button>
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html + `
+    <div class="pagination">
+      <button disabled>← Previous</button>
+      <span class="page-info">Page 1 of ${Math.max(1, Math.ceil(filtered.length / 20))}</span>
+      <button disabled>Next →</button>
+    </div>`;
+}
+
+function renderKanban() {
+  const columns = { new: { title: 'New', dot: 'blue', leads: [] }, contacted: { title: 'Contacted', dot: 'amber', leads: [] }, qualified: { title: 'Qualified', dot: 'green', leads: [] }, lost: { title: 'Lost', dot: 'gray', leads: [] } };
+  getFilteredLeads().forEach(l => { if (columns[l.status]) columns[l.status].leads.push(l); });
+
+  let html = '';
+  Object.entries(columns).forEach(([key, col]) => {
+    html += `
+      <div class="kanban-column" data-status="${key}">
+        <div class="kanban-column-header">
+          <div class="kanban-column-title"><span class="col-dot ${col.dot}"></span>${col.title}</div>
+          <div class="kanban-count">${col.leads.length}</div>
+        </div>
+        <div class="kanban-cards" ondragover="event.preventDefault()" ondrop="dropCard(event, '${key}')">`;
+
+    col.leads.forEach(lead => {
+      const quality = getLeadQuality(lead);
+      const initials = getInitials(lead.company);
+      const color = getAvatarColor(lead.company);
+      html += `
+          <div class="kanban-card" draggable="true" ondragstart="dragStart(event, '${lead.id}')" ondblclick="showDetail('${lead.id}')">
+            <div class="kanban-card-header">
+              <div class="kanban-card-avatar" style="background:${color}">${initials}</div>
+              <div class="kanban-card-name">${esc(lead.company)}</div>
+            </div>
+            <div class="kanban-card-region">${esc(lead.region)}</div>
+            <div class="kanban-card-product">${esc(lead.product)}</div>
+            <div class="kanban-card-quality">
+              <span class="quality-badge ${quality}" style="font-size:10px;padding:2px 8px"><span class="quality-dot" style="width:6px;height:6px"></span>${quality.charAt(0).toUpperCase() + quality.slice(1)}</span>
+            </div>
+            <div class="kanban-card-actions">
+              <button onclick="quickAction('${lead.id}','qualified')">Qualify</button>
+              <button onclick="quickAction('${lead.id}','lost')">Lost</button>
+            </div>
+          </div>`;
+    });
+
+    html += '</div></div>';
+  });
+
+  document.getElementById('kanbanBoard').innerHTML = html;
+}
+
+function renderMap() {
+  const svg = document.getElementById('mapSvg');
+  const leads = getFilteredLeads();
+
+  // Simplified Malaysia map outline (Peninsular + Sabah/Sarawak)
+  const regions = {
+    'kl_selangor': { cx: 220, cy: 320, color: '#2563eb', label: 'KL / Selangor' },
+    'penang': { cx: 190, cy: 180, color: '#10b981', label: 'Penang / North' },
+    'johor': { cx: 230, cy: 460, color: '#f59e0b', label: 'Johor / South' },
+    'other_peninsular': { cx: 160, cy: 280, color: '#8b5cf6', label: 'Other Peninsular' },
+    'sarawak': { cx: 340, cy: 340, color: '#8b5cf6', label: 'Sarawak' },
+    'sabah': { cx: 400, cy: 220, color: '#8b5cf6', label: 'Sabah' }
+  };
+
+  const priorityAreas = ['kuala lumpur','petaling jaya','subang jaya','shah alam','puchong','klang','cheras','ampang','kajang','selangor','cyberjaya'];
+
+  function getRegion(lead) {
+    const r = lead.region.toLowerCase();
+    if (priorityAreas.includes(r)) return 'kl_selangor';
+    if (['penang','ipoh'].includes(r)) return 'penang';
+    if (['johor bahru','melaka','seremban'].includes(r)) return 'johor';
+    if (['kuching'].includes(r)) return 'sarawak';
+    if (['kota kinabalu'].includes(r)) return 'sabah';
+    return 'other_peninsular';
+  }
+
+  // Count leads per region
+  const counts = {};
+  Object.keys(regions).forEach(k => counts[k] = 0);
+  leads.forEach(l => { const r = getRegion(l); counts[r] = (counts[r] || 0) + 1; });
+
+  // Build SVG
+  let svgContent = `
+    <!-- Simplified Malaysia Map Background -->
+    <defs>
+      <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <!-- Peninsular Malaysia (simplified outline) -->
+    <path d="M170,120 L200,110 L230,115 L250,130 L260,160 L255,200 L250,240 L245,280 L240,320 L235,360 L230,400 L225,440 L220,470 L210,490 L195,495 L180,485 L170,460 L165,420 L160,380 L155,340 L150,300 L148,260 L150,220 L155,180 L160,150 Z" fill="#e8eaef" stroke="#d1d5db" stroke-width="1.5"/>
+    <!-- Sabah (simplified) -->
+    <path d="M370,180 L400,170 L430,175 L450,190 L460,210 L455,240 L440,260 L420,270 L395,265 L375,250 L365,220 Z" fill="#e8eaef" stroke="#d1d5db" stroke-width="1.5"/>
+    <!-- Sarawak (simplified) -->
+    <path d="M310,300 L350,290 L390,295 L410,310 L415,340 L410,370 L390,385 L360,390 L330,380 L310,360 L305,330 Z" fill="#e8eaef" stroke="#d1d5db" stroke-width="1.5"/>
+    <!-- Labels -->
+    <text x="200" y="105" font-size="10" fill="#9ca3af" font-weight="600">PENINSULAR MALAYSIA</text>
+    <text x="390" y="165" font-size="9" fill="#9ca3af" font-weight="600">SABAH</text>
+    <text x="345" y="405" font-size="9" fill="#9ca3af" font-weight="600">SARAWAK</text>`;
+
+  // Add pins for each region with counts
+  Object.entries(regions).forEach(([key, region]) => {
+    const count = counts[key] || 0;
+    if (count === 0) return;
+    const size = Math.max(16, Math.min(36, count * 4));
+    svgContent += `
+      <g class="map-pin-group" transform="translate(${region.cx}, ${region.cy})" onclick="showRegionPins('${key}')" style="cursor:pointer">
+        <circle cx="0" cy="0" r="${size}" fill="${region.color}" opacity="0.15"/>
+        <circle cx="0" cy="0" r="${size * 0.6}" fill="${region.color}" opacity="0.4" filter="url(#glow)"/>
+        <circle cx="0" cy="0" r="5" fill="${region.color}"/>
+        <text x="0" y="-${size + 8}" text-anchor="middle" font-size="11" font-weight="700" fill="${region.color}">${count}</text>
+        <text x="0" y="${size + 16}" text-anchor="middle" font-size="9" fill="#6b7280" font-weight="600">${region.label}</text>
+      </g>`;
+  });
+
+  // Add individual lead pins for small clusters
+  let pinOffset = 0;
+  leads.forEach((lead, i) => {
+    const region = getRegion(lead);
+    const r = regions[region];
+    if (!r) return;
+    const offset = (i % 5) * 12 - 24;
+    const offsetY = (Math.floor(i / 5)) * 12;
+    const color = getAvatarColor(lead.company);
+    svgContent += `
+      <g class="map-pin" transform="translate(${r.cx + offset}, ${r.cy + offsetY})" onmouseenter="showMapTooltip(event, '${esc(lead.company)}','${esc(lead.region)}','${esc(lead.product)}','${getLeadQuality(lead)}')" onmouseleave="hideMapTooltip()">
+        <circle cx="0" cy="0" r="6" fill="${color}" stroke="white" stroke-width="1.5"/>
+        <text x="0" y="3" text-anchor="middle" font-size="6" fill="white" font-weight="700">${getInitials(lead.company)}</text>
+      </g>`;
+  });
+
+  svg.innerHTML = svgContent;
+}
+
+let draggedLeadId = null;
+
+function dragStart(e, leadId) {
+  draggedLeadId = leadId;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function dropCard(e, newStatus) {
+  e.preventDefault();
+  if (!draggedLeadId) return;
+  const lead = leads.find(l => l.id === draggedLeadId);
+  if (lead && lead.status !== newStatus) {
+    lead.status = newStatus;
+    showNotification(`${lead.company} moved to ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`, 'success');
+    renderKanban();
+    renderStatCards();
+  }
+  draggedLeadId = null;
+}
+
+// ===== FILTERING =====
+function getFilteredLeads() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const product = document.getElementById('productFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  const quality = document.getElementById('qualityFilter').value;
+
+  return leads.filter(l => {
+    if (search && !l.company.toLowerCase().includes(search) && !l.contact.toLowerCase().includes(search) && !l.region.toLowerCase().includes(search)) return false;
+    if (product && l.product !== product) return false;
+    if (status && l.status !== status) return false;
+    if (quality && getLeadQuality(l) !== quality) return false;
+    return true;
+  });
+}
+
+function filterLeads() {
+  renderStatCards();
+  renderListView();
+  renderKanban();
+  updateSelectionInfo();
+}
+
+// ===== VIEW SWITCHING =====
+function switchView(view, btn) {
+  document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('listView').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('kanbanView').style.display = view === 'kanban' ? '' : 'none';
+  document.getElementById('mapView').style.display = view === 'map' ? '' : 'none';
+  if (view === 'kanban') renderKanban();
+  if (view === 'map') renderMap();
+}
+
+// ===== SELECTION =====
+function toggleSelect(id, checked) {
+  if (checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  updateSelectionInfo();
+}
+
+function selectAll(checked) {
+  getFilteredLeads().forEach(l => {
+    if (checked) selectedIds.add(l.id);
+    else selectedIds.delete(l.id);
+  });
+  renderListView();
+  updateSelectionInfo();
+}
+
+function updateSelectionInfo() {
+  const count = selectedIds.size;
+  const withEmail = leads.filter(l => selectedIds.has(l.id) && l.email).length;
+  document.getElementById('selectionInfo').textContent = count > 0 ? `${count} selected (${withEmail} with email)` : '0 selected';
+}
+
+// ===== BULK ACTIONS =====
+function toggleBulkMenu() {
+  const menu = document.getElementById('bulkMenu');
+  menu.classList.toggle('show');
+}
+
+// Close bulk menu on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.bulk-action-wrapper')) {
+    document.getElementById('bulkMenu').classList.remove('show');
+  }
+});
+
+function bulkAction(action) {
+  document.getElementById('bulkMenu').classList.remove('show');
+  const count = selectedIds.size;
+  if (count === 0) {
+    showNotification('Select at least one lead first', 'warning');
+    return;
+  }
+
+  const selectedLeads = leads.filter(l => selectedIds.has(l.id));
+
+  switch (action) {
+    case 'email':
+      document.getElementById('bulkEmailCount').textContent = count;
+      openModal('bulkEmailModal');
+      break;
+    case 'qualify':
+      selectedLeads.forEach(l => { l.status = 'qualified'; l.lastActivity = new Date().toISOString(); });
+      showNotification(`${count} lead${count > 1 ? 's' : ''} marked as qualified`, 'success');
+      selectedIds.clear();
+      filterLeads();
+      break;
+    case 'contacted':
+      selectedLeads.forEach(l => { l.status = 'contacted'; l.lastActivity = new Date().toISOString(); });
+      showNotification(`${count} lead${count > 1 ? 's' : ''} marked as contacted`, 'success');
+      selectedIds.clear();
+      filterLeads();
+      break;
+    case 'lost':
+      selectedLeads.forEach(l => { l.status = 'lost'; l.lastActivity = new Date().toISOString(); });
+      showNotification(`${count} lead${count > 1 ? 's' : ''} marked as lost`, 'info');
+      selectedIds.clear();
+      filterLeads();
+      break;
+    case 'assign':
+      document.getElementById('assignCount').textContent = count;
+      openModal('assignModal');
+      break;
+    case 'export':
+      showNotification(`Exporting ${count} leads to CSV...`, 'info');
+      setTimeout(() => showNotification('Export complete!', 'success'), 1000);
+      break;
+    case 'delete':
+      if (confirm(`Delete ${count} selected lead${count > 1 ? 's' : ''}?`)) {
+        leads = leads.filter(l => !selectedIds.has(l.id));
+        selectedIds.clear();
+        showNotification(`${count} lead${count > 1 ? 's' : ''} deleted`, 'warning');
+        filterLeads();
+      }
+      break;
+  }
+}
+
+function sendBulkEmail() {
+  closeModal('bulkEmailModal');
+  const count = selectedIds.size;
+  showNotification(`Sending email to ${count} leads...`, 'info');
+  setTimeout(() => {
+    selectedIds.clear();
+    filterLeads();
+    showNotification(`Emails sent successfully!`, 'success');
+  }, 1500);
+}
+
+function doAssign() {
+  const user = document.getElementById('assignUser').value;
+  const count = selectedIds.size;
+  closeModal('assignModal');
+  showNotification(`${count} leads assigned to ${user}`, 'success');
+  selectedIds.clear();
+  filterLeads();
+}
+
+// ===== QUICK ACTIONS =====
+function quickAction(id, newStatus) {
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+  const oldStatus = lead.status;
+  lead.status = newStatus;
+  lead.lastActivity = new Date().toISOString();
+  showNotification(`${lead.company}: ${oldStatus} → ${newStatus}`, 'success');
+  filterLeads();
+}
+
+// ===== EMAIL =====
+function openEmail(id) {
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+  document.getElementById('emailTo').value = lead.email;
+  document.getElementById('emailSubject').value = `${lead.product} idea for ${lead.company}`;
+  document.getElementById('emailBody').value = `Hi ${lead.contact},\n\nI came across ${lead.company} while reviewing businesses from ${lead.source} in ${lead.region}.\n\nBased on your setup in ${lead.industry}, I believe ${lead.product} could be a strong fit.\n\nWould you be open to a quick discussion?\n\nBest regards,\nLeadGen AI Team`;
+  openModal('emailModal');
+}
+
+function sendEmail() {
+  closeModal('emailModal');
+  showNotification('Email sent successfully!', 'success');
+}
+
+// ===== DETAIL MODAL =====
+let currentDetailLead = null;
+
+function showDetail(id, event) {
+  if (event && event.target.tagName === 'INPUT') return;
+  const lead = leads.find(l => l.id === id);
+  if (!lead) return;
+  currentDetailLead = lead;
+
+  document.getElementById('detailTitle').textContent = lead.company;
+  const quality = getLeadQuality(lead);
+
+  let body = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <div class="lead-avatar" style="background:${getAvatarColor(lead.company)};width:48px;height:48px;font-size:16px">${getInitials(lead.company)}</div>
+      <div>
+        <div style="font-size:16px;font-weight:700">${esc(lead.company)}</div>
+        <div style="font-size:13px;color:var(--text-secondary)">${esc(lead.contact)} · ${esc(lead.region)}</div>
+      </div>
+      <div style="margin-left:auto">
+        <span class="quality-badge ${quality}"><span class="quality-dot"></span>${quality.charAt(0).toUpperCase() + quality.slice(1)}</span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div style="padding:10px 14px;background:var(--border-light);border-radius:6px"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Email</div><div style="font-size:13px;font-weight:500">${esc(lead.email)}</div></div>
+      <div style="padding:10px 14px;background:var(--border-light);border-radius:6px"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Phone</div><div style="font-size:13px;font-weight:500">${esc(lead.phone)}</div></div>
+      <div style="padding:10px 14px;background:var(--border-light);border-radius:6px"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Industry</div><div style="font-size:13px;font-weight:500">${esc(lead.industry)}</div></div>
+      <div style="padding:10px 14px;background:var(--border-light);border-radius:6px"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Product</div><div style="font-size:13px;font-weight:500">${esc(lead.product)}</div></div>
+      <div style="padding:10px 14px;background:var(--border-light);border-radius:6px"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Source</div><div style="font-size:13px;font-weight:500">${esc(lead.source)}</div></div>
+      <div style="padding:10px 14px;background:var(--border-light);border-radius:6px"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Status</div><div style="font-size:13px;font-weight:500">${lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}</div></div>
+    </div>
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px">Activity Timeline</div>`;
+
+  lead.activity.forEach(a => {
+    const icons = { email_sent: '', email_opened: '️', link_clicked: '🔗', qualified: '⭐', lost: '', lead_added: '➕', email_replied: '💬' };
+    body += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);font-size:13px">
+      <span>${icons[a.type] || '•'}</span>
+      <span style="flex:1">${a.label}</span>
+      <span style="color:var(--text-muted);font-size:12px">${timeAgo(a.time)}</span>
+    </div>`;
+  });
+
+  document.getElementById('detailBody').innerHTML = body;
+  openModal('detailModal');
+}
+
+function detailQualify() {
+  if (currentDetailLead) {
+    currentDetailLead.status = 'qualified';
+    currentDetailLead.lastActivity = new Date().toISOString();
+    showNotification(`${currentDetailLead.company} marked as qualified`, 'success');
+    closeModal('detailModal');
+    filterLeads();
+  }
+}
+
+// ===== MAP TOOLTIP =====
+function showMapTooltip(event, company, region, product, quality) {
+  const tooltip = document.getElementById('mapTooltip');
+  const container = document.getElementById('mapContainer');
+  const rect = container.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  const qualityColor = quality === 'hot' ? 'var(--red-600)' : quality === 'warm' ? 'var(--amber-600)' : 'var(--text-muted)';
+  tooltip.innerHTML = `
+    <div class="map-tooltip-name">${company}</div>
+    <div class="map-tooltip-detail">${region} · ${product}</div>
+    <div class="map-tooltip-detail" style="color:${qualityColor};font-weight:600;margin-top:4px">${quality.charAt(0).toUpperCase() + quality.slice(1)} Lead</div>`;
+  tooltip.style.left = x + 12 + 'px';
+  tooltip.style.top = y - 10 + 'px';
+  tooltip.classList.add('show');
+}
+
+function hideMapTooltip() {
+  document.getElementById('mapTooltip').classList.remove('show');
+}
+
+function showRegionPins(region) {
+  showNotification(`Region: ${region} — ${leads.filter(l => getRegion(l) === region).length} leads`, 'info');
+}
+
+function getRegion(lead) {
+  const r = lead.region.toLowerCase();
+  const priorityAreas = ['kuala lumpur','petaling jaya','subang jaya','shah alam','puchong','klang','cheras','ampang','kajang','selangor','cyberjaya'];
+  if (priorityAreas.includes(r)) return 'kl_selangor';
+  if (['penang','ipoh'].includes(r)) return 'penang';
+  if (['johor bahru','melaka','seremban'].includes(r)) return 'johor';
+  if (['kuching'].includes(r)) return 'sarawak';
+  if (['kota kinabalu'].includes(r)) return 'sabah';
+  return 'other_peninsular';
+}
+
+// ===== MODAL HELPERS =====
+function openModal(id) { document.getElementById(id).removeAttribute('hidden'); }
+function closeModal(id) { document.getElementById(id).setAttribute('hidden', ''); }
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) backdrop.setAttribute('hidden', '');
+  });
+});
+
+// Close modals on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-backdrop:not([hidden])').forEach(m => m.setAttribute('hidden', ''));
+  }
+});
+
+// ===== NOTIFICATIONS =====
+function showNotification(message, type = 'info') {
+  const container = document.getElementById('notifContainer');
+  const icons = { success: '✓', info: 'ℹ', warning: '⚠' };
+  const notif = document.createElement('div');
+  notif.className = `notification ${type}`;
+  notif.innerHTML = `<span>${icons[type] || 'ℹ'}</span> ${message}`;
+  container.appendChild(notif);
+  setTimeout(() => {
+    notif.style.opacity = '0';
+    notif.style.transform = 'translateX(40px)';
+    notif.style.transition = '0.3s ease';
+    setTimeout(() => notif.remove(), 300);
+  }, 3000);
+}
+
+// ===== LOAD DEMO =====
+function loadDemo() {
+  generateDemoLeads();
+  selectedIds.clear();
+  // Populate product filter
+  const products = [...new Set(leads.map(l => l.product))];
+  const pf = document.getElementById('productFilter');
+  pf.innerHTML = '<option value="">All Products</option>' + products.map(p => `<option value="${p}">${p}</option>`).join('');
+  filterLeads();
+  showNotification(`Loaded ${leads.length} demo leads`, 'success');
+}
+
+// ===== ESCAPE HTML =====
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// ===== INIT =====
+try {
+  loadDemo();
+  console.log('Demo loaded with', leads.length, 'leads');
+} catch(e) {
+  console.error('Init error:', e);
+  document.body.innerHTML = '<div style="padding:40px;font-family:Inter,sans-serif"><h2>Error loading preview</h2><pre>' + e.message + '\n' + e.stack + '</pre></div>';
+}
+</script>
+</body>
+</html>
