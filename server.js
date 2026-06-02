@@ -248,20 +248,20 @@ function seedDefaultEmailTemplates(store) {
     {
       id: "tmpl_default_1",
       name: "General Outreach",
-      subject: "Solutions that could benefit {{company}}",
-      body: "Hi {{contactName}},\n\nI hope this finds you well. I'm reaching out from PreSoft — we work with {{industry}} businesses across {{region}} to streamline their daily operations.\n\nMany companies like {{company}} are using our solutions to reduce admin time and gain better visibility into their finances and stock. I'd love to share how this might apply to your setup.\n\nWould you be open to a brief chat next week?\n\nBest regards,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
+      subject: "Quick question about {{company}}",
+      body: "Hi {{contactName}},\n\nI'm reaching out from PreSoft — we help {{industry}} businesses in {{region}} simplify their daily operations.\n\nWould you be open to a brief chat next week to see if our tools could help {{company}}?\n\nBest regards,\n{{senderName}}\n{{senderEmail}}"
     },
     {
       id: "tmpl_default_2",
       name: "Follow-up",
-      subject: "Re: Solutions that could benefit {{company}}",
-      body: "Hi {{contactName}},\n\nI wanted to circle back on my previous note — I know things get busy.\n\nIn case it helps, here's what other {{industry}} businesses in {{region}} have told us they value most:\n\n• Less time on manual bookkeeping and reporting\n• Real-time visibility into stock levels and sales\n• One system that handles POS, accounting, and payroll together\n\nIf any of that resonates, I'd be happy to arrange a quick demo at your convenience.\n\nWarm regards,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
+      subject: "Re: Quick question about {{company}}",
+      body: "Hi {{contactName}},\n\nJust circling back on my note from last week — no rush at all.\n\nIf you have 10 minutes sometime, I'd love to share how other {{industry}} businesses in {{region}} are using our tools.\n\nWarm regards,\n{{senderName}}\n{{senderEmail}}"
     },
     {
       id: "tmpl_default_3",
       name: "Partnership Inquiry",
-      subject: "Exploring a collaboration with {{company}}",
-      body: "Dear {{contactName}},\n\nI'm reaching out from PreSoft, a Malaysian business software company founded in 2004. We've been following {{company}}'s work in {{region}} and see strong alignment between what you do and the solutions we provide.\n\nWe're currently expanding our network of partners across the {{industry}} sector and would love to explore how we might work together — whether through referrals, joint offerings, or shared client support.\n\nWould you be available for a brief introductory call in the coming week?\n\nSincerely,\n{{senderName}}\n{{senderEmail}}\nPreSoft (M) Sdn Bhd"
+      subject: "Connecting with {{company}}",
+      body: "Dear {{contactName}},\n\nI'm from PreSoft, a Malaysian business software company. We've been following {{company}}'s work in {{region}} and see some interesting overlap with what we do.\n\nWould you be available for a brief intro call next week?\n\nSincerely,\n{{senderName}}\n{{senderEmail}}"
     }
   ];
   store.defaultTemplateId = "tmpl_default_1";
