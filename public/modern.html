@@ -528,7 +528,7 @@
     .bulk-tmpl-card .btm-subject { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* Email Tracking */
-    .et-metrics-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
+    .et-metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
     .et-metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; text-align: center; cursor: pointer; transition: all 200ms ease; position: relative; overflow: hidden; }
     .et-metric-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
     .et-metric-card.et-active { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
@@ -536,9 +536,6 @@
     .et-metric-card:nth-child(1)::after { background: linear-gradient(90deg, var(--blue-500), var(--blue-600)); }
     .et-metric-card:nth-child(2)::after { background: linear-gradient(90deg, var(--green), #059669); }
     .et-metric-card:nth-child(3)::after { background: linear-gradient(90deg, var(--purple), #7c3aed); }
-    .et-metric-card:nth-child(4)::after { background: linear-gradient(90deg, var(--amber), #d97706); }
-    .et-metric-card:nth-child(5)::after { background: linear-gradient(90deg, var(--cyan), #0891b2); }
-    .et-metric-card:nth-child(6)::after { background: linear-gradient(90deg, var(--red), #dc2626); }
     .et-metric-icon { font-size: 18px; margin-bottom: 6px; }
     .et-metric-value { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
     .et-metric-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
@@ -688,7 +685,7 @@
 
     @media (max-width: 1200px) { .crm-stat-cards { grid-template-columns: repeat(2, 1fr); } .crm-kanban-board { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 768px) { .crm-stat-cards { grid-template-columns: 1fr; } .crm-lead-row { grid-template-columns: 40px 1fr; gap: 8px; } .crm-lead-row > :nth-child(4), .crm-lead-row > :nth-child(5), .crm-lead-row > :nth-child(6), .crm-lead-row > :nth-child(7) { display: none; } .crm-kanban-board { grid-template-columns: 1fr; } }
-    .et-metrics-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 18px; }
+    .et-metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
     .et-metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
     .et-metric-card:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-1px); }
     .et-metric-card.et-active { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
@@ -998,28 +995,7 @@
             <div class="et-metric-change" id="et-trend-sent">—</div>
             <div class="et-metric-bar bar-blue" style="width:100%"></div>
           </div>
-          <div class="et-metric-card" id="et-metric-delivered" onclick="etFilterStatus('delivered')">
-            <div class="et-metric-icon icon-green">✅</div>
-            <div class="et-metric-value" id="et-val-delivered">0</div>
-            <div class="et-metric-label">Delivered</div>
-            <div class="et-metric-change" id="et-rate-delivered">0% rate</div>
-            <div class="et-metric-bar bar-green" style="width:0%"></div>
-          </div>
-          <div class="et-metric-card" id="et-metric-opened" onclick="etFilterStatus('opened')">
-            <div class="et-metric-icon icon-purple">👁️</div>
-            <div class="et-metric-value" id="et-val-opened">0</div>
-            <div class="et-metric-label">Opened</div>
-            <div class="et-metric-change" id="et-rate-opened">0% rate</div>
-            <div class="et-metric-bar bar-purple" style="width:0%"></div>
-          </div>
-          <div class="et-metric-card" id="et-metric-clicked" onclick="etFilterStatus('clicked')">
-            <div class="et-metric-icon icon-amber">🔗</div>
-            <div class="et-metric-value" id="et-val-clicked">0</div>
-            <div class="et-metric-label">Link Clicked</div>
-            <div class="et-metric-change" id="et-rate-clicked">0% rate</div>
-            <div class="et-metric-bar bar-amber" style="width:0%"></div>
-          </div>
-          <div class="et-metric-card" id="et-metric-replied" onclick="etFilterStatus('replied')">
+<div class="et-metric-card" id="et-metric-replied" onclick="etFilterStatus('replied')">
             <div class="et-metric-icon icon-cyan">💬</div>
             <div class="et-metric-value" id="et-val-replied">0</div>
             <div class="et-metric-label">Replied</div>
@@ -1067,9 +1043,6 @@
           <select id="etStatusFilter">
             <option value="all">All Statuses</option>
             <option value="sent">📨 Sent</option>
-            <option value="delivered">✅ Delivered</option>
-            <option value="opened">👁️ Opened</option>
-            <option value="clicked"> Clicked</option>
             <option value="replied">💬 Replied</option>
             <option value="bounced">❌ Bounced</option>
           </select>
@@ -3262,7 +3235,7 @@
 
     async function etLoadSummary(){
       try{var r=await fetch('/api/email/tracking/summary');if(!r.ok)return;etSummary=await r.json();
-      ['sent','delivered','opened','clicked','replied','bounced'].forEach(function(k){var el=document.getElementById('et-val-'+k);if(el)el.textContent=etSummary[k]||0});
+      ['sent','replied','bounced'].forEach(function(k){var el=document.getElementById('et-val-'+k);if(el)el.textContent=etSummary[k]||0});
       var total=etSummary.sent||1;
       ['delivered','opened','clicked','replied','bounced'].forEach(function(k){var bar=document.querySelector('#et-metric-'+k+' .et-metric-bar');var rate=document.getElementById('et-rate-'+k);if(bar)bar.style.width=((etSummary[k]||0)/total*100)+'%';if(rate)rate.textContent=(total>1?Math.round((etSummary[k]||0)/total*1000)/10:0)+'% rate'});
       etRenderDonut();etUpdateTrend()}catch(e){}}
