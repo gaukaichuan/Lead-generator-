@@ -249,19 +249,19 @@ function seedDefaultEmailTemplates(store) {
       id: "tmpl_default_1",
       name: "General Outreach",
       subject: "Quick question about {{company}}",
-      body: "Hi {{contactName}},\n\nI'm reaching out from PreSoft — we help {{industry}} businesses in {{region}} simplify their daily operations.\n\nWould you be open to a brief chat next week to see if our tools could help {{company}}?\n\nBest regards,\n{{senderName}}\n{{senderEmail}}"
+      body: "Hi {{contactName}},\n\nI came across {{company}} while looking at businesses in {{region}}.\n\nWe help {{industry}} companies simplify their operations — would you be open to a 10-minute chat next week to see if there's a fit?\n\nBest,\n{{senderName}}"
     },
     {
       id: "tmpl_default_2",
       name: "Follow-up",
       subject: "Re: Quick question about {{company}}",
-      body: "Hi {{contactName}},\n\nJust circling back on my note from last week — no rush at all.\n\nIf you have 10 minutes sometime, I'd love to share how other {{industry}} businesses in {{region}} are using our tools.\n\nWarm regards,\n{{senderName}}\n{{senderEmail}}"
+      body: "Hi {{contactName}},\n\nJust circling back on my note from last week — no rush.\n\nIf you have 10 minutes, I'd love to share how other {{industry}} businesses in {{region}} are simplifying their workflow.\n\nBest regards,\n{{senderName}}"
     },
     {
       id: "tmpl_default_3",
-      name: "Partnership Inquiry",
+      name: "Short Intro",
       subject: "Connecting with {{company}}",
-      body: "Dear {{contactName}},\n\nI'm from PreSoft, a Malaysian business software company. We've been following {{company}}'s work in {{region}} and see some interesting overlap with what we do.\n\nWould you be available for a brief intro call next week?\n\nSincerely,\n{{senderName}}\n{{senderEmail}}"
+      body: "Hi {{contactName}},\n\nI'm from PreSoft — we work with {{industry}} businesses in Malaysia.\n\nWould you be available for a brief intro call next week?\n\nThanks,\n{{senderName}}"
     }
   ];
   store.defaultTemplateId = "tmpl_default_1";

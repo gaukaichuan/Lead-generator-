@@ -1803,20 +1803,20 @@
     {
       "id": "tmpl_default_1",
       "name": "General Outreach",
-      "subject": "{{productName}} idea for {{company}}",
-      "body": "Hi {{contactName}},\n\nI came across {{company}} while reviewing businesses from {{source}} in {{region}}.\n\nBased on your setup in {{industry}}, I believe {{productName}} could be a strong fit.\n\n{{pitch}}\n\nThe main opportunity I see is around the areas you're currently working to improve.\n\n{{productBlocks}}\n\nBest,\n{{senderName}}\n{{senderEmail}}"
+      "subject": "Quick question about {{company}}",
+      "body": "Hi {{contactName}},\n\nI came across {{company}} while looking at businesses in {{region}}.\n\nWe help {{industry}} companies simplify their operations — would you be open to a 10-minute chat next week to see if there's a fit?\n\nBest,\n{{senderName}}"
     },
     {
       "id": "tmpl_default_2",
       "name": "Follow-up",
-      "subject": "Following up — {{productName}} for {{company}}",
-      "body": "Hi {{contactName}},\n\nI wanted to follow up on my previous message about {{productName}} for {{company}}.\n\nI understand you're busy, but I truly believe this could help with:\n\n{{pitch}}\n\n{{productBlocks}}\n\nWould you be open to a quick 10-minute call this week?\n\nBest regards,\n{{senderName}}"
+      "subject": "Re: Quick question about {{company}}",
+      "body": "Hi {{contactName}},\n\nJust circling back on my note from last week — no rush.\n\nIf you have 10 minutes, I'd love to share how other {{industry}} businesses in {{region}} are simplifying their workflow.\n\nBest regards,\n{{senderName}}"
     },
     {
       "id": "tmpl_default_3",
-      "name": "Partnership Inquiry",
-      "subject": "Partnership opportunity — {{company}} x {{productName}}",
-      "body": "Dear {{contactName}},\n\nI'm reaching out from LeadGen AI. We've identified {{company}} as a potential partner for our {{productName}} solution.\n\n{{pitch}}\n\n{{productBlocks}}\n\nWe'd love to explore how we can work together to benefit businesses in {{region}}.\n\nLooking forward to your response.\n\nSincerely,\n{{senderName}}\n{{senderEmail}}"
+      "name": "Short Intro",
+      "subject": "Connecting with {{company}}",
+      "body": "Hi {{contactName}},\n\nI'm from PreSoft — we work with {{industry}} businesses in Malaysia.\n\nWould you be available for a brief intro call next week?\n\nThanks,\n{{senderName}}"
     }
   ],
   "defaultTemplateId": "tmpl_default_1"
