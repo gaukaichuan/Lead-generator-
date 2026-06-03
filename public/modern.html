@@ -974,6 +974,9 @@
       <div style="display:flex;flex-direction:column;gap:12px">
         <div><label class="form-label">Subject</label><input class="form-input" id="e-subject"></div>
         <div><label class="form-label">Message Body</label><textarea class="form-textarea" id="e-body" rows="6"></textarea></div>
+        <div class="placeholder-hint" style="font-size:10px;color:var(--text-muted);line-height:1.5">
+          Available: <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{company}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{contactName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{painPointLabel}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{region}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{source}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{senderName}}</code>
+        </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:18px">
         <button class="btn" onclick="resetEmail()">Reset Draft</button>
@@ -1027,7 +1030,7 @@
         <div class="bulk-tone-badge" id="b-tone-badge"></div>
         <div><label class="form-label">Subject Template</label><input class="form-input" id="b-subject2"></div>
         <div style="margin-top:10px"><label class="form-label">Message Template</label><textarea class="form-textarea" id="b-body2" rows="7"></textarea></div>
-        <div class="placeholder-hint">Available: <code>{{company}}</code> <code>{{contactName}}</code> <code>{{region}}</code> <code>{{source}}</code> <code>{{senderName}}</code> <code>{{senderEmail}}</code> <code>{{productBlocks}}</code> <code>{{productName1}}</code> <code>{{pitch1}}</code> <code>{{productName2}}</code> <code>{{pitch2}}</code> <code>{{productName3}}</code> <code>{{pitch3}}</code></div>
+        <div class="placeholder-hint">Available: <code>{{company}}</code> <code>{{contactName}}</code> <code>{{region}}</code> <code>{{source}}</code> <code>{{senderName}}</code> <code>{{senderEmail}}</code> <code>{{painPointLabel}}</code> <code>{{productBlocks}}</code> <code>{{productName1}}</code> <code>{{pitch1}}</code> <code>{{productName2}}</code> <code>{{pitch2}}</code> <code>{{productName3}}</code> <code>{{pitch3}}</code></div>
       </div>
       <div style="display:flex;gap:10px;padding:16px 24px;border-top:1px solid var(--border-light)">
         <button class="btn" onclick="bulkBackToStep1()">← Back</button>
@@ -1176,7 +1179,7 @@
         <div><label class="form-label">Subject</label><input class="form-input" id="tmpl-subject" placeholder="{{productName}} idea for {{company}}"></div>
         <div><label class="form-label">Body</label><textarea class="form-textarea" id="tmpl-body" rows="6" placeholder="Hi {{contactName}}, ..."></textarea></div>
         <div class="placeholder-hint" style="font-size:10px;color:var(--text-muted);line-height:1.5">
-          Available: <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{company}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{contactName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productBlocks}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{region}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{source}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{senderName}}</code>
+          Available: <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{company}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{contactName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productName}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{painPointLabel}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{productBlocks}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{region}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{source}}</code> <code style="background:var(--blue-50);color:var(--blue-600);padding:1px 4px;border-radius:3px;font-size:10px">{{senderName}}</code>
         </div>
         <div class="placeholder-hint" id="tmpl-multi-hint" style="font-size:10px;color:var(--text-muted);line-height:1.5;margin-top:-6px" hidden>
           Multi-product: <code style="background:var(--amber-50);color:var(--amber);padding:1px 4px;border-radius:3px;font-size:10px">{{productName1}}</code> <code style="background:var(--amber-50);color:var(--amber);padding:1px 4px;border-radius:3px;font-size:10px">{{pitch1}}</code>
@@ -1621,6 +1624,7 @@
         notify('Saved', `${l.company} was updated.`);
         cancelEditMode();
         await loadLeads();
+        if (typeof etRefresh === 'function') etRefresh();
       } catch (err) {
         notify('Error', err.message, 'error');
       }
@@ -2006,6 +2010,7 @@
         notify('Sent', `Message sent to ${l.email}.`);
         closeM('m-email');
         await loadLeads();
+        if (typeof etRefresh === 'function') etRefresh();
       } catch (err) {
         notify('Send Failed', err.message, 'error');
       } finally {
@@ -2242,11 +2247,12 @@
       closeBulkFlow();
       sel.clear();
       await loadLeads();
+      if (typeof etRefresh === 'function') etRefresh();
       notify('Bulk Sent', `${success} sent, ${failed} failed.`);
     }
 
     function tpl(t, l) {
-      const r = { contactName: l.contactName || 'there', company: l.company || '', source: l.source || '', region: l.region || '', industry: l.industry || '', productName: l.recommendation?.productName || '', pitch: l.recommendation?.pitch || '', reason: l.recommendation?.reason || '', senderName: sName, senderEmail: sEmail };
+      const r = { contactName: l.contactName || 'there', company: l.company || '', source: l.source || '', region: l.region || '', industry: l.industry || '', productName: l.recommendation?.productName || '', pitch: l.recommendation?.pitch || '', reason: l.recommendation?.reason || '', painPointLabel: l.painPointLabel || '', senderName: sName, senderEmail: sEmail };
       return t.replace(/\{\{(\w+)\}\}/g, (_, k) => r[k] || '');
     }
 
@@ -2889,6 +2895,10 @@
       if(eb)eb.addEventListener('click',function(){window.location.href='/api/export/sent.csv'});
       if(cb)cb.addEventListener('click',function(){notify('Coming Soon','Campaign composer is under development.')});
       etLoadProducts();
+      etLoadSummary();etLoadDaily();etLoadActivity()}
+
+    // Refresh tracking dashboard (called after send-email, mark-as-sent, etc.)
+    function etRefresh(){
       etLoadSummary();etLoadDaily();etLoadActivity()}
   </script>
 </body>

@@ -797,6 +797,7 @@ function applyTemplate(template, lead) {
     productName: lead.recommendation.productName,
     pitch: lead.recommendation.pitch,
     reason: lead.recommendation.reason,
+    painPointLabel: lead.painPointLabel || "",
     senderName: state.senderName,
     senderEmail: state.senderEmail
   };
