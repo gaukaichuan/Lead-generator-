@@ -631,7 +631,8 @@
 
     /* Kanban */
     .crm-kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; min-height: 500px; }
-    .crm-kanban-col { background: var(--border-light); border-radius: var(--radius-lg); padding: 12px; display: flex; flex-direction: column; }
+    .crm-kanban-col { background: var(--border-light); border-radius: var(--radius-lg); padding: 12px; display: flex; flex-direction: column; transition: var(--transition); }
+    .crm-kanban-col.drag-over { background: var(--blue-50); border: 2px dashed var(--blue-500); }
     .crm-kanban-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 4px 8px; }
     .crm-kanban-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .crm-kanban-dot { width: 10px; height: 10px; border-radius: 50%; }
@@ -2110,13 +2111,12 @@
       crmGetFiltered().forEach(l => { if(cols[l.status]) cols[l.status].leads.push(l); });
       let html = '';
       Object.entries(cols).forEach(([key,col]) => {
-        html += `<div class="crm-kanban-col" data-status="${key}"><div class="crm-kanban-header"><div class="crm-kanban-title"><span class="crm-kanban-dot" style="background:${col.dot}"></span>${col.title}</div><span class="crm-kanban-count">${col.leads.length}</span></div><div class="crm-kanban-cards">`;
+        html += `<div class="crm-kanban-col" data-status="${key}" ondragover="crmDragOver(event)" ondragenter="crmDragEnter(event)" ondragleave="crmDragLeave(event)" ondrop="crmDrop(event,'${key}')"><div class="crm-kanban-header"><div class="crm-kanban-title"><span class="crm-kanban-dot" style="background:${col.dot}"></span>${col.title}</div><span class="crm-kanban-count">${col.leads.length}</span></div><div class="crm-kanban-cards">`;
         col.leads.forEach(lead => {
-          const quality = crmLeadQuality(lead);
           const initials = crmInitials(lead.company);
           const color = crmAvatarColor(lead.company);
           const productName = lead.recommendation?.productName||'';
-          html += `<div class="crm-kanban-card" onclick="openDetail('${lead.id}')">
+          html += `<div class="crm-kanban-card" draggable="true" ondragstart="crmDragStart(event,'${lead.id}')" onclick="openDetail('${lead.id}')">
             <div class="crm-kanban-card-header"><div class="crm-kanban-avatar" style="background:${color}">${initials}</div><div class="crm-kanban-name">${crmEsc(lead.company)}</div></div>
             <div class="crm-kanban-region">${crmEsc(lead.region)}</div>
             <div class="crm-kanban-product">${crmEsc(productName)}</div>
@@ -2129,6 +2129,27 @@
         html += '</div></div>';
       });
       document.getElementById('crmKanbanBoard').innerHTML = html;
+    }
+
+    let crmDragLeadId = null;
+    function crmDragStart(e, id) { crmDragLeadId = id; e.dataTransfer.effectAllowed = 'move'; e.target.style.opacity = '0.4'; }
+    function crmDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+    function crmDragEnter(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    function crmDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+    function crmDrop(e, targetStatus) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      if (!crmDragLeadId) return;
+      const l = leads.find(x => x.id === crmDragLeadId);
+      if (!l || l.status === targetStatus) { crmDragLeadId = null; return; }
+      api(`/api/leads/${crmDragLeadId}/status`, { method:'PATCH', body:JSON.stringify({status:targetStatus}) })
+        .then(() => {
+          l.status = targetStatus;
+          notify('Moved', `${l.company} → ${targetStatus}`);
+          renderCrm(); renderDash();
+        })
+        .catch(err => notify('Error', err.message, 'error'));
+      crmDragLeadId = null;
     }
 
     function crmRenderMap() {
