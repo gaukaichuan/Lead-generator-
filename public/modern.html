@@ -2118,12 +2118,10 @@
 
       const productBlocks = buildProductBlocks(selProds);
 
-      // Replace {{productBlocks}} in template body, or append if not present
+      // Replace {{productBlocks}} only if the placeholder exists in the template
       let body = tmpl.body;
       if (body.includes('{{productBlocks}}')) {
         body = body.replace(/\{\{productBlocks\}\}/g, productBlocks);
-      } else {
-        body += `\n\n${productBlocks}`;
       }
 
       let subject = tmpl.subject;
