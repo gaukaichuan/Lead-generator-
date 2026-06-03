@@ -2387,7 +2387,7 @@ async function handleApi(request, response, pathname, options = {}) {
         contactName: l.contactName,
         email: l.email,
         product: info.name || l.recommendedProductKey || "Unknown",
-        status: l.emailStatus,
+        status: l.emailStatus || (l.sent ? "sent" : "not_sent"),
         sentAt: l.sentAt || null,
         openedAt: l.emailOpenedAt || null,
         repliedAt: l.emailRepliedAt || null,
@@ -2417,7 +2417,7 @@ async function handleApi(request, response, pathname, options = {}) {
       contactName: lead.contactName,
       email: lead.email,
       product: info.name || lead.recommendedProductKey || "Unknown",
-      status: lead.emailStatus,
+      status: lead.emailStatus || (lead.sent ? "sent" : "not_sent"),
       sentAt: lead.sentAt || null,
       openedAt: lead.emailOpenedAt || null,
       repliedAt: lead.emailRepliedAt || null,
@@ -2971,6 +2971,9 @@ async function handleApi(request, response, pathname, options = {}) {
       lead.emailStatus = "sent";
       lead.emailLastError = "";
       lead.emailLastAttemptAt = lead.sentAt;
+      // Persist the recommended product key so email tracking can display it
+      const rec = recommendProduct(lead);
+      lead.recommendedProductKey = rec.productKey || "";
       // Store messageId for webhook correlation (Phase 1)
       if (mailResult && mailResult.messageId) {
         lead.emailMessageId = mailResult.messageId;
@@ -3050,6 +3053,9 @@ async function handleApi(request, response, pathname, options = {}) {
         lead.emailStatus = "sent";
         lead.emailLastError = "";
         lead.emailLastAttemptAt = lead.sentAt;
+        // Persist the recommended product key so email tracking can display it
+        const rec = recommendProduct(lead);
+        lead.recommendedProductKey = rec.productKey || "";
         appendActivity(store, lead.id, "Outreach marked as sent", `${lead.company} was added to the sent email list.`, session.username);
       }
     }
