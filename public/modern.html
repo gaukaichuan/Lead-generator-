@@ -528,6 +528,166 @@
     .bulk-tmpl-card .btm-subject { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* Email Tracking */
+    .et-metrics-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 20px; }
+    .et-metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; text-align: center; cursor: pointer; transition: all 200ms ease; position: relative; overflow: hidden; }
+    .et-metric-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .et-metric-card.et-active { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .et-metric-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .et-metric-card:nth-child(1)::after { background: linear-gradient(90deg, var(--blue-500), var(--blue-600)); }
+    .et-metric-card:nth-child(2)::after { background: linear-gradient(90deg, var(--green), #059669); }
+    .et-metric-card:nth-child(3)::after { background: linear-gradient(90deg, var(--purple), #7c3aed); }
+    .et-metric-card:nth-child(4)::after { background: linear-gradient(90deg, var(--amber), #d97706); }
+    .et-metric-card:nth-child(5)::after { background: linear-gradient(90deg, var(--cyan), #0891b2); }
+    .et-metric-card:nth-child(6)::after { background: linear-gradient(90deg, var(--red), #dc2626); }
+    .et-metric-icon { font-size: 18px; margin-bottom: 6px; }
+    .et-metric-value { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+    .et-metric-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
+    .et-metric-change { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .et-metric-bar { height: 3px; border-radius: 2px; margin-top: 8px; background: var(--border-light); }
+    .et-metric-bar.bar-blue { background: linear-gradient(90deg, var(--blue-500), var(--blue-600)); }
+    .et-metric-bar.bar-green { background: linear-gradient(90deg, var(--green), #059669); }
+    .et-metric-bar.bar-purple { background: linear-gradient(90deg, var(--purple), #7c3aed); }
+    .et-metric-bar.bar-amber { background: linear-gradient(90deg, var(--amber), #d97706); }
+    .et-metric-bar.bar-cyan { background: linear-gradient(90deg, var(--cyan), #0891b2); }
+    .et-metric-bar.bar-red { background: linear-gradient(90deg, var(--red), #dc2626); }
+
+    /* ===== CRM MANAGER NEW UI ===== */
+    .crm-stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .crm-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; position: relative; overflow: hidden; transition: var(--transition); }
+    .crm-stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+    .crm-stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .crm-stat-card.blue::before { background: linear-gradient(90deg, var(--blue-500), var(--blue-700)); }
+    .crm-stat-card.green::before { background: linear-gradient(90deg, var(--green), #059669); }
+    .crm-stat-card.amber::before { background: linear-gradient(90deg, var(--amber), #d97706); }
+    .crm-stat-card.red::before { background: linear-gradient(90deg, var(--red), #dc2626); }
+    .crm-stat-value { font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .crm-stat-card.blue .crm-stat-value { color: var(--blue-600); }
+    .crm-stat-card.green .crm-stat-value { color: var(--green); }
+    .crm-stat-card.amber .crm-stat-value { color: var(--amber); }
+    .crm-stat-card.red .crm-stat-value { color: var(--red); }
+    .crm-stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+
+    .crm-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .crm-toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .crm-toolbar-right { display: flex; align-items: center; gap: 10px; }
+    .crm-search-box { position: relative; }
+    .crm-search-box input { width: 240px; padding: 8px 12px 8px 34px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text); transition: var(--transition); outline: none; }
+    .crm-search-box input:focus { border-color: var(--blue-500); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .crm-search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted); fill: currentColor; }
+    .crm-filter-select { padding: 8px 28px 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text); cursor: pointer; outline: none; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+    .crm-filter-select:focus { border-color: var(--blue-500); }
+    .crm-view-toggle { display: flex; background: var(--border-light); border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border); }
+    .crm-view-toggle button { padding: 7px 14px; border: none; background: transparent; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--text-secondary); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 5px; }
+    .crm-view-toggle button.active { background: var(--surface); color: var(--blue-600); box-shadow: var(--shadow-sm); }
+    .crm-view-toggle button:hover:not(.active) { color: var(--text); }
+    .crm-view-toggle button svg { width: 15px; height: 15px; }
+    .crm-bulk-wrapper { position: relative; }
+    .crm-bulk-menu { position: absolute; top: 100%; right: 0; margin-top: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); min-width: 200px; z-index: 50; display: none; }
+    .crm-bulk-menu.show { display: block; }
+    .crm-bulk-item { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: var(--transition); border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+    .crm-bulk-item:hover { background: var(--surface-hover); }
+    .crm-bulk-item svg { width: 16px; height: 16px; color: var(--text-secondary); fill: currentColor; }
+    .crm-bulk-item.danger { color: var(--red); }
+    .crm-bulk-item.danger svg { color: var(--red); }
+    .crm-bulk-divider { height: 1px; background: var(--border-light); margin: 4px 0; }
+
+    .crm-lead-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .crm-lead-row { display: grid; grid-template-columns: 40px 1fr auto auto auto auto auto; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border-light); transition: var(--transition); position: relative; cursor: default; }
+    .crm-lead-row:last-child { border-bottom: none; }
+    .crm-lead-row:hover { background: var(--surface-hover); }
+    .crm-lead-row.stale { border-left: 3px solid var(--amber); background: #fffbf0; }
+    .crm-lead-row.stale:hover { background: #fff8e6; }
+    .crm-lead-check { display: flex; align-items: center; justify-content: center; }
+    .crm-lead-check input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--blue-600); cursor: pointer; }
+    .crm-lead-info { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .crm-lead-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; flex-shrink: 0; position: relative; }
+    .crm-lead-avatar .crm-activity-dot { position: absolute; bottom: -1px; right: -1px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--surface); }
+    .crm-lead-avatar .crm-activity-dot.active { background: var(--green); }
+    .crm-lead-name { font-weight: 600; font-size: 13.5px; line-height: 1.3; }
+    .crm-lead-detail { font-size: 12px; color: var(--text-muted); }
+    .crm-quality-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .crm-quality-badge.hot { background: #fef2f2; color: var(--red); }
+    .crm-quality-badge.warm { background: #fffbeb; color: var(--amber); }
+    .crm-quality-badge.cold { background: #f3f4f6; color: var(--text-muted); }
+    .crm-quality-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .crm-quality-badge.hot .crm-quality-dot { background: var(--red); box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+    .crm-quality-badge.warm .crm-quality-dot { background: var(--amber); }
+    .crm-quality-badge.cold .crm-quality-dot { background: var(--text-muted); }
+    .crm-product-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; background: var(--blue-50); color: var(--blue-600); white-space: nowrap; }
+    .crm-status-tag { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+    .crm-status-tag.new { background: var(--blue-50); color: var(--blue-600); }
+    .crm-status-tag.contacted { background: var(--amber-50); color: var(--amber); }
+    .crm-status-tag.qualified { background: var(--green-50); color: var(--green); }
+    .crm-status-tag.lost { background: #f3f4f6; color: var(--text-muted); }
+    .crm-stale-badge { font-size: 11px; color: var(--amber); font-weight: 600; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+    .crm-stale-badge svg { width: 14px; height: 14px; fill: currentColor; }
+    .crm-hover-actions { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; opacity: 0; pointer-events: none; transition: var(--transition); z-index: 2; }
+    .crm-lead-row:hover .crm-hover-actions { opacity: 1; pointer-events: auto; }
+    .crm-hover-btn { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); color: var(--text-secondary); font-size: 13px; box-shadow: var(--shadow-sm); }
+    .crm-hover-btn:hover { background: var(--blue-600); color: white; border-color: var(--blue-600); }
+    .crm-hover-btn.danger:hover { background: var(--red); border-color: var(--red); }
+    .crm-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 20px; border-top: 1px solid var(--border-light); }
+    .crm-pagination button { padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-size: 12px; font-weight: 600; font-family: inherit; color: var(--text-secondary); cursor: pointer; transition: var(--transition); }
+    .crm-pagination button:hover:not(:disabled) { border-color: var(--blue-500); color: var(--blue-600); }
+    .crm-pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .crm-pagination .page-info { font-size: 12px; color: var(--text-muted); }
+
+    /* Kanban */
+    .crm-kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; min-height: 500px; }
+    .crm-kanban-col { background: var(--border-light); border-radius: var(--radius-lg); padding: 12px; display: flex; flex-direction: column; }
+    .crm-kanban-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 4px 8px; }
+    .crm-kanban-title { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .crm-kanban-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .crm-kanban-count { font-size: 12px; font-weight: 600; background: var(--surface); padding: 2px 8px; border-radius: 10px; color: var(--text-secondary); }
+    .crm-kanban-cards { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow-y: auto; min-height: 100px; }
+    .crm-kanban-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; cursor: grab; transition: var(--transition); }
+    .crm-kanban-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .crm-kanban-card:active { cursor: grabbing; }
+    .crm-kanban-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .crm-kanban-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; }
+    .crm-kanban-name { font-size: 13px; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .crm-kanban-region { font-size: 11px; color: var(--text-muted); }
+    .crm-kanban-product { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--blue-50); color: var(--blue-600); margin-top: 6px; display: inline-block; }
+    .crm-kanban-actions { display: flex; gap: 4px; margin-top: 10px; }
+    .crm-kanban-actions button { flex: 1; padding: 5px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); font-size: 11px; cursor: pointer; transition: var(--transition); color: var(--text-secondary); font-family: inherit; }
+    .crm-kanban-actions button:hover { background: var(--blue-600); color: white; border-color: var(--blue-600); }
+
+    /* Map */
+    .crm-map-view { position: relative; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: visible; }
+    .crm-map-header { padding: 16px 20px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; }
+    .crm-map-legend { display: flex; gap: 16px; }
+    .crm-map-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .crm-map-legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .crm-map-container { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .crm-map-svg { width: 500px; height: 600px; display: block; }
+    .crm-map-pin { cursor: pointer; transition: var(--transition); }
+    .crm-map-pin:hover { transform: scale(1.2); }
+    .crm-map-tooltip { position: absolute; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; box-shadow: var(--shadow-lg); z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.15s; max-width: 220px; }
+    .crm-map-tooltip.show { opacity: 1; }
+    .crm-map-tooltip-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+    .crm-map-tooltip-detail { font-size: 12px; color: var(--text-secondary); }
+
+    /* CRM Modals */
+    .crm-modal-backdrop { position: fixed; inset: 0; background: rgba(17,24,39,0.35); backdrop-filter: blur(4px); z-index: 100; display: grid; place-items: center; }
+    .crm-modal-backdrop[hidden] { display: none !important; }
+    .crm-modal { background: var(--surface); border-radius: var(--radius-xl); box-shadow: var(--shadow-xl); width: 90%; max-width: 560px; max-height: 85vh; overflow-y: auto; animation: crmModalIn 0.2s ease; }
+    @keyframes crmModalIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .crm-modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; }
+    .crm-modal-title { font-size: 17px; font-weight: 700; }
+    .crm-modal-close { width: 32px; height: 32px; border-radius: 8px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 18px; transition: var(--transition); }
+    .crm-modal-close:hover { background: var(--border-light); color: var(--text); }
+    .crm-modal-body { padding: 20px 24px; }
+    .crm-modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 10px; }
+    .crm-notif-container { position: fixed; top: 20px; right: 20px; z-index: 200; display: flex; flex-direction: column; gap: 8px; }
+    .crm-notif { padding: 12px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; animation: crmNotifIn 0.3s ease; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 8px; }
+    .crm-notif.success { background: var(--green-50); color: var(--green); border: 1px solid var(--green); }
+    .crm-notif.info { background: var(--blue-50); color: var(--blue-600); border: 1px solid var(--blue-500); }
+    .crm-notif.warning { background: var(--amber-50); color: var(--amber); border: 1px solid var(--amber); }
+    .crm-notif.error { background: var(--red-50); color: var(--red); border: 1px solid var(--red); }
+    @keyframes crmNotifIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+
+    @media (max-width: 1200px) { .crm-stat-cards { grid-template-columns: repeat(2, 1fr); } .crm-kanban-board { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .crm-stat-cards { grid-template-columns: 1fr; } .crm-lead-row { grid-template-columns: 40px 1fr; gap: 8px; } .crm-lead-row > :nth-child(4), .crm-lead-row > :nth-child(5), .crm-lead-row > :nth-child(6), .crm-lead-row > :nth-child(7) { display: none; } .crm-kanban-board { grid-template-columns: 1fr; } }
     .et-metrics-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 18px; }
     .et-metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
     .et-metric-card:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-1px); }
@@ -745,14 +905,83 @@
 
       <!-- ===== CRM MANAGER ===== -->
       <div class="workspace" id="w-crm">
-        <div class="top-bar"><div><h2>CRM Manager</h2><p>Review your pipeline, qualify leads, and manage CRM actions.</p></div><div class="top-actions"><button class="btn" onclick="loadDemo()"><svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>Load Demo</button><button class="btn" onclick="refreshLeads()"><svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>Refresh</button></div></div>
-        <div class="panel">
-          <div class="toolbar">
-            <div class="toolbar-left"><span class="toolbar-summary" id="q-summary">0 selected</span><div class="search-input"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg><input placeholder="Search leads..." id="q-search" oninput="queuePage=1;renderQueue()"></div><select class="select-input" id="q-prod" onchange="queuePage=1;renderQueue()"><option value="all">All Products</option></select></div>
-            <div class="toolbar-right"><button class="btn" style="font-size:12px;padding:5px 12px" onclick="selectAll()">Select All</button><button class="btn" style="font-size:12px;padding:5px 12px" onclick="sel.clear();renderQueue()">Clear</button><button class="btn btn-primary" style="font-size:12px;padding:5px 12px" onclick="bulkEmail()"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>Bulk Email</button><button class="btn btn-red" style="font-size:12px;padding:5px 12px" onclick="clearAllLeads()">Clear All</button></div>
+        <div class="top-bar"><div><h2>CRM Manager</h2><p>Review your pipeline, qualify leads, and manage CRM actions.</p></div></div>
+
+        <!-- Stat Cards -->
+        <div class="crm-stat-cards" id="crmStatCards">
+          <div class="crm-stat-card blue"><div class="crm-stat-value" id="crmStatTotal">0</div><div class="crm-stat-label">Total Leads</div></div>
+          <div class="crm-stat-card green"><div class="crm-stat-value" id="crmStatQualified">0</div><div class="crm-stat-label">Qualified</div></div>
+          <div class="crm-stat-card amber"><div class="crm-stat-value" id="crmStatPriority">0</div><div class="crm-stat-label">Priority (KL/Selangor)</div></div>
+          <div class="crm-stat-card red"><div class="crm-stat-value" id="crmStatStale">0</div><div class="crm-stat-label">Stale (30+ days)</div></div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="crm-toolbar">
+          <div class="crm-toolbar-left">
+            <span class="toolbar-summary" id="crmSelInfo">0 selected</span>
+            <div class="crm-search-box">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+              <input type="text" placeholder="Search leads..." id="crmSearch" oninput="crmFilter();renderCrm()" />
+            </div>
+            <select class="crm-filter-select" id="crmProdFilter" onchange="crmFilter();renderCrm()"><option value="">All Products</option></select>
+            <select class="crm-filter-select" id="crmStatusFilter" onchange="crmFilter();renderCrm()">
+              <option value="">All Status</option><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="lost">Lost</option>
+            </select>
+            <select class="crm-filter-select" id="crmQualityFilter" onchange="crmFilter();renderCrm()">
+              <option value="">All Quality</option><option value="hot">Hot</option><option value="warm">Warm</option><option value="cold">Cold</option>
+            </select>
           </div>
-          <div class="lead-list" id="q-list"></div>
-          <div class="pagination"><button class="btn" style="font-size:12px;padding:5px 12px" onclick="queuePage--;renderQueue()" id="q-prev">← Previous</button><span class="pagination-info" id="q-page">Page 1 of 1</span><button class="btn" style="font-size:12px;padding:5px 12px" onclick="queuePage++;renderQueue()" id="q-next">Next →</button></div>
+          <div class="crm-toolbar-right">
+            <div class="crm-view-toggle">
+              <button class="active" onclick="crmSwitchView('list',this)" title="List"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>List</button>
+              <button onclick="crmSwitchView('kanban',this)" title="Board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>Board</button>
+              <button onclick="crmSwitchView('map',this)" title="Map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Map</button>
+            </div>
+            <div class="crm-bulk-wrapper">
+              <button class="btn btn-primary" style="font-size:12px;padding:7px 14px" onclick="crmToggleBulk()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+                Bulk Actions <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <div class="crm-bulk-menu" id="crmBulkMenu">
+                <button class="crm-bulk-item" onclick="crmBulkAction('email')">✉️ Send Bulk Email</button>
+                <button class="crm-bulk-item" onclick="crmBulkAction('qualify')">✓ Mark as Qualified</button>
+                <button class="crm-bulk-item" onclick="crmBulkAction('contacted')">📞 Mark as Contacted</button>
+                <button class="crm-bulk-item" onclick="crmBulkAction('lost')">✕ Mark as Lost</button>
+                <div class="crm-bulk-divider"></div>
+                <button class="crm-bulk-item" onclick="crmBulkAction('assign')">👤 Assign to User</button>
+                <button class="crm-bulk-item" onclick="crmBulkAction('export')">⬇️ Export Selected</button>
+                <div class="crm-bulk-divider"></div>
+                <button class="crm-bulk-item danger" onclick="crmBulkAction('delete')">🗑️ Delete Selected</button>
+              </div>
+            </div>
+            <button class="btn" style="font-size:12px;padding:7px 14px" onclick="loadDemo()">⬇️ Load Demo</button>
+          </div>
+        </div>
+
+        <!-- List View -->
+        <div id="crmListView">
+          <div class="crm-lead-list" id="crmLeadList"></div>
+        </div>
+
+        <!-- Kanban View -->
+        <div id="crmKanbanView" style="display:none">
+          <div class="crm-kanban-board" id="crmKanbanBoard"></div>
+        </div>
+
+        <!-- Map View -->
+        <div id="crmMapView" style="display:none">
+          <div class="crm-map-view">
+            <div class="crm-map-header">
+              <span style="font-weight:700;font-size:15px">Lead Locations — Malaysia</span>
+              <div class="crm-map-legend">
+                <div class="crm-map-legend-item"><div class="crm-map-legend-dot" style="background:#2563eb"></div>KL / Selangor</div>
+                <div class="crm-map-legend-item"><div class="crm-map-legend-dot" style="background:#10b981"></div>Penang / North</div>
+                <div class="crm-map-legend-item"><div class="crm-map-legend-dot" style="background:#f59e0b"></div>Johor / South</div>
+                <div class="crm-map-legend-item"><div class="crm-map-legend-dot" style="background:#8b5cf6"></div>Other</div>
+              </div>
+            </div>
+            <div class="crm-map-container"><svg viewBox="0 0 500 600" class="crm-map-svg" id="crmMapSvg"></svg><div class="crm-map-tooltip" id="crmMapTooltip"></div></div>
+          </div>
         </div>
       </div>
 
@@ -1291,7 +1520,7 @@
       document.querySelectorAll('.workspace').forEach(w => w.classList.remove('active'));
       document.getElementById('w-' + ws).classList.add('active');
       if (ws === 'dashboard') renderDash();
-      if (ws === 'crm') renderQueue();
+      if (ws === 'crm') renderCrm();
       if (ws === 'outbound') etInit();
     }
 
@@ -1810,6 +2039,236 @@
         btn.disabled = false;
         btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg> Search & Import';
       }
+    }
+
+    // ===== NEW CRM MANAGER UI =====
+    const CRM_AVATAR_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#f97316','#6366f1','#14b8a6','#e11d48','#0ea5e9'];
+    let crmSel = new Set();
+    let crmCurrentView = 'list';
+
+    function crmAvatarColor(name) { let h=0; for(let i=0;i<name.length;i++) h=((h<<5)-h)+name.charCodeAt(i); return CRM_AVATAR_COLORS[Math.abs(h)%CRM_AVATAR_COLORS.length]; }
+    function crmInitials(name) { return name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase(); }
+    function crmDaysAgo(dateStr) { if(!dateStr) return 999; const d=new Date(dateStr); return Math.floor((Date.now()-d.getTime())/86400000); }
+    function crmTimeAgo(dateStr) { const d=crmDaysAgo(dateStr); if(d===0) return 'Today'; if(d===1) return 'Yesterday'; if(d<7) return d+'d ago'; if(d<30) return Math.floor(d/7)+'w ago'; return Math.floor(d/30)+'mo ago'; }
+    function crmEsc(s) { if(!s) return ''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function crmLeadQuality(lead) {
+      let score = 0;
+      if (lead.sent || lead.emailStatus === 'sent') score += 1;
+      if (lead.emailOpenedAt) score += 1;
+      if (lead.emailClicked) score += 1;
+      if (lead.emailRepliedAt || lead.emailStatus === 'replied') score += 1;
+      if (lead.status === 'qualified') score += 1;
+      if (PA.includes((lead.region||'').toLowerCase())) score += 1;
+      if (crmDaysAgo(lead.createdAt) < 7) score += 1;
+      if (score >= 5) return 'hot';
+      if (score >= 3) return 'warm';
+      return 'cold';
+    }
+
+    function crmFilter() {
+      // Just triggers renderCrm; filters applied there
+    }
+
+    function crmGetFiltered() {
+      const q = (document.getElementById('crmSearch')?.value||'').toLowerCase();
+      const pf = document.getElementById('crmProdFilter')?.value||'';
+      const sf = document.getElementById('crmStatusFilter')?.value||'';
+      const qf = document.getElementById('crmQualityFilter')?.value||'';
+      return leads.filter(l => {
+        if (pf && l.recommendation?.productName !== pf) return false;
+        if (sf && l.status !== sf) return false;
+        if (qf && crmLeadQuality(l) !== qf) return false;
+        if (q) { const s=[l.company,l.contactName,l.region,l.source,l.industry].join(' ').toLowerCase(); if(!s.includes(q)) return false; }
+        return true;
+      });
+    }
+
+    function crmRenderStats() {
+      const f = crmGetFiltered();
+      document.getElementById('crmStatTotal').textContent = f.length;
+      document.getElementById('crmStatQualified').textContent = f.filter(l=>l.status==='qualified').length;
+      document.getElementById('crmStatPriority').textContent = f.filter(l=>PA.includes((l.region||'').toLowerCase())).length;
+      document.getElementById('crmStatStale').textContent = f.filter(l=>crmDaysAgo(l.createdAt)>30).length;
+      document.getElementById('crmSelInfo').textContent = crmSel.size + ' selected';
+    }
+
+    function crmRenderList() {
+      const filtered = crmGetFiltered();
+      const el = document.getElementById('crmLeadList');
+      if (!filtered.length) {
+        el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-muted)"><div style="font-size:48px;margin-bottom:12px">📭</div><div style="font-size:15px;font-weight:600">No leads found</div><div style="font-size:13px;margin-top:4px">Try adjusting your filters</div></div>';
+        return;
+      }
+      let html = '';
+      filtered.forEach(lead => {
+        const quality = crmLeadQuality(lead);
+        const initials = crmInitials(lead.company);
+        const color = crmAvatarColor(lead.company);
+        const hasActivity = lead.sent || lead.emailOpenedAt || lead.emailRepliedAt;
+        const isStale = crmDaysAgo(lead.createdAt) > 30;
+        const isSelected = crmSel.has(lead.id);
+        const productName = lead.recommendation?.productName || '';
+        const lastAct = lead.emailLastAttemptAt || lead.sentAt || lead.createdAt;
+
+        html += `<div class="crm-lead-row ${isStale?'stale':''}" data-id="${lead.id}" onclick="openDetail('${lead.id}')">
+          <div class="crm-lead-check" onclick="event.stopPropagation()"><input type="checkbox" ${isSelected?'checked':''} onchange="crmToggleSel('${lead.id}',this.checked)"></div>
+          <div class="crm-lead-info">
+            <div class="crm-lead-avatar" style="background:${color}">${initials}<span class="crm-activity-dot ${hasActivity?'active':''}"></span></div>
+            <div><div class="crm-lead-name">${crmEsc(lead.company)}</div><div class="crm-lead-detail">${crmEsc(lead.contactName||'No contact')} · ${crmEsc(lead.region)} · ${crmTimeAgo(lastAct)}</div></div>
+          </div>
+          <div><span class="crm-quality-badge ${quality}"><span class="crm-quality-dot"></span>${quality.charAt(0).toUpperCase()+quality.slice(1)}</span></div>
+          <div><span class="crm-product-tag">${crmEsc(productName)}</span></div>
+          <div><span class="crm-status-tag ${lead.status}">${lead.status.charAt(0).toUpperCase()+lead.status.slice(1)}</span></div>
+          <div>${isStale?`<span class="crm-stale-badge"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${crmDaysAgo(lead.createdAt)}d</span>`:`<span style="font-size:12px;color:var(--text-muted)">${crmTimeAgo(lastAct)}</span>`}</div>
+          <div class="crm-hover-actions" onclick="event.stopPropagation()">
+            <button class="crm-hover-btn" title="Email" onclick="openEmail('${lead.id}')">✉️</button>
+            <button class="crm-hover-btn" title="Qualify" onclick="crmQuickAction('${lead.id}','qualified')">⭐</button>
+            <button class="crm-hover-btn" title="Contacted" onclick="crmQuickAction('${lead.id}','contacted')">📞</button>
+            <button class="crm-hover-btn danger" title="Lost" onclick="crmQuickAction('${lead.id}','lost')">✕</button>
+          </div>
+        </div>`;
+      });
+      el.innerHTML = html + `<div class="crm-pagination"><span class="page-info">${filtered.length} leads</span></div>`;
+    }
+
+    function crmRenderKanban() {
+      const cols = { new:{title:'New',dot:'#3b82f6',leads:[]}, contacted:{title:'Contacted',dot:'#f59e0b',leads:[]}, qualified:{title:'Qualified',dot:'#10b981',leads:[]}, lost:{title:'Lost',dot:'#9ca3af',leads:[]} };
+      crmGetFiltered().forEach(l => { if(cols[l.status]) cols[l.status].leads.push(l); });
+      let html = '';
+      Object.entries(cols).forEach(([key,col]) => {
+        html += `<div class="crm-kanban-col" data-status="${key}"><div class="crm-kanban-header"><div class="crm-kanban-title"><span class="crm-kanban-dot" style="background:${col.dot}"></span>${col.title}</div><span class="crm-kanban-count">${col.leads.length}</span></div><div class="crm-kanban-cards">`;
+        col.leads.forEach(lead => {
+          const quality = crmLeadQuality(lead);
+          const initials = crmInitials(lead.company);
+          const color = crmAvatarColor(lead.company);
+          const productName = lead.recommendation?.productName||'';
+          html += `<div class="crm-kanban-card" onclick="openDetail('${lead.id}')">
+            <div class="crm-kanban-card-header"><div class="crm-kanban-avatar" style="background:${color}">${initials}</div><div class="crm-kanban-name">${crmEsc(lead.company)}</div></div>
+            <div class="crm-kanban-region">${crmEsc(lead.region)}</div>
+            <div class="crm-kanban-product">${crmEsc(productName)}</div>
+            <div class="crm-kanban-actions">
+              <button onclick="event.stopPropagation();crmQuickAction('${lead.id}','qualified')">Qualify</button>
+              <button onclick="event.stopPropagation();crmQuickAction('${lead.id}','lost')">Lost</button>
+            </div>
+          </div>`;
+        });
+        html += '</div></div>';
+      });
+      document.getElementById('crmKanbanBoard').innerHTML = html;
+    }
+
+    function crmRenderMap() {
+      const regionCoords = {
+        'kuala lumpur':{lat:200,lng:250},'petaling jaya':{lat:200,lng:240},'subang jaya':{lat:200,lng:235},
+        'shah alam':{lat:195,lng:230},'puchong':{lat:210,lng:245},'klang':{lat:190,lng:220},
+        'cheras':{lat:205,lng:260},'ampang':{lat:200,lng:265},'kajang':{lat:220,lng:260},
+        'cyberjaya':{lat:230,lng:250},'penang':{lat:80,lng:150},'ipoh':{lat:130,lng:200},
+        'johor bahru':{lat:380,lng:280},'melaka':{lat:300,lng:240},'seremban':{lat:270,lng:260},
+        'kuching':{lat:250,lng:50},'kota kinabalu':{lat:100,lng:30},'other':{lat:250,lng:250}
+      };
+      const filtered = crmGetFiltered();
+      const pins = {};
+      filtered.forEach(l => {
+        const region = (l.region||'').toLowerCase();
+        const coord = regionCoords[region] || regionCoords['other'];
+        const key = coord.lat+','+coord.lng;
+        if (!pins[key]) pins[key] = {x:coord.lng, y:coord.lat, leads:[]};
+        pins[key].leads.push(l);
+      });
+      let circles = '';
+      Object.values(pins).forEach(p => {
+        const count = p.leads.length;
+        const r = 8 + Math.min(count, 5) * 4;
+        const firstLead = p.leads[0];
+        const region = (firstLead.region||'').toLowerCase();
+        let color = '#8b5cf6';
+        if (PA.includes(region)) color = '#2563eb';
+        else if (['penang','ipoh','perak'].includes(region)) color = '#10b981';
+        else if (['johor bahru','johor','melaka','seremban'].includes(region)) color = '#f59e0b';
+        circles += `<circle cx="${p.x}" cy="${p.y}" r="${r}" fill="${color}" opacity="0.6" class="crm-map-pin" onclick="crmMapShowTooltip(event,${JSON.stringify(p.leads.map(l=>({company:l.company,region:l.region,product:l.recommendation?.productName||''}))).replace(/"/g,'&quot;')})"/>`;
+        circles += `<text x="${p.x}" y="${p.y}" text-anchor="middle" dy=".35em" fill="white" font-size="${r>15?12:10}" font-weight="700" pointer-events="none">${count}</text>`;
+      });
+      document.getElementById('crmMapSvg').innerHTML = circles || '<text x="250" y="300" text-anchor="middle" fill="var(--text-muted)">No leads to display</text>';
+    }
+
+    function crmMapShowTooltip(e, leads) {
+      const tooltip = document.getElementById('crmMapTooltip');
+      let html = '';
+      leads.slice(0,5).forEach(l => { html += `<div class="crm-map-tooltip-name">${crmEsc(l.company)}</div><div class="crm-map-tooltip-detail">${crmEsc(l.region)} · ${crmEsc(l.product)}</div>`; });
+      if (leads.length > 5) html += `<div class="crm-map-tooltip-detail" style="color:var(--text-muted)">+${leads.length-5} more</div>`;
+      tooltip.innerHTML = html;
+      tooltip.style.left = (e.offsetX + 10) + 'px';
+      tooltip.style.top = (e.offsetY - 10) + 'px';
+      tooltip.classList.add('show');
+      setTimeout(() => tooltip.classList.remove('show'), 3000);
+    }
+
+    function crmSwitchView(view, btn) {
+      crmCurrentView = view;
+      document.querySelectorAll('.crm-view-toggle button').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.getElementById('crmListView').style.display = view==='list' ? '' : 'none';
+      document.getElementById('crmKanbanView').style.display = view==='kanban' ? '' : 'none';
+      document.getElementById('crmMapView').style.display = view==='map' ? '' : 'none';
+      renderCrm();
+    }
+
+    function crmToggleSel(id, checked) { if(checked) crmSel.add(id); else crmSel.delete(id); renderCrm(); }
+
+    function crmToggleBulk() { document.getElementById('crmBulkMenu').classList.toggle('show'); }
+    document.addEventListener('click', e => { if(!e.target.closest('.crm-bulk-wrapper')) document.getElementById('crmBulkMenu')?.classList.remove('show'); });
+
+    function crmQuickAction(id, status) {
+      const l = leads.find(x => x.id === id);
+      if (!l) return;
+      api(`/api/leads/${id}/status`, { method:'PATCH', body:JSON.stringify({status}) }).then(() => {
+        l.status = status;
+        notify(status==='qualified'?'Qualified':status==='lost'?'Lost':'Updated', `${l.company} → ${status}`);
+        renderCrm(); renderDash();
+      }).catch(err => notify('Error', err.message, 'error'));
+    }
+
+    async function crmBulkAction(action) {
+      document.getElementById('crmBulkMenu').classList.remove('show');
+      const selected = leads.filter(l => crmSel.has(l.id));
+      if (!selected.length) { notify('Info', 'Select leads first.', 'info'); return; }
+
+      if (action === 'qualify' || action === 'contacted' || action === 'lost') {
+        for (const l of selected) {
+          try { await api(`/api/leads/${l.id}/status`, { method:'PATCH', body:JSON.stringify({status:action}) }); l.status = action; }
+          catch(e) {}
+        }
+        notify('Done', `${selected.length} leads → ${action}`);
+        crmSel.clear(); renderCrm(); renderDash();
+      } else if (action === 'delete') {
+        if (!confirm(`Delete ${selected.length} leads?`)) return;
+        for (const l of selected) {
+          try { await api(`/api/leads/${l.id}`, { method:'DELETE' }); }
+          catch(e) {}
+        }
+        notify('Deleted', `${selected.length} leads removed.`);
+        crmSel.clear(); await loadLeads();
+      } else if (action === 'email') {
+        // Open existing bulk email flow with selected leads
+        sel = new Set(crmSel);
+        bulkEmail();
+        crmSel.clear();
+      } else if (action === 'export') {
+        window.location.href = '/api/export/leads.csv';
+      } else if (action === 'assign') {
+        notify('Info', 'Use the edit form to assign leads.', 'info');
+      }
+    }
+
+    function renderCrm() {
+      crmRenderStats();
+      // Update product filter
+      const pfEl = document.getElementById('crmProdFilter');
+      if (pfEl) { const names=[...new Set(leads.map(l=>l.recommendation?.productName).filter(Boolean))]; pfEl.innerHTML='<option value="">All Products</option>'+names.map(n=>`<option>${n}</option>`).join(''); }
+      if (crmCurrentView === 'list') crmRenderList();
+      else if (crmCurrentView === 'kanban') crmRenderKanban();
+      else if (crmCurrentView === 'map') crmRenderMap();
     }
 
     // ===== APIFY GOOGLE MAPS SCRAPER =====
