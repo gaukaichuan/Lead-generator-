@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OCBC x AutoCount Promo — Video Storyboard</title>
+<style>
+  :root { --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --muted: #64748b; --blue: #2563eb; --amber: #f59e0b; --green: #10b981; }
+  body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 80px; }
+  header { text-align: center; padding: 20px; }
+  h1 { margin: 0; font-size: 22px; color: var(--blue); }
+  .video-frame { width: 90%; max-width: 360px; aspect-ratio: 9/16; background: var(--card); border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; overflow: hidden; }
+  .badge { position: absolute; top: 20px; left: 20px; background: rgba(37,99,235,0.1); color: var(--blue); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; z-index: 2; }
+  .scene-content { flex: 1; padding: 40px 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; opacity: 0; transition: opacity 0.4s; position: absolute; inset: 0; pointer-events: none; }
+  .scene-content.active { opacity: 1; pointer-events: auto; z-index: 1; }
+  .scene-content h2 { font-size: 20px; margin-bottom: 12px; }
+  .scene-content p { font-size: 15px; line-height: 1.6; color: var(--muted); margin: 0; }
+  .highlight { color: var(--blue); font-weight: 800; font-size: 32px; display: block; margin: 10px 0; }
+  .director-note { position: absolute; bottom: 0; left: 0; right: 0; background: #fffbeb; border-top: 1px solid #fde68a; padding: 10px 16px; font-size: 12px; color: #92400e; transform: translateY(100%); transition: transform 0.3s; }
+  .director-note.active { transform: translateY(0); }
+  
+  .controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 100; }
+  .play-btn { background: var(--blue); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex-shrink: 0; }
+  .play-btn svg { width: 18px; height: 18px; fill: currentColor; }
+  .progress-bar { flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue); width: 0%; transition: width 0.1s linear; }
+  .time { font-size: 12px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 35px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>OCBC × AutoCount Promo</h1>
+  <div style="color:var(--muted); font-size:13px;">60s Video Storyboard Preview</div>
+</header>
+
+<div class="video-frame">
+  <div class="badge">OCBC × AutoCount</div>
+  
+  <div class="scene-content" id="scene-1">
+    <h2>👋 Hi there!</h2>
+    <p>I'm [Name] from [Company].<br>We help SMEs boost efficiency.</p>
+    <p style="margin-top:12px; font-weight:600; color:var(--text);">Today I have huge news for you!</p>
+  </div>
+
+  <div class="scene-content" id="scene-2">
+    <h2>🔥 Super Deal Alert</h2>
+    <p>Buy AutoCount + Open OCBC Business Account</p>
+    <span class="highlight">Get RM400 Cashback!</span>
+    <p style="font-size:13px;">Official partnership promo. 100% legit.</p>
+  </div>
+
+  <div class="scene-content" id="scene-3">
+    <h2>🎯 Who is this for?</h2>
+    <p style="text-align:left; font-size:14px; line-height:1.8; color:var(--text);">
+      1️⃣ Still doing manual billing?<br>
+      2️⃣ Want to upgrade to v2.2?<br>
+      3️⃣ New boss needing full setup?
+    </p>
+  </div>
+
+  <div class="scene-content" id="scene-4">
+    <h2>🏦 No OCBC Account?</h2>
+    <p>No worries! Opening one is fast & easy.</p>
+    <p style="margin-top:10px; font-weight:600; color:var(--text);">Open account → Buy AutoCount → <span style="color:var(--green)">Claim RM400</span></p>
+  </div>
+
+  <div class="scene-content" id="scene-5">
+    <h2>⏳ Don't Miss Out!</h2>
+    <p>Ends <b>July 30, 2025</b></p>
+    <p style="margin:10px 0;">Limited slots. First come, first served.</p>
+    <div style="background:var(--blue); color:white; padding:10px 20px; border-radius:8px; margin-top:10px; font-weight:700;">
+      👉 Click Link / Contact Us
+    </div>
+  </div>
+
+  <div class="director-note" id="note">💡 <span id="note-text">Loading...</span></div>
+</div>
+
+<div class="controls">
+  <button class="play-btn" onclick="togglePlay()">
+    <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  <span class="time" id="time-left">0:00</span>
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+  <span class="time">1:00</span>
+</div>
+
+<script>
+  const scenes = [
+    { id: 1, start: 0, end: 10, note: "Smile, warm tone. Look directly at the lens to build connection." },
+    { id: 2, start: 10, end: 35, note: "Slow down on 'RM400'. Use hand gesture to emphasize the amount." },
+    { id: 3, start: 35, end: 45, note: "Count on fingers (1, 2, 3) to make it dynamic and easy to follow." },
+    { id: 4, start: 45, end: 50, note: "Reassuring tone. Remove the fear of 'it's too hard to open an account'." },
+    { id: 5, start: 50, end: 60, note: "Urgent tone. Fast pace. Ensure contact link is visible on screen." }
+  ];
+
+  let time = 0;
+  let playing = false;
+  let timer;
+
+  function update(t) {
+    document.getElementById('time-left').textContent = `0:${Math.floor(t).toString().padStart(2,'0')}`;
+    document.getElementById('progress').style.width = `${(t/60)*100}%`;
+    
+    scenes.forEach(s => {
+      document.getElementById(`scene-${s.id}`).classList.remove('active');
+    });
+    const curr = scenes.find(s => t >= s.start && t < s.end);
+    if (curr) {
+      document.getElementById(`scene-${curr.id}`).classList.add('active');
+      document.getElementById('note-text').textContent = curr.note;
+      document.getElementById('note').classList.add('active');
+    }
+  }
+
+  function togglePlay() {
+    playing = !playing;
+    document.getElementById('play-icon').innerHTML = playing ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+    if (playing) timer = setInterval(() => { time += 0.1; if(time>=60) {time=0; togglePlay();} update(time); }, 100);
+    else clearInterval(timer);
+  }
+
+  update(0);
+</script>
+</body>
+</html>
