@@ -1802,7 +1802,7 @@
   "emailTemplates": [
     {
       "id": "tmpl_default_1",
-      "name": "General Outreach",
+      "name": "Quick Question",
       "subject": "Quick question about {{company}}",
       "body": "Hi {{contactName}},\n\nI came across {{company}} while looking at businesses in {{region}}.\n\nWe help {{industry}} companies simplify their operations — would you be open to a 10-minute chat next week to see if there's a fit?\n\nBest,\n{{senderName}}"
     },
@@ -1814,9 +1814,9 @@
     },
     {
       "id": "tmpl_default_3",
-      "name": "Short Intro",
-      "subject": "Connecting with {{company}}",
-      "body": "Hi {{contactName}},\n\nI'm from PreSoft — we work with {{industry}} businesses in Malaysia.\n\nWould you be available for a brief intro call next week?\n\nThanks,\n{{senderName}}"
+      "name": "Success Story",
+      "subject": "How similar {{industry}} businesses cut manual work",
+      "body": "Hi {{contactName}},\n\nMany {{industry}} businesses in {{region}} were spending hours every week on manual tasks. After switching to {{productName}}, they cut that down to minutes.\n\nI think {{company}} could see similar results — especially if you're still handling things manually.\n\nHappy to share how they did it if you're curious. Worth a quick chat?\n\nBest,\n{{senderName}}"
     }
   ],
   "defaultTemplateId": "tmpl_default_1"

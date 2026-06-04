@@ -9,6 +9,16 @@ const cookie = require("cookie");
 
 // ===== SESSION MANAGEMENT =====
 const SESSION_COOKIE_NAME = "lg_session";
+
+// ===== DATA PERSISTENCE: Pull latest store.json from git on every startup =====
+// This ensures data survives Render's ephemeral filesystem rebuilds.
+// Data is committed to git before each deploy so the new container gets the latest version.
+try {
+  require('child_process').execSync('git pull origin main', { cwd: __dirname, stdio: 'inherit', timeout: 15000 });
+  console.log('[Git] Data synced from origin/main');
+} catch(e) {
+  console.log('[Git] Sync skipped (local/dev mode or network issue)');
+}
 const SESSION_DURATION_DAYS = 7;
 const activeSessions = new Map(); // sessionId -> { username, role, createdAt, lastAccess }
 
@@ -247,7 +257,7 @@ function seedDefaultEmailTemplates(store) {
   store.emailTemplates = [
     {
       id: "tmpl_default_1",
-      name: "General Outreach",
+      name: "Quick Question",
       subject: "Quick question about {{company}}",
       body: "Hi {{contactName}},\n\nI came across {{company}} while looking at businesses in {{region}}.\n\nWe help {{industry}} companies simplify their operations — would you be open to a 10-minute chat next week to see if there's a fit?\n\nBest,\n{{senderName}}"
     },
@@ -259,9 +269,9 @@ function seedDefaultEmailTemplates(store) {
     },
     {
       id: "tmpl_default_3",
-      name: "Short Intro",
-      subject: "Connecting with {{company}}",
-      body: "Hi {{contactName}},\n\nI'm from PreSoft — we work with {{industry}} businesses in Malaysia.\n\nWould you be available for a brief intro call next week?\n\nThanks,\n{{senderName}}"
+      name: "Success Story",
+      subject: "How similar {{industry}} businesses cut manual work",
+      body: "Hi {{contactName}},\n\nMany {{industry}} businesses in {{region}} were spending hours every week on manual tasks. After switching to {{productName}}, they cut that down to minutes.\n\nI think {{company}} could see similar results — especially if you're still handling things manually.\n\nHappy to share how they did it if you're curious. Worth a quick chat?\n\nBest,\n{{senderName}}"
     }
   ];
   store.defaultTemplateId = "tmpl_default_1";
