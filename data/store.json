@@ -1802,15 +1802,15 @@
   "emailTemplates": [
     {
       "id": "tmpl_default_1",
-      "name": "Quick Inquiry",
-      "subject": "Quick question regarding {{company}}",
-      "body": "Hi {{contactName}},\n\nAre you the right person to speak to about the software systems at {{company}}?\n\nWe are a local provider (PreSoft) helping businesses in {{region}} with their POS and accounting.\n\nThanks,\n{{senderName}}"
+      "name": "Professional Outreach",
+      "subject": "Quick idea for {{company}}",
+      "body": "Hi {{contactName}},\n\nI came across {{company}} and was impressed by your presence in {{region}}.\n\nI noticed you're handling {{painPointLabel}}, which is exactly what we help {{industry}} businesses improve.\n\nWe recently helped a similar business reduce their manual workload by 40% using {{productName}}.\n\nGiven your focus on efficiency, I thought you might find our solution valuable.\n\nWould you be open to a brief 15-minute conversation next week? I'm available Tuesday or Thursday afternoons.\n\nThanks for considering,\n\n{{senderName}}\nPreSoft Team\n{{senderEmail}}\n+603-8068 2556"
     },
     {
       "id": "tmpl_default_2",
       "name": "Follow-up",
-      "subject": "Re: Quick question regarding {{company}}",
-      "body": "Hi {{contactName}},\n\nJust following up on my previous note.\n\nI'd love to share how we helped other {{industry}} businesses in {{region}} improve their workflow.\n\nBest,\n{{senderName}}"
+      "subject": "Re: Quick idea for {{company}}",
+      "body": "Hi {{contactName}},\n\nJust following up on my previous note regarding {{painPointLabel}}.\n\nI'd love to share how we helped other {{industry}} businesses in {{region}} improve their workflow with {{productName}}.\n\nBest,\n{{senderName}}"
     },
     {
       "id": "tmpl_default_3",
