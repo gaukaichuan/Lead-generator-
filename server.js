@@ -257,21 +257,21 @@ function seedDefaultEmailTemplates(store) {
   store.emailTemplates = [
     {
       id: "tmpl_default_1",
-      name: "Quick Question",
-      subject: "Quick question about {{company}}",
-      body: "Hi {{contactName}},\n\nI came across {{company}} while looking at businesses in {{region}}.\n\nWe help {{industry}} companies simplify their operations — would you be open to a 10-minute chat next week to see if there's a fit?\n\nBest,\n{{senderName}}"
+      name: "Quick Inquiry",
+      subject: "Quick question regarding {{company}}",
+      body: "Hi {{contactName}},\n\nAre you the right person to speak to about the software systems at {{company}}?\n\nWe are a local provider (PreSoft) helping businesses in {{region}} with their POS and accounting.\n\nThanks,\n{{senderName}}"
     },
     {
       id: "tmpl_default_2",
       name: "Follow-up",
-      subject: "Re: Quick question about {{company}}",
-      body: "Hi {{contactName}},\n\nJust circling back on my note from last week — no rush.\n\nIf you have 10 minutes, I'd love to share how other {{industry}} businesses in {{region}} are simplifying their workflow.\n\nBest regards,\n{{senderName}}"
+      subject: "Re: Quick question regarding {{company}}",
+      body: "Hi {{contactName}},\n\nJust following up on my previous note.\n\nI'd love to share how we helped other {{industry}} businesses in {{region}} improve their workflow.\n\nBest,\n{{senderName}}"
     },
     {
       id: "tmpl_default_3",
-      name: "Success Story",
-      subject: "How similar {{industry}} businesses cut manual work",
-      body: "Hi {{contactName}},\n\nMany {{industry}} businesses in {{region}} were spending hours every week on manual tasks. After switching to {{productName}}, they cut that down to minutes.\n\nI think {{company}} could see similar results — especially if you're still handling things manually.\n\nHappy to share how they did it if you're curious. Worth a quick chat?\n\nBest,\n{{senderName}}"
+      name: "Intro",
+      subject: "Intro from PreSoft — {{company}}",
+      body: "Hi {{contactName}},\n\nI'm {{senderName}} from PreSoft. We help businesses in {{region}} manage their inventory and accounts better.\n\nOpen to a quick chat next week?\n\nThanks,\n{{senderName}}"
     }
   ];
   store.defaultTemplateId = "tmpl_default_1";
