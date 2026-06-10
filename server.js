@@ -258,7 +258,7 @@ function seedDefaultEmailTemplates(store) {
     {
       id: "tmpl_default_1",
       name: "Professional Outreach",
-      subject: "Quick idea for {{company}}",
+      subject: "{{contactName}}, a note from {{senderName}}",
       body: "Hi {{contactName}},\n\nI came across {{company}} and was impressed by your presence in {{region}}.\n\nI noticed you're handling {{painPointLabel}}, which is exactly what we help {{industry}} businesses improve.\n\nWe recently helped a similar business reduce their manual workload by 40% using {{productName}}.\n\nGiven your focus on efficiency, I thought you might find our solution valuable.\n\nWould you be open to a brief 15-minute conversation next week? I'm available Tuesday or Thursday afternoons.\n\nThanks for considering,\n\n{{senderName}}\nPreSoft Team\n{{senderEmail}}\n+603-8068 2556"
     },
     {
@@ -430,27 +430,10 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
     throw new Error("EngineMailer is not configured. Set ENGINEMAILER_FROM_EMAIL on the server.");
   }
 
-  // Phase 2: Inject tracking pixel + Phase 3: Rewrite links for click tracking
   // Convert plain text to HTML: double newlines → paragraph breaks, single newlines → <br>
-  let htmlBody = messageBody
+  const htmlBody = messageBody
     .split(/\n\n+/)
     .map(block => `<p>${block.replace(/\n/g, "<br>")}</p>`).join("");
-  if (leadId && baseUrl) {
-    // Inject tracking pixel
-    const pixelUrl = `${baseUrl}/track/open?leadId=${encodeURIComponent(leadId)}`;
-    htmlBody += `<img src="${pixelUrl}" width="1" height="1" style="display:none" alt="" />`;
-
-    // Rewrite all <a href="..."> links to go through click tracker
-    const clickTrackerPattern = /<a\s+([^>]*?)href=["']([^"']+)["']([^>]*)>/gi;
-    htmlBody = htmlBody.replace(clickTrackerPattern, (match, before, href, after) => {
-      // Skip mailto:, tel:, and already-tracked links
-      if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#') || href.includes('/track/click')) {
-        return match;
-      }
-      const trackedUrl = `${baseUrl}/track/click?leadId=${encodeURIComponent(leadId)}&url=${encodeURIComponent(href)}`;
-      return `<a ${before}href="${trackedUrl}"${after}>`;
-    });
-  }
 
   const response = await fetch("https://api.enginemailer.com/RESTAPI/V2/Submission/SendEmail", {
     method: "POST",
@@ -464,7 +447,8 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
       Subject: messageSubject,
       SenderEmail: emFromEmail,
       SenderName: emFromName,
-      SubmittedContent: htmlBody
+      SubmittedContent: htmlBody,
+      PlainTextContent: messageBody
     })
   });
 
@@ -3243,9 +3227,3 @@ if (require.main === module) {
 }
 
 module.exports = { createAppServer, startServer };
-
-
-
-
-
-
