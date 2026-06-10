@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unsubscribe & Suppression List — Preview</title>
+<style>
+  :root {
+    --bg: #f8fafc; --surface: #fff; --border: #e2e8f0; --text: #1e293b;
+    --text-dim: #64748b; --accent: #3b82f6; --red: #ef4444; --green: #22c55e;
+    --amber: #f59e0b; --green-bg: #d1fae5; --green-text: #065f46;
+    --red-bg: #fee2e2; --red-text: #dc2626; --blue-bg: #dbeafe; --blue-text: #2563eb;
+    --amber-bg: #fef3c7; --amber-text: #b45309;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+  }
+
+  /* Top bar */
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 12px 24px; display: flex; align-items: center; gap: 10px;
+  }
+  .topbar .logo { font-size: 0.8rem; font-weight: 700; }
+  .topbar .sep { color: #cbd5e1; }
+  .topbar .page { font-size: 0.8rem; color: var(--text-dim); }
+  .topbar .ver { margin-left: auto; background: var(--green-bg); color: var(--green-text); padding: 3px 10px; border-radius: 10px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .wrap { max-width: 840px; margin: 0 auto; padding: 32px 20px; }
+
+  .hdr { margin-bottom: 24px; }
+  .hdr h1 { font-size: 1.35rem; font-weight: 600; }
+  .hdr p { color: var(--text-dim); font-size: 0.85rem; margin-top: 4px; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 28px; }
+  .tab {
+    padding: 10px 20px; font-size: 0.82rem; font-weight: 500; color: #94a3b8;
+    cursor: pointer; border: none; background: none; position: relative; transition: color 0.2s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); }
+  .tab.active::after {
+    content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: var(--accent);
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 4px; }
+  .card .desc { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 16px; }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .st {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .st .ico { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .st-red .ico { background: var(--red-bg); }
+  .st-blue .ico { background: var(--blue-bg); }
+  .st-amber .ico { background: var(--amber-bg); }
+  .st .n { font-size: 1.3rem; font-weight: 700; }
+  .st .l { font-size: 0.7rem; color: var(--text-dim); }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { text-align: left; padding: 10px 14px; font-weight: 600; font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid var(--border); }
+  td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; }
+  tr:hover td { background: #f8fafc; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 0.68rem; font-weight: 600; }
+  .badge-red { background: var(--red-bg); color: var(--red-text); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber-text); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 5px; padding: 7px 15px;
+    border-radius: 8px; font-size: 0.78rem; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text); transition: all 0.15s;
+  }
+  .btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { background: #2563eb; border-color: #2563eb; }
+  .btn-danger { color: var(--red); border-color: #fecaca; }
+  .btn-danger:hover { background: #fef2f2; border-color: var(--red); }
+  .btn-red { background: var(--red); color: #fff; border-color: var(--red); }
+  .btn-red:hover { background: #dc2626; border-color: #dc2626; }
+  .btn-gray { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+  .btn-gray:hover { background: #e2e8f0; }
+  .btn-sm { padding: 4px 10px; font-size: 0.72rem; }
+
+  /* Input */
+  .input-row { display: flex; gap: 8px; }
+  .input {
+    flex: 1; padding: 9px 13px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.82rem; outline: none; background: var(--surface); transition: border 0.15s;
+  }
+  .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+  /* Email */
+  .email-frame {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;
+    color: var(--text); font-size: 0.85rem; line-height: 1.6;
+  }
+  .email-meta { font-size: 0.72rem; color: var(--text-dim); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
+  .email-meta strong { color: #475569; }
+  .unsub-area { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f1f5f9; }
+  .unsub-area small { color: var(--text-dim); font-size: 0.72rem; display: block; margin-bottom: 4px; }
+  .unsub-area a { color: var(--accent); font-size: 0.78rem; cursor: pointer; text-decoration: none; }
+  .unsub-area a:hover { text-decoration: underline; }
+
+  /* Landing */
+  .landing {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 44px 32px; text-align: center; max-width: 420px; margin: 0 auto;
+  }
+  .landing .ico { font-size: 2rem; margin-bottom: 12px; }
+  .landing h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; }
+  .landing p { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px; }
+  .landing .addr {
+    display: inline-block; background: #f1f5f9; padding: 6px 14px; border-radius: 6px;
+    font-size: 0.78rem; color: var(--accent); margin-bottom: 20px; font-family: monospace;
+  }
+  .landing .actions { display: flex; gap: 10px; justify-content: center; }
+
+  /* Flow diagram */
+  .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 0 0 16px; }
+  .flow-step { background: #f1f5f9; padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; text-align: center; }
+  .flow-arrow { color: var(--accent); font-size: 1rem; }
+
+  .note { background: #fffbeb; border-left: 3px solid var(--amber); padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 0.78rem; color: #92400e; margin-top: 16px; }
+  .callout { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 16px; font-size: 0.78rem; color: #1e40af; margin-top: 16px; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #fff; padding: 9px 18px; border-radius: 8px; font-size: 0.78rem; font-weight: 500; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000; }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { background: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">Lead Generator</span>
+  <span class="sep">/</span>
+  <span class="page">Unsubscribe & Suppression List</span>
+  <span class="ver">Preview</span>
+</div>
+
+<div class="wrap">
+  <div class="hdr">
+    <h1>Unsubscribe & Suppression List</h1>
+    <p>How recipients opt out — and how you prevent future sends to them</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="tab(this,'p1')">How It Works</button>
+    <button class="tab" onclick="tab(this,'p2')">Email View</button>
+    <button class="tab" onclick="tab(this,'p3')">Unsubscribe Page</button>
+    <button class="tab" onclick="tab(this,'p4')">Admin Panel</button>
+  </div>
+
+  <!-- TAB 1: Flow -->
+  <div id="p1" class="panel active">
+    <div class="flow">
+      <div class="flow-step">📧 Send bulk email</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">👤 Recipient reads</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">🔗 Clicks unsubscribe</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">📝 Opt-out page</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">✅ Added to suppression list</div>
+    </div>
+
+    <div class="card">
+      <h3>What happens when someone is suppressed?</h3>
+      <ul style="margin: 12px 0 0 18px; font-size: 0.82rem; line-height: 2.1; color: var(--text-dim);">
+        <li>The email is <strong style="color:var(--red)">blocked from ALL future bulk sends</strong></li>
+        <li>The lead gets a <span class="badge badge-red">unsubscribed</span> badge</li>
+        <li>Individual sends to that lead are also blocked with a warning</li>
+        <li>The suppression is permanent unless you manually remove it</li>
+      </ul>
+    </div>
+
+    <div class="callout">
+      ⚠️ <strong>Note:</strong> This does NOT improve spam placement. Spam filters check SPF/DKIM/DMARC, sender reputation, and engagement — not unsubscribe links. This feature is about <strong>compliance</strong> and <strong>respecting recipient choice</strong>.
+    </div>
+  </div>
+
+  <!-- TAB 2: Email -->
+  <div id="p2" class="panel">
+    <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 0;">
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border);">
+        <h3>What the recipient sees</h3>
+        <p class="desc" style="margin-bottom: 0;">Email as received by the lead, with unsubscribe footer</p>
+      </div>
+      <div style="padding: 20px;">
+        <div class="email-frame">
+          <div class="email-meta">
+            <strong>From:</strong> Jackson &lt;info@presoft.my&gt;<br>
+            <strong>To:</strong> jacksongau123@gmail.com<br>
+            <strong>Subject:</strong> Quick question about Seri Setia Construction
+          </div>
+          <p>Hi Business Contact,</p>
+          <p style="margin: 8px 0;">I came across Seri Setia Construction while looking at businesses in Puchong.</p>
+          <p style="margin: 8px 0;">We help general contractor companies simplify their operations — would you be open to a 10-minute chat next week to see if there's a fit?</p>
+          <p style="margin: 12px 0 0;">Best,<br>Jackson</p>
+          <div class="unsub-area">
+            <small>You're receiving this because we identified your business as a potential fit.</small>
+            <a onclick="switchToLanding()">Unsubscribe from future emails</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Landing -->
+  <div id="p3" class="panel">
+    <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 0;">
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border);">
+        <h3>Unsubscribe landing page</h3>
+        <p class="desc" style="margin-bottom: 0;">Simple one-click opt-out — no preference center needed</p>
+      </div>
+      <div style="padding: 24px;">
+        <div class="landing">
+          <div class="ico">📭</div>
+          <h2>Unsubscribe from our emails</h2>
+          <p>You won't receive any more outreach emails from us after confirming.</p>
+          <div class="addr">jacksongau123@gmail.com</div>
+          <div class="actions">
+            <button class="btn btn-red" onclick="doUnsub(this)" id="unsubBtn">Yes, unsubscribe me</button>
+            <button class="btn btn-gray" onclick="cancelUnsub()">No, keep me</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      💡 <strong>Why not a preference center?</strong> For cold outreach, a simple one-click unsubscribe is better. Preference centers add complexity and signal you're a bulk sender. A clear opt-out looks more like a personal email.
+    </div>
+  </div>
+
+  <!-- TAB 4: Admin -->
+  <div id="p4" class="panel">
+    <!-- Stats -->
+    <div class="stats">
+      <div class="st st-red">
+        <div class="ico">🚫</div>
+        <div><div class="n" id="statSuppressed">3</div><div class="l">Suppressed</div></div>
+      </div>
+      <div class="st st-blue">
+        <div class="ico">🛡️</div>
+        <div><div class="n">5</div><div class="l">Sends Blocked</div></div>
+      </div>
+      <div class="st st-amber">
+        <div class="ico">📅</div>
+        <div><div class="n">1</div><div class="l">This Week</div></div>
+      </div>
+    </div>
+
+    <!-- Manual add -->
+    <div class="card">
+      <h3>➕ Manually add to suppression list</h3>
+      <p class="desc">Use this when someone replies "stop" or asks you to remove them.</p>
+      <div class="input-row">
+        <input class="input" id="manualEmail" type="email" placeholder="email@example.com">
+        <button class="btn btn-primary" onclick="addManual()">Block email</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--border);">
+        <h3>📋 Suppressed contacts</h3>
+        <p class="desc" style="margin-bottom: 0;">Emails blocked from future sends</p>
+      </div>
+      <table>
+        <thead><tr><th>Email</th><th>Company</th><th>Reason</th><th>Date</th><th style="width:80px;"></th></tr></thead>
+        <tbody id="tbl">
+          <tr><td style="font-family:monospace;font-size:0.8rem;">no-reply@abc-corp.com</td><td>ABC Corporation</td><td><span class="badge badge-red">Unsubscribed</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Jun 3, 2026</td><td><button class="btn btn-sm btn-danger" onclick="rm(this)">Remove</button></td></tr>
+          <tr><td style="font-family:monospace;font-size:0.8rem;">admin@xyz-sdn.com</td><td>XYZ Sdn Bhd</td><td><span class="badge badge-amber">Replied "stop"</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Jun 5, 2026</td><td><button class="btn btn-sm btn-danger" onclick="rm(this)">Remove</button></td></tr>
+          <tr><td style="font-family:monospace;font-size:0.8rem;">info@testco.com.my</td><td>TestCo Malaysia</td><td><span class="badge badge-red">Unsubscribed</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Jun 7, 2026</td><td><button class="btn btn-sm btn-danger" onclick="rm(this)">Remove</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      🛡️ <strong>How bulk sends work:</strong> Suppressed emails are automatically skipped. You'll see: <em>"3 selected, 1 skipped, 2 sent"</em>.
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+function tab(btn, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+function switchToLanding() { tab(document.querySelectorAll('.tab')[2], 'p3'); }
+function doUnsub(btn) {
+  btn.disabled = true;
+  btn.innerHTML = '✅ Unsubscribed';
+  btn.style.background = 'var(--green)';
+  btn.style.color = '#fff';
+  btn.style.borderColor = 'var(--green)';
+  document.querySelector('.landing p').textContent = 'Your email has been added to our suppression list.';
+  const tbody = document.getElementById('tbl');
+  const row = document.createElement('tr');
+  row.innerHTML = `<td style="font-family:monospace;font-size:0.8rem;">jacksongau123@gmail.com</td><td>Seri Setia Construction</td><td><span class="badge badge-red">Unsubscribed</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Jun 8, 2026</td><td><button class="btn btn-sm btn-danger" onclick="rm(this)">Remove</button></td>`;
+  tbody.insertBefore(row, tbody.firstChild);
+  document.getElementById('statSuppressed').textContent = '4';
+  toast('Added to suppression list');
+}
+function cancelUnsub() { toast('You\'re still subscribed ✓'); }
+function addManual() {
+  const inp = document.getElementById('manualEmail');
+  const v = inp.value.trim();
+  if (!v || !v.includes('@')) { toast('Enter a valid email', true); return; }
+  const tbody = document.getElementById('tbl');
+  const row = document.createElement('tr');
+  row.innerHTML = `<td style="font-family:monospace;font-size:0.8rem;">${v}</td><td>—</td><td><span class="badge badge-amber">Manual</span></td><td style="color:var(--text-dim);font-size:0.78rem;">Jun 8, 2026</td><td><button class="btn btn-sm btn-danger" onclick="rm(this)">Remove</button></td>`;
+  tbody.insertBefore(row, tbody.firstChild);
+  inp.value = '';
+  toast(v + ' blocked');
+}
+function rm(btn) {
+  const row = btn.closest('tr');
+  row.style.opacity = '0.3';
+  setTimeout(() => { row.remove(); toast('Removed from list'); }, 300);
+}
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = err ? 'toast error show' : 'toast show';
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

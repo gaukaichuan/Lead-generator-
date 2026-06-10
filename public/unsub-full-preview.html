@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unsubscribe & Suppression — Full System Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8f9fc; --surface: #ffffff; --surface-hover: #f8f9fc;
+      --border: #e8eaef; --border-light: #f1f3f8;
+      --text: #111827; --text-secondary: #6b7280; --text-muted: #9ca3af;
+      --blue: #3b82f6; --blue-50: #eff6ff; --blue-100: #dbeafe; --blue-600: #2563eb; --blue-700: #1d4ed8;
+      --green: #10b981; --green-50: #ecfdf5; --green-100: #d1fae5;
+      --amber: #f59e0b; --amber-50: #fffbeb; --amber-100: #fef3c7;
+      --red: #ef4444; --red-50: #fef2f2; --red-100: #fee2e2;
+      --purple: #8b5cf6; --purple-50: #f5f3ff; --purple-100: #ede9fe;
+      --indigo: #6366f1; --cyan: #06b6d4;
+      --radius-sm: 8px; --radius: 12px; --radius-lg: 16px; --radius-xl: 20px;
+      --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.03); --shadow: 0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px -1px rgba(0,0,0,0.03);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.03);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.04);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.07), 0 8px 10px -6px rgba(0,0,0,0.04);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 80% 50% at 20% 0%, rgba(59,130,246,0.04) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(139,92,246,0.03) 0%, transparent 50%); pointer-events: none; z-index: 0; }
+    .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; position: relative; z-index: 1; }
+
+    /* Sidebar */
+    .sidebar { background: var(--surface); border-right: 1px solid var(--border); padding: 24px 16px; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 0; height: 100vh; }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 4px 12px; margin-bottom: 28px; }
+    .brand-icon { width: 40px; height: 40px; border-radius: var(--radius); background: linear-gradient(135deg, #3b82f6, #6366f1); display: grid; place-items: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(59,130,246,0.25); }
+    .brand-icon svg { width: 22px; height: 22px; fill: #ffffff; }
+    .brand h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; background: linear-gradient(135deg, var(--text), var(--text-secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .brand p { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .nav-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; padding: 16px 12px 6px; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm); border: none; background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 150ms ease; text-align: left; font: inherit; font-size: 13.5px; font-weight: 500; width: 100%; }
+    .nav-item:hover { background: var(--surface-hover); color: var(--text); }
+    .nav-item.active { background: var(--blue-50); color: var(--blue-600); font-weight: 600; }
+    .nav-item svg { width: 18px; height: 18px; fill: currentColor; flex-shrink: 0; opacity: 0.7; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-badge { margin-left: auto; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-radius: var(--radius); background: linear-gradient(135deg, var(--blue-50), var(--purple-50)); border: 1px solid var(--blue-100); }
+    .sidebar-footer strong { display: block; font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .sidebar-footer span { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* Main */
+    .main { padding: 16px 24px; max-width: 1400px; }
+    .top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; gap: 16px; }
+    .top-bar h2 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+    .top-bar p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* Buttons */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 18px; border-radius: var(--radius-sm); font-weight: 600; font-size: 13px; border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: all 150ms ease; font-family: inherit; white-space: nowrap; box-shadow: var(--shadow-sm); }
+    .btn:hover { background: var(--surface-hover); box-shadow: var(--shadow); transform: translateY(-1px); }
+    .btn-primary { background: var(--blue-600); border-color: var(--blue-600); color: white; box-shadow: 0 1px 3px rgba(37,99,235,0.2); }
+    .btn-primary:hover { background: var(--blue-700); box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
+    .btn-green { background: var(--green); border-color: var(--green); color: white; }
+    .btn-green:hover { background: #059669; }
+    .btn-red { background: var(--red); border-color: var(--red); color: white; }
+    .btn-red:hover { background: #dc2626; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--surface-hover); }
+    .btn svg { width: 15px; height: 15px; fill: currentColor; }
+    .btn-primary svg, .btn-green svg, .btn-red svg { fill: white; }
+
+    /* Metrics */
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; position: relative; overflow: hidden; transition: all 200ms ease; }
+    .metric:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .metric::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .metric.blue::after { background: linear-gradient(90deg, var(--blue-500, #3b82f6), var(--blue-600)); }
+    .metric.red::after { background: linear-gradient(90deg, var(--red), #dc2626); }
+    .metric.amber::after { background: linear-gradient(90deg, var(--amber), #d97706); }
+    .metric.green::after { background: linear-gradient(90deg, var(--green), #059669); }
+    .metric-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .metric-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+    .metric-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); display: grid; place-items: center; }
+    .metric-icon svg { width: 16px; height: 16px; }
+    .metric.blue .metric-icon { background: var(--blue-50); } .metric.blue .metric-icon svg { fill: var(--blue); }
+    .metric.red .metric-icon { background: var(--red-50); } .metric.red .metric-icon svg { fill: var(--red); }
+    .metric.amber .metric-icon { background: var(--amber-50); } .metric.amber .metric-icon svg { fill: var(--amber); }
+    .metric.green .metric-icon { background: var(--green-50); } .metric.green .metric-icon svg { fill: var(--green); }
+    .metric-value { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px; }
+    .metric-change { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+
+    /* Cards */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .card-header h3 { font-size: 15px; font-weight: 700; }
+    .card-header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Table */
+    .table-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .table-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border-light); }
+    .table-header h3 { font-size: 14px; font-weight: 700; }
+    .table-header .count { font-size: 12px; color: var(--text-muted); background: var(--surface-hover); padding: 2px 10px; border-radius: 99px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--border-light); background: var(--surface-hover); }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border-light); font-size: 13px; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface-hover); }
+    .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+    .badge-red { background: var(--red-50); color: #dc2626; }
+    .badge-amber { background: var(--amber-50); color: #b45309; }
+    .badge-green { background: var(--green-50); color: #047857; }
+    .badge-blue { background: var(--blue-50); color: var(--blue-600); }
+
+    /* Input */
+    .input { padding: 9px 13px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; outline: none; background: var(--surface); transition: border 0.15s; font-family: inherit; }
+    .input:focus { border-color: var(--blue-600); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .input-row { display: flex; gap: 8px; }
+    .input-row .input { flex: 1; }
+
+    /* Toolbar */
+    .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .search-box { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 12px; flex: 1; max-width: 320px; }
+    .search-box svg { width: 16px; height: 16px; fill: var(--text-muted); flex-shrink: 0; }
+    .search-box input { border: none; outline: none; background: transparent; padding: 9px 0; font-size: 13px; font-family: inherit; width: 100%; }
+    .toolbar select { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; background: var(--surface); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+
+    /* Workspace sections */
+    .workspace { display: none; }
+    .workspace.active { display: block; }
+
+    /* Email preview frame */
+    .email-frame { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; line-height: 1.6; }
+    .email-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+    .email-meta strong { color: var(--text-secondary); }
+    .email-body { font-size: 13px; color: var(--text); }
+    .email-body p { margin: 8px 0; }
+    .email-footer { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border); font-size: 11px; color: var(--text-muted); }
+    .email-footer a { color: var(--blue-600); text-decoration: none; cursor: pointer; }
+    .email-footer a:hover { text-decoration: underline; }
+
+    /* Unsubscribe landing page */
+    .landing-page { max-width: 440px; margin: 40px auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 44px 32px; text-align: center; box-shadow: var(--shadow-lg); }
+    .landing-page .ico { width: 56px; height: 56px; border-radius: 50%; background: var(--red-50); display: grid; place-items: center; margin: 0 auto 16px; font-size: 24px; }
+    .landing-page h2 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+    .landing-page p { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; line-height: 1.6; }
+    .landing-page .addr { display: inline-block; background: var(--blue-50); padding: 6px 16px; border-radius: var(--radius-sm); font-size: 13px; color: var(--blue-600); margin-bottom: 24px; font-family: monospace; font-weight: 500; }
+    .landing-page .actions { display: flex; gap: 10px; justify-content: center; }
+    .landing-page .btn { padding: 10px 24px; font-size: 14px; }
+    .landing-page .success-msg { background: var(--green-50); border: 1px solid var(--green-100); border-radius: var(--radius); padding: 16px; margin-top: 16px; }
+    .landing-page .success-msg h3 { color: #047857; font-size: 15px; margin-bottom: 4px; }
+    .landing-page .success-msg p { color: #065f46; font-size: 13px; margin: 0; }
+
+    /* Bulk send simulation */
+    .bulk-sim { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+    .bulk-step { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+    .bulk-step:last-child { border-bottom: none; }
+    .bulk-step .num { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .bulk-step .num.green { background: var(--green-50); color: #047857; }
+    .bulk-step .num.red { background: var(--red-50); color: #dc2626; }
+    .bulk-step .num.blue { background: var(--blue-50); color: var(--blue-600); }
+    .bulk-step .info { flex: 1; }
+    .bulk-step .info strong { font-size: 13px; }
+    .bulk-step .info span { font-size: 12px; color: var(--text-muted); display: block; }
+
+    /* Flow diagram */
+    .flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+    .flow-step { background: var(--surface); border: 1px solid var(--border); padding: 8px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; white-space: nowrap; }
+    .flow-arrow { color: var(--blue-600); font-size: 14px; }
+
+    /* Note / callout */
+    .callout { background: var(--amber-50); border: 1px solid var(--amber-100); border-radius: var(--radius); padding: 12px 16px; font-size: 12px; color: #92400e; line-height: 1.6; }
+    .callout strong { color: #78350f; }
+    .callout-blue { background: var(--blue-50); border-color: var(--blue-100); color: #1e40af; }
+    .callout-blue strong { color: #1d4ed8; }
+    .callout-green { background: var(--green-50); border-color: var(--green-100); color: #065f46; }
+    .callout-green strong { color: #047857; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #fff; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all 0.3s; z-index: 1000; box-shadow: var(--shadow-lg); }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { background: var(--red); }
+
+    /* Settings panel */
+    .settings-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+    .settings-panel h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .settings-panel .desc { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-light); }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { font-size: 13px; font-weight: 500; }
+    .setting-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .toggle { width: 44px; height: 24px; border-radius: 12px; background: #d1d5db; position: relative; cursor: pointer; transition: background 0.2s; }
+    .toggle.on { background: var(--green); }
+    .toggle::after { content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: #fff; top: 2px; left: 2px; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .toggle.on::after { transform: translateX(20px); }
+
+    /* Preview banner */
+    .preview-banner { background: var(--green-50); border: 1px solid var(--green-100); padding: 8px 16px; font-size: 12px; font-weight: 600; color: #047857; display: flex; align-items: center; gap: 8px; border-radius: var(--radius-sm); margin-bottom: 16px; }
+    .preview-banner span { background: var(--green); color: #fff; padding: 1px 8px; border-radius: 99px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* Modal backdrop */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 90; display: none; place-items: center; }
+    .modal-backdrop.show { display: grid; }
+    .modal { background: var(--surface); border-radius: var(--radius-xl); padding: 24px; box-shadow: var(--shadow-xl); max-width: 520px; width: 90%; max-height: 85vh; overflow-y: auto; }
+    .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--surface-hover); cursor: pointer; display: grid; place-items: center; font-size: 18px; color: var(--text-muted); transition: all 0.15s; }
+    .modal-close:hover { background: var(--border); }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      </div>
+      <div><h1>LeadGen AI</h1><p>PreSoft</p></div>
+    </div>
+
+    <div class="nav-label">Workspace</div>
+    <button class="nav-item" onclick="go('dashboard', this)">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg> Dashboard
+    </button>
+    <button class="nav-item" onclick="go('intake', this)">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg> Inbound Scanner
+    </button>
+    <button class="nav-item" onclick="go('queue', this)">
+      <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> CRM Manager
+    </button>
+    <button class="nav-item" onclick="go('outbound', this)">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> Outbound Tools
+    </button>
+
+    <div class="nav-label">Compliance</div>
+    <button class="nav-item active" onclick="go('suppression', this)" id="nav-supp">
+      <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.1v8.79z"/></svg> Suppression List
+      <span class="nav-badge" id="nav-badge">3</span>
+    </button>
+
+    <div class="sidebar-footer">
+      <strong id="sf-avatar">J</strong>
+      <strong>Jackson</strong>
+      <span>Admin · PreSoft Team</span>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ===== WORKSPACE: SUPPRESSION LIST (main view) ===== -->
+    <div class="workspace active" id="w-suppression">
+      <div class="preview-banner"><span>Preview</span> Full system — Suppression List integrated into the app</div>
+      <div class="top-bar">
+        <div>
+          <h2>Suppression List</h2>
+          <p>Manage unsubscribed contacts — they are automatically blocked from all future email sends.</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" onclick="go('how-it-works', document.querySelectorAll('.nav-item')[0])">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:var(--text-muted)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            How It Works
+          </button>
+          <button class="btn btn-outline" onclick="go('settings-view', document.querySelectorAll('.nav-item')[0])">
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:var(--text-muted)"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+            Settings
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="metrics">
+        <div class="metric red">
+          <div class="metric-header">
+            <div class="metric-label">Suppressed</div>
+            <div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+          </div>
+          <div class="metric-value" id="stat-suppressed">3</div>
+          <div class="metric-change">1 added this week</div>
+        </div>
+        <div class="metric blue">
+          <div class="metric-header">
+            <div class="metric-label">Sends Blocked</div>
+            <div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+          </div>
+          <div class="metric-value">5</div>
+          <div class="metric-change">Since suppression enabled</div>
+        </div>
+        <div class="metric amber">
+          <div class="metric-header">
+            <div class="metric-label">Unsubscribed</div>
+            <div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+          </div>
+          <div class="metric-value">2</div>
+          <div class="metric-change">Self-opted out</div>
+        </div>
+        <div class="metric green">
+          <div class="metric-header">
+            <div class="metric-label">Manual Blocks</div>
+            <div class="metric-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+          </div>
+          <div class="metric-value">1</div>
+          <div class="metric-change">Replied "stop"</div>
+        </div>
+      </div>
+
+      <!-- Manual add -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h3>➕ Manually Block an Email</h3>
+            <p>Use when someone replies "stop", asks to be removed, or you want to prevent future sends.</p>
+          </div>
+        </div>
+        <div class="input-row">
+          <input class="input" id="manualEmail" type="email" placeholder="email@example.com">
+          <select class="input" id="manualReason" style="flex:0 0 180px">
+            <option value="Replied stop">Replied "stop"</option>
+            <option value="Verbal request">Verbal request</option>
+            <option value="Complaint">Complaint</option>
+            <option value="Other">Other</option>
+          </select>
+          <button class="btn btn-red" onclick="addManual()">Block Email</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <div class="table-header">
+          <h3>📋 Suppressed Contacts</h3>
+          <span class="count" id="table-count">3 entries</span>
+        </div>
+        <div class="toolbar" style="padding: 12px 18px 0">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" placeholder="Search email or company..." id="searchSupp" oninput="filterTable()">
+          </div>
+          <select id="filterReason" onchange="filterTable()">
+            <option value="all">All Reasons</option>
+            <option value="Unsubscribed">Unsubscribed</option>
+            <option value="Replied stop">Replied "stop"</option>
+            <option value="Manual">Manual</option>
+          </select>
+        </div>
+        <table style="margin-top: 8px;">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Company</th>
+              <th>Reason</th>
+              <th>Source</th>
+              <th>Date Added</th>
+              <th style="width:80px"></th>
+            </tr>
+          </thead>
+          <tbody id="suppTable">
+            <tr data-reason="Unsubscribed">
+              <td class="mono">no-reply@abc-corp.com</td>
+              <td>ABC Corporation</td>
+              <td><span class="badge badge-red">Unsubscribed</span></td>
+              <td style="font-size:12px;color:var(--text-muted)">Link click</td>
+              <td style="font-size:12px;color:var(--text-muted)">Jun 3, 2026</td>
+              <td><button class="btn btn-sm" style="padding:4px 10px;font-size:11px;border-color:#fecaca;color:var(--red)" onclick="removeRow(this)">Remove</button></td>
+            </tr>
+            <tr data-reason="Replied stop">
+              <td class="mono">admin@xyz-sdn.com</td>
+              <td>XYZ Sdn Bhd</td>
+              <td><span class="badge badge-amber">Replied "stop"</span></td>
+              <td style="font-size:12px;color:var(--text-muted)">Manual</td>
+              <td style="font-size:12px;color:var(--text-muted)">Jun 5, 2026</td>
+              <td><button class="btn btn-sm" style="padding:4px 10px;font-size:11px;border-color:#fecaca;color:var(--red)" onclick="removeRow(this)">Remove</button></td>
+            </tr>
+            <tr data-reason="Unsubscribed">
+              <td class="mono">info@testco.com.my</td>
+              <td>TestCo Malaysia</td>
+              <td><span class="badge badge-red">Unsubscribed</span></td>
+              <td style="font-size:12px;color:var(--text-muted)">Link click</td>
+              <td style="font-size:12px;color:var(--text-muted)">Jun 7, 2026</td>
+              <td><button class="btn btn-sm" style="padding:4px 10px;font-size:11px;border-color:#fecaca;color:var(--red)" onclick="removeRow(this)">Remove</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bulk send simulation -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-header">
+          <div>
+            <h3>📨 How Bulk Send Handles Suppression</h3>
+            <p>When you send a campaign, suppressed emails are automatically skipped — no manual filtering needed.</p>
+          </div>
+        </div>
+        <div class="bulk-sim">
+          <div style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:10px">Example: Send to 5 leads</div>
+          <div class="bulk-step">
+            <div class="num green">✓</div>
+            <div class="info"><strong>sarah@buildpro.com.my</strong><span>BuildPro Construction · AutoCount POS</span></div>
+            <span class="badge badge-green">Sent</span>
+          </div>
+          <div class="bulk-step">
+            <div class="num red">✕</div>
+            <div class="info"><strong>no-reply@abc-corp.com</strong><span>ABC Corporation · Suppressed</span></div>
+            <span class="badge badge-red">Skipped</span>
+          </div>
+          <div class="bulk-step">
+            <div class="num green">✓</div>
+            <div class="info"><strong>ceo@megatrade.com</strong><span>MegaTrade Sdn Bhd · Mobile Stock</span></div>
+            <span class="badge badge-green">Sent</span>
+          </div>
+          <div class="bulk-step">
+            <div class="num red">✕</div>
+            <div class="info"><strong>info@testco.com.my</strong><span>TestCo Malaysia · Suppressed</span></div>
+            <span class="badge badge-red">Skipped</span>
+          </div>
+          <div class="bulk-step">
+            <div class="num green">✓</div>
+            <div class="info"><strong>info@smartwarehouse.my</strong><span>Smart Warehouse · Cubehous WMS</span></div>
+            <span class="badge badge-green">Sent</span>
+          </div>
+          <div style="margin-top:12px;padding:10px 14px;background:var(--blue-50);border-radius:var(--radius-sm);font-size:12px;color:var(--blue-600);font-weight:500">
+            Result: <strong>3 sent</strong>, <strong>2 skipped</strong> (suppressed). You see: <em>"5 selected, 2 skipped, 3 sent"</em>.
+          </div>
+        </div>
+      </div>
+
+      <!-- Email view with unsubscribe footer -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-header">
+          <div>
+            <h3>📧 What Recipients See — Unsubscribe Footer</h3>
+            <p>Every bulk email includes an unsubscribe link at the bottom.</p>
+          </div>
+        </div>
+        <div class="email-frame">
+          <div class="email-meta">
+            <strong>From:</strong> Jackson &lt;presoftjackson@gmail.com&gt;<br>
+            <strong>To:</strong> jacksongau123@gmail.com<br>
+            <strong>Subject:</strong> Quick question about Seri Setia Construction
+          </div>
+          <div class="email-body">
+            <p>Hi Business Contact,</p>
+            <p>I came across Seri Setia Construction while looking at businesses in Puchong.</p>
+            <p>We help general contractor companies simplify their operations — would you be open to a 10-minute chat next week to see if there's a fit?</p>
+            <p style="margin-top:12px">Best,<br>Jackson</p>
+          </div>
+          <div class="email-footer">
+            You're receiving this because we identified your business as a potential fit for our solutions.<br>
+            <a onclick="go('landing-view', document.querySelectorAll('.nav-item')[0])">Unsubscribe from future emails</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flow diagram -->
+      <div class="callout callout-blue" style="margin-top:16px">
+        <strong>How the flow works:</strong><br><br>
+        <div class="flow" style="margin:10px 0 0">
+          <div class="flow-step">📧 Bulk email sent</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">👤 Recipient reads</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">🔗 Clicks unsubscribe</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">📝 Opt-out page</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">✅ Added to suppression</div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step">🛡️ Blocked from future sends</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WORKSPACE: HOW IT WORKS ===== -->
+    <div class="workspace" id="w-how-it-works">
+      <div class="top-bar">
+        <div>
+          <h2>How Suppression Works</h2>
+          <p>Understanding the unsubscribe flow and what happens behind the scenes.</p>
+        </div>
+        <button class="btn" onclick="go('suppression', document.getElementById('nav-supp'))">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:var(--text-muted)"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          Back to List
+        </button>
+      </div>
+
+      <div class="callout" style="margin-bottom:20px">
+        ⚠️ <strong>Important:</strong> The suppression list does NOT improve spam placement. Spam filters check SPF/DKIM/DMARC, sender reputation, and engagement — not unsubscribe links. This feature is about <strong>compliance</strong> and <strong>respecting recipient choice</strong>.
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:12px">What happens when someone is suppressed?</h3>
+        <ul style="margin-left:18px;font-size:13px;line-height:2.2;color:var(--text-secondary)">
+          <li>The email is <strong style="color:var(--red)">blocked from ALL future bulk sends</strong></li>
+          <li>The lead gets a <span class="badge badge-red">unsubscribed</span> badge in the lead list</li>
+          <li>Individual sends to that lead are also blocked with a warning</li>
+          <li>The suppression is permanent unless you manually remove it</li>
+          <li>The count in the sidebar badge updates automatically</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:12px">Ways someone gets added to the suppression list</h3>
+        <table>
+          <thead><tr><th>Method</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-red">Link click</span></td><td>Recipient clicks "Unsubscribe" in email footer and confirms on the landing page</td></tr>
+            <tr><td><span class="badge badge-amber">Manual</span></td><td>You manually add an email (e.g., they replied "stop" to you)</td></tr>
+            <tr><td><span class="badge badge-blue">Bounce</span></td><td>Hard bounces can optionally be auto-added (configurable in Settings)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-green">
+        💡 <strong>Why a simple one-click unsubscribe?</strong> For cold outreach, a simple one-click unsubscribe is better than a preference center. Preference centers add complexity and signal you're a bulk sender. A clear opt-out looks more like a personal email.
+      </div>
+    </div>
+
+    <!-- ===== WORKSPACE: UNsubscribe LANDING PAGE ===== -->
+    <div class="workspace" id="w-landing-view">
+      <div style="padding:8px 0">
+        <div class="preview-banner" style="max-width:440px;margin:0 auto 16px"><span>Preview</span> This is the page recipients see when they click "Unsubscribe"</div>
+      </div>
+
+      <div class="landing-page" id="landingPage">
+        <div class="ico">📭</div>
+        <h2>Unsubscribe from our emails</h2>
+        <p>You won't receive any more outreach emails from us after confirming below.</p>
+        <div class="addr" id="landingEmail">jacksongau123@gmail.com</div>
+        <div class="actions">
+          <button class="btn btn-red" id="unsubBtn" onclick="confirmUnsub()">Yes, unsubscribe me</button>
+          <button class="btn" onclick="cancelUnsub()">No, keep me subscribed</button>
+        </div>
+        <div id="successMsg" style="display:none;margin-top:20px">
+          <div class="success-msg">
+            <h3>✅ You've been unsubscribed</h3>
+            <p>Your email has been added to our suppression list. You won't receive future outreach emails from us.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WORKSPACE: SETTINGS ===== -->
+    <div class="workspace" id="w-settings-view">
+      <div class="top-bar">
+        <div>
+          <h2>Unsubscribe Settings</h2>
+          <p>Configure how the unsubscribe feature behaves in your email campaigns.</p>
+        </div>
+        <button class="btn" onclick="go('suppression', document.getElementById('nav-supp'))">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:var(--text-muted)"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          Back to List
+        </button>
+      </div>
+
+      <div class="settings-panel">
+        <h3>Email Footer Configuration</h3>
+        <p class="desc">Control what appears in the unsubscribe footer of your emails.</p>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Include unsubscribe link</div>
+            <div class="setting-desc">Add "Unsubscribe from future emails" link to all bulk emails</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Custom footer text</div>
+            <div class="setting-desc">Message shown before the unsubscribe link</div>
+          </div>
+        </div>
+        <textarea class="input" style="width:100%;margin-top:8px;margin-bottom:16px;min-height:60px;font-family:inherit;font-size:13px;resize:vertical" rows="2">You're receiving this because we identified your business as a potential fit for our solutions.</textarea>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Unsubscribe link text</div>
+            <div class="setting-desc">The clickable text in the email footer</div>
+          </div>
+        </div>
+        <input class="input" value="Unsubscribe from future emails" style="width:100%;margin-top:8px;margin-bottom:16px">
+      </div>
+
+      <div class="settings-panel" style="margin-top:16px">
+        <h3>Auto-Suppression Rules</h3>
+        <p class="desc">Automatically add emails to the suppression list based on events.</p>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Auto-suppress hard bounces</div>
+            <div class="setting-desc">When an email hard bounces, automatically add to suppression list</div>
+          </div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Auto-suppress spam complaints</div>
+            <div class="setting-desc">When a recipient marks as spam via ESP webhook</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Block individual sends too</div>
+            <div class="setting-desc">Prevent sending even single emails to suppressed contacts</div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+
+      <div class="settings-panel" style="margin-top:16px">
+        <h3>Unsubscribe Page</h3>
+        <p class="desc">Customize the landing page recipients see when they click unsubscribe.</p>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Company name in header</div>
+            <div class="setting-desc">Shown on the unsubscribe confirmation page</div>
+          </div>
+        </div>
+        <input class="input" value="PreSoft (M) Sdn Bhd" style="width:100%;margin-top:8px;margin-bottom:16px">
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Confirmation message</div>
+            <div class="setting-desc">Message shown after someone unsubscribes</div>
+          </div>
+        </div>
+        <textarea class="input" style="width:100%;margin-top:8px;margin-bottom:16px;min-height:60px;font-family:inherit;font-size:13px;resize:vertical" rows="2">Your email has been added to our suppression list. You won't receive future outreach emails from us.</textarea>
+      </div>
+
+      <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn" onclick="toast('Settings preview only')">Cancel</button>
+        <button class="btn btn-primary" onclick="toast('Settings saved ✓')">Save Settings</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// Workspace navigation
+function go(id, navBtn) {
+  // Map nav targets to workspace IDs
+  const map = {
+    'dashboard': 'w-dashboard',
+    'intake': 'w-intake',
+    'queue': 'w-queue',
+    'outbound': 'w-outbound',
+    'suppression': 'w-suppression',
+    'how-it-works': 'w-how-it-works',
+    'landing-view': 'w-landing-view',
+    'settings-view': 'w-settings-view'
+  };
+
+  // Only handle suppression-related workspaces
+  const suppWorkspaces = ['w-suppression', 'w-how-it-works', 'w-landing-view', 'w-settings-view'];
+
+  if (suppWorkspaces.includes(map[id]) || suppWorkspaces.includes(id)) {
+    document.querySelectorAll('.workspace').forEach(w => w.classList.remove('active'));
+    const ws = document.getElementById(map[id] || id);
+    if (ws) ws.classList.add('active');
+
+    // Update nav active state
+    if (navBtn && navBtn.classList.contains('nav-item')) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      navBtn.classList.add('active');
+    } else {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const suppNav = document.getElementById('nav-supp');
+      if (suppNav) suppNav.classList.add('active');
+    }
+  } else {
+    // Show placeholder for non-suppression workspaces
+    toast('Preview: Suppression feature only. Other pages not included.');
+  }
+}
+
+// Manual add
+function addManual() {
+  const inp = document.getElementById('manualEmail');
+  const reasonSel = document.getElementById('manualReason');
+  const v = inp.value.trim();
+  if (!v || !v.includes('@')) { toast('Enter a valid email', true); return; }
+
+  const reason = reasonSel.value;
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  const tbody = document.getElementById('suppTable');
+  const row = document.createElement('tr');
+  row.setAttribute('data-reason', reason);
+  const badgeClass = reason === 'Unsubscribed' ? 'badge-red' : 'badge-amber';
+  row.innerHTML = `
+    <td class="mono">${v}</td>
+    <td>—</td>
+    <td><span class="badge ${badgeClass}">${reason}</span></td>
+    <td style="font-size:12px;color:var(--text-muted)">Manual</td>
+    <td style="font-size:12px;color:var(--text-muted)">${dateStr}</td>
+    <td><button class="btn btn-sm" style="padding:4px 10px;font-size:11px;border-color:#fecaca;color:var(--red)" onclick="removeRow(this)">Remove</button></td>
+  `;
+  tbody.insertBefore(row, tbody.firstChild);
+  inp.value = '';
+
+  // Update counts
+  updateCounts();
+  toast(v + ' blocked from future sends');
+}
+
+// Remove row
+function removeRow(btn) {
+  const row = btn.closest('tr');
+  row.style.transition = 'opacity 0.3s';
+  row.style.opacity = '0.3';
+  setTimeout(() => {
+    row.remove();
+    updateCounts();
+    toast('Removed from suppression list');
+  }, 300);
+}
+
+// Filter table
+function filterTable() {
+  const search = document.getElementById('searchSupp').value.toLowerCase();
+  const reasonFilter = document.getElementById('filterReason').value;
+  const rows = document.getElementById('suppTable').querySelectorAll('tr');
+
+  let visible = 0;
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const reason = row.getAttribute('data-reason') || '';
+    const matchSearch = !search || text.includes(search);
+    const matchReason = reasonFilter === 'all' || reason === reasonFilter;
+    const show = matchSearch && matchReason;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+
+  document.getElementById('table-count').textContent = visible + ' entries';
+}
+
+// Update counts
+function updateCounts() {
+  const rows = document.getElementById('suppTable').querySelectorAll('tr');
+  let total = 0, unsub = 0, manual = 0;
+  rows.forEach(row => {
+    if (row.style.display !== 'none') {
+      total++;
+      const reason = row.getAttribute('data-reason');
+      if (reason === 'Unsubscribed') unsub++;
+      else manual++;
+    }
+  });
+
+  document.getElementById('stat-suppressed').textContent = total;
+  document.getElementById('table-count').textContent = total + ' entries';
+  document.getElementById('nav-badge').textContent = total;
+}
+
+// Unsubscribe landing page
+function confirmUnsub() {
+  const btn = document.getElementById('unsubBtn');
+  btn.disabled = true;
+  btn.innerHTML = '✅ Unsubscribed';
+  btn.style.background = 'var(--green)';
+  btn.style.borderColor = 'var(--green)';
+  document.getElementById('successMsg').style.display = 'block';
+  document.querySelector('.landing-page p').textContent = 'Your email has been added to our suppression list.';
+
+  // Add to suppression table
+  const email = document.getElementById('landingEmail').textContent;
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const tbody = document.getElementById('suppTable');
+  const row = document.createElement('tr');
+  row.setAttribute('data-reason', 'Unsubscribed');
+  row.innerHTML = `
+    <td class="mono">${email}</td>
+    <td>Self opt-out</td>
+    <td><span class="badge badge-red">Unsubscribed</span></td>
+    <td style="font-size:12px;color:var(--text-muted)">Link click</td>
+    <td style="font-size:12px;color:var(--text-muted)">${dateStr}</td>
+    <td><button class="btn btn-sm" style="padding:4px 10px;font-size:11px;border-color:#fecaca;color:var(--red)" onclick="removeRow(this)">Remove</button></td>
+  `;
+  tbody.insertBefore(row, tbody.firstChild);
+  updateCounts();
+  toast('Added to suppression list');
+}
+
+function cancelUnsub() {
+  toast('You\'re still subscribed ✓');
+}
+
+// Toast
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = err ? 'toast error show' : 'toast show';
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
