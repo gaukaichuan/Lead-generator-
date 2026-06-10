@@ -258,7 +258,7 @@ function seedDefaultEmailTemplates(store) {
     {
       id: "tmpl_default_1",
       name: "Professional Outreach",
-      subject: "Quick idea for {{company}}",
+      subject: "{{contactName}}, a note from {{senderName}}",
       body: "Hi {{contactName}},\n\nI came across {{company}} and was impressed by your presence in {{region}}.\n\nI noticed you're handling {{painPointLabel}}, which is exactly what we help {{industry}} businesses improve.\n\nWe recently helped a similar business reduce their manual workload by 40% using {{productName}}.\n\nGiven your focus on efficiency, I thought you might find our solution valuable.\n\nWould you be open to a brief 15-minute conversation next week? I'm available Tuesday or Thursday afternoons.\n\nThanks for considering,\n\n{{senderName}}\nPreSoft Team\n{{senderEmail}}\n+603-8068 2556"
     },
     {
@@ -430,27 +430,15 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
     throw new Error("EngineMailer is not configured. Set ENGINEMAILER_FROM_EMAIL on the server.");
   }
 
-  // Phase 2: Inject tracking pixel + Phase 3: Rewrite links for click tracking
   // Convert plain text to HTML: double newlines → paragraph breaks, single newlines → <br>
-  let htmlBody = messageBody
+  // Auto-append unsubscribe link at the bottom (with lead's email for auto-fill)
+  const unsubscribeUrl = leadId
+    ? `https://lead-generator-j78o.onrender.com/unsubscribe?email=${encodeURIComponent(to)}`
+    : `https://lead-generator-j78o.onrender.com/unsubscribe`;
+  const unsubscribeLink = `<br><br><hr style="border:none;border-top:1px solid #ddd;margin:20px 0;"><p style="font-size:12px;color:#666;">If you no longer wish to receive emails from us, <a href="${unsubscribeUrl}" style="color:#666;">click here to unsubscribe</a>.</p>`;
+  const htmlBody = (messageBody
     .split(/\n\n+/)
-    .map(block => `<p>${block.replace(/\n/g, "<br>")}</p>`).join("");
-  if (leadId && baseUrl) {
-    // Inject tracking pixel
-    const pixelUrl = `${baseUrl}/track/open?leadId=${encodeURIComponent(leadId)}`;
-    htmlBody += `<img src="${pixelUrl}" width="1" height="1" style="display:none" alt="" />`;
-
-    // Rewrite all <a href="..."> links to go through click tracker
-    const clickTrackerPattern = /<a\s+([^>]*?)href=["']([^"']+)["']([^>]*)>/gi;
-    htmlBody = htmlBody.replace(clickTrackerPattern, (match, before, href, after) => {
-      // Skip mailto:, tel:, and already-tracked links
-      if (href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#') || href.includes('/track/click')) {
-        return match;
-      }
-      const trackedUrl = `${baseUrl}/track/click?leadId=${encodeURIComponent(leadId)}&url=${encodeURIComponent(href)}`;
-      return `<a ${before}href="${trackedUrl}"${after}>`;
-    });
-  }
+    .map(block => `<p>${block.replace(/\n/g, "<br>")}</p>`).join("")) + unsubscribeLink;
 
   const response = await fetch("https://api.enginemailer.com/RESTAPI/V2/Submission/SendEmail", {
     method: "POST",
@@ -464,7 +452,8 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
       Subject: messageSubject,
       SenderEmail: emFromEmail,
       SenderName: emFromName,
-      SubmittedContent: htmlBody
+      SubmittedContent: htmlBody,
+      PlainTextContent: messageBody + "\n\n---\nIf you no longer wish to receive emails from us, visit: https://lead-generator-j78o.onrender.com/unsubscribe"
     })
   });
 
@@ -2098,6 +2087,111 @@ async function handleApi(request, response, pathname, options = {}) {
 
   // ===== EMAIL TRACKING ENDPOINTS (no auth required — called by browsers/email clients) =====
 
+  // GET /unsubscribe — Unsubscribe page
+  if (pathname === "/unsubscribe") {
+    if (request.method === "GET") {
+      const urlObj = new URL(request.url, `http://${request.headers.host}`);
+      const email = urlObj.searchParams.get("email") || "";
+
+      response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      response.end(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unsubscribe — LeadGen AI</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .card { background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-width: 480px; width: 100%; padding: 40px; text-align: center; }
+    .icon { font-size: 3rem; margin-bottom: 16px; }
+    h1 { font-size: 1.5rem; color: #1a1a2e; margin-bottom: 12px; }
+    p { color: #6b7280; line-height: 1.6; margin-bottom: 24px; }
+    .email { background: #f3f4f6; padding: 12px 16px; border-radius: 8px; font-family: monospace; color: #374151; margin-bottom: 24px; word-break: break-all; }
+    button { background: #667eea; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #5a67d8; }
+    .success { color: #10b981; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📧</div>
+    <h1>Unsubscribe</h1>
+    <div id="confirm-section">
+      <p>You are about to unsubscribe from emails sent to:</p>
+      <div class="email">${esc(email || "your email address")}</div>
+      <p style="font-size: 0.9rem;">You will no longer receive marketing emails from us. This action cannot be undone.</p>
+      <button onclick="confirmUnsubscribe()">Confirm Unsubscribe</button>
+    </div>
+    <div id="success-section" class="hidden">
+      <div class="icon success">✅</div>
+      <h1 class="success">You've been unsubscribed</h1>
+      <p>We're sorry to see you go. You will no longer receive emails from us.</p>
+      <p style="font-size: 0.85rem; color: #9ca3af;">If this was a mistake, please contact us at info@presoft.com.my</p>
+    </div>
+  </div>
+  <script>
+    function confirmUnsubscribe() {
+      fetch('/api/unsubscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: '${esc(email)}' })
+      }).then(res => res.json()).then(data => {
+        if (data.success) {
+          document.getElementById('confirm-section').classList.add('hidden');
+          document.getElementById('success-section').classList.remove('hidden');
+        } else {
+          alert('Error: ' + (data.error || 'Unknown error'));
+        }
+      }).catch(err => alert('Error: ' + err.message));
+    }
+    function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  </script>
+</body>
+</html>`);
+      return;
+    }
+  }
+
+  // POST /api/unsubscribe — Process unsubscribe request
+  if (request.method === "POST" && pathname === "/api/unsubscribe") {
+    const body = await readRequestBody(request);
+    const { email } = body;
+
+    if (!email) {
+      response.writeHead(400, { "Content-Type": "application/json" });
+      response.end(JSON.stringify({ success: false, error: "Email is required" }));
+      return;
+    }
+
+    // Find and mark lead as unsubscribed
+    let found = false;
+    for (const lead of store.leads) {
+      if (lead.email && lead.email.toLowerCase() === email.toLowerCase()) {
+        lead.unsubscribed = true;
+        lead.unsubscribedAt = new Date().toISOString();
+        found = true;
+        break;
+      }
+    }
+
+    // If not found in leads, store the unsubscribe email anyway
+    if (!found) {
+      if (!store.unsubscribedEmails) store.unsubscribedEmails = [];
+      if (!store.unsubscribedEmails.includes(email.toLowerCase())) {
+        store.unsubscribedEmails.push(email.toLowerCase());
+      }
+    }
+
+    writeStore(store);
+    console.log("[UNSUBSCRIBE]", email, found ? "(found in leads)" : "(added to blocklist)");
+
+    response.writeHead(200, { "Content-Type": "application/json" });
+    response.end(JSON.stringify({ success: true }));
+    return;
+  }
+
   // GET /track/open — 1x1 tracking pixel (Phase 2)
   if (request.method === "GET" && pathname === "/track/open") {
     console.log("[TRACK] /track/open hit, leadId:", new URL(request.url, `http://${request.headers.host}`).searchParams.get("leadId"));
@@ -2953,6 +3047,19 @@ async function handleApi(request, response, pathname, options = {}) {
       return;
     }
 
+    // Check if lead is unsubscribed
+    if (lead.unsubscribed) {
+      sendJson(response, 400, { error: "This lead has unsubscribed and cannot receive emails." });
+      return;
+    }
+
+    // Check global unsubscribe blocklist
+    const blocklist = store.unsubscribedEmails || [];
+    if (blocklist.includes(String(lead.email).trim().toLowerCase())) {
+      sendJson(response, 400, { error: "This email address is on the unsubscribe blocklist." });
+      return;
+    }
+
     const body = await readRequestBody(request);
     const senderName = String(body.senderName || "").trim() || store.emailSettings.senderName || "Jackson";
     const senderEmail = String(body.senderEmail || "").trim() || store.emailSettings.senderEmail || process.env.ENGINEMAILER_FROM_EMAIL || "";
@@ -3243,9 +3350,3 @@ if (require.main === module) {
 }
 
 module.exports = { createAppServer, startServer };
-
-
-
-
-
-
