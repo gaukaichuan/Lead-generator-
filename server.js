@@ -431,9 +431,10 @@ async function sendEmailMessage({ to, fromName, fromEmail, subject, body, leadId
   }
 
   // Convert plain text to HTML: double newlines → paragraph breaks, single newlines → <br>
+  const unsubscribeFooter = `<p style="font-size:11px;color:#888;margin-top:32px;border-top:1px solid #eee;padding-top:8px;">You received this email because we thought it might be relevant to your business. <a href="mailto:${emFromEmail}?subject=Unsubscribe&body=Please%20remove%20me%20from%20your%20list" style="color:#888;">Unsubscribe</a></p>`;
   const htmlBody = messageBody
     .split(/\n\n+/)
-    .map(block => `<p>${block.replace(/\n/g, "<br>")}</p>`).join("");
+    .map(block => `<p>${block.replace(/\n/g, "<br>")}</p>`).join("") + unsubscribeFooter;
 
   const response = await fetch("https://api.enginemailer.com/RESTAPI/V2/Submission/SendEmail", {
     method: "POST",
